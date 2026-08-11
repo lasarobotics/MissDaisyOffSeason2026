@@ -10,8 +10,8 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * A command composition that runs one of a selection of states
- * according to the state machine's current state
+ * A command composition that runs one of a selection of states according to the state machine's
+ * current state
  */
 public class StateCommand extends Command {
   private final StateMachine m_machine;
@@ -20,6 +20,7 @@ public class StateCommand extends Command {
 
   /**
    * Creates a new StateCommand.
+   *
    * @param machine State machine this command is associated with
    */
   public StateCommand(StateMachine machine) {
