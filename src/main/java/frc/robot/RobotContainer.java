@@ -12,7 +12,6 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.serialization.SerializationSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
-import frc.robot.subsystems.turret.TurretSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -22,7 +21,6 @@ import frc.robot.subsystems.turret.TurretSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final TurretSubsystem m_turrentSubsystem = new TurretSubsystem();
   private final ClimbSubsystem m_climbSubsystem = new ClimbSubsystem();
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
   private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
