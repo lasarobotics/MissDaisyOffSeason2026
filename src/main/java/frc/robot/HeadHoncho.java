@@ -2,14 +2,14 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.turret;
+package frc.robot;
 
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class TurretSubsystem extends StateMachine implements AutoCloseable {
+public class HeadHoncho extends StateMachine implements AutoCloseable {
 
-  public enum TurretStates implements SystemState {
+  public enum HeadHonchoStates implements SystemState {
     REST {
       @Override
       public void initialize() {}
@@ -24,17 +24,17 @@ public class TurretSubsystem extends StateMachine implements AutoCloseable {
     }
   }
 
-  private static TurretSubsystem s_turretInstance;
+  private static HeadHoncho s_headHoncho;
 
-  public TurretSubsystem() {
-    super(TurretStates.REST);
+  public HeadHoncho() {
+    super(HeadHonchoStates.REST);
   }
 
-  public static TurretSubsystem getInstance() {
-    if (s_turretInstance == null) {
-      s_turretInstance = new TurretSubsystem();
+  public static HeadHoncho getInstance() {
+    if (s_headHoncho == null) {
+      s_headHoncho = new HeadHoncho();
     }
-    return s_turretInstance;
+    return s_headHoncho;
   }
 
   @Override
