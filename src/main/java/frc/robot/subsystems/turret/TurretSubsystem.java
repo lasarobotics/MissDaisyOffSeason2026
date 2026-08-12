@@ -4,35 +4,37 @@
 
 package frc.robot.subsystems.turret;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.fsm.StateMachine;
+import frc.robot.fsm.SystemState;
 
-public class TurretSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public TurretSubsystem() {}
+public class TurretSubsystem extends StateMachine implements AutoCloseable {
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public enum TurretStates implements SystemState {
+    REST {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    }
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  private static TurretSubsystem s_turretInstance;
+
+  public TurretSubsystem() {
+    super(TurretStates.REST);
+  }
+
+  public static TurretSubsystem getInstance() {
+    if (s_turretInstance == null) {
+      s_turretInstance = new TurretSubsystem();
+    }
+    return s_turretInstance;
   }
 
   @Override
@@ -41,7 +43,5 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+  public void close() {}
 }

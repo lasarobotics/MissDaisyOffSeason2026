@@ -4,35 +4,37 @@
 
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.fsm.StateMachine;
+import frc.robot.fsm.SystemState;
 
-public class DriveSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public DriveSubsystem() {}
+public class DriveSubsystem extends StateMachine implements AutoCloseable {
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public enum DriveStates implements SystemState {
+    REST {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    }
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  private static DriveSubsystem s_driveInstance;
+
+  public DriveSubsystem() {
+    super(DriveStates.REST);
+  }
+
+  public static DriveSubsystem getInstance() {
+    if (s_driveInstance == null) {
+      s_driveInstance = new DriveSubsystem();
+    }
+    return s_driveInstance;
   }
 
   @Override
@@ -41,7 +43,5 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+  public void close() {}
 }

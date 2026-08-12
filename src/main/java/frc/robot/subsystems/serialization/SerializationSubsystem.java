@@ -4,35 +4,37 @@
 
 package frc.robot.subsystems.serialization;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.fsm.StateMachine;
+import frc.robot.fsm.SystemState;
 
-public class SerializationSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public SerializationSubsystem() {}
+public class SerializationSubsystem extends StateMachine implements AutoCloseable {
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public enum SerializationStates implements SystemState {
+    REST {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    }
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  private static SerializationSubsystem s_serializationInstance;
+
+  public SerializationSubsystem() {
+    super(SerializationStates.REST);
+  }
+
+  public static SerializationSubsystem getInstance() {
+    if (s_serializationInstance == null) {
+      s_serializationInstance = new SerializationSubsystem();
+    }
+    return s_serializationInstance;
   }
 
   @Override
@@ -41,7 +43,5 @@ public class SerializationSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+  public void close() {}
 }

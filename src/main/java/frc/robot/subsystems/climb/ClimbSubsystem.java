@@ -2,14 +2,14 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.climb;
 
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class IntakeSubsystem extends StateMachine implements AutoCloseable {
+public class ClimbSubsystem extends StateMachine implements AutoCloseable {
 
-  public enum IntakeStates implements SystemState {
+  public enum ClimbStates implements SystemState {
     REST {
       @Override
       public void initialize() {}
@@ -24,17 +24,17 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
     }
   }
 
-  private static IntakeSubsystem s_intakeInstance;
+  private static ClimbSubsystem s_climbInstance;
 
-  public IntakeSubsystem() {
-    super(IntakeStates.REST);
+  public ClimbSubsystem() {
+    super(ClimbStates.REST);
   }
 
-  public static IntakeSubsystem getInstance() {
-    if (s_intakeInstance == null) {
-      s_intakeInstance = new IntakeSubsystem();
+  public static ClimbSubsystem getInstance() {
+    if (s_climbInstance == null) {
+      s_climbInstance = new ClimbSubsystem();
     }
-    return s_intakeInstance;
+    return s_climbInstance;
   }
 
   @Override
