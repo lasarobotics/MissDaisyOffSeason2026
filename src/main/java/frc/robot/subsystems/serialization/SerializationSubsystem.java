@@ -10,7 +10,7 @@ import frc.robot.fsm.SystemState;
 public class SerializationSubsystem extends StateMachine implements AutoCloseable {
 
   public enum SerializationStates implements SystemState {
-    REST {
+    OFF {
       @Override
       public void initialize() {}
 
@@ -19,15 +19,28 @@ public class SerializationSubsystem extends StateMachine implements AutoCloseabl
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return getInstance().m_selectedState;
+      }
+    },
+    ON {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_selectedState;
       }
     }
   }
 
   private static SerializationSubsystem s_serializationInstance;
+  private SerializationStates m_selectedState;
 
   public SerializationSubsystem() {
-    super(SerializationStates.REST);
+    super(SerializationStates.OFF);
   }
 
   public static SerializationSubsystem getInstance() {
@@ -35,6 +48,10 @@ public class SerializationSubsystem extends StateMachine implements AutoCloseabl
       s_serializationInstance = new SerializationSubsystem();
     }
     return s_serializationInstance;
+  }
+
+  public void setState(SerializationStates state) {
+    m_selectedState = state;
   }
 
   @Override

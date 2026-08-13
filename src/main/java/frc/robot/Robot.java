@@ -6,6 +6,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.drive.DriveSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
 
 /**
@@ -16,7 +19,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  private final CommandXboxController m_driverController;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -25,7 +28,9 @@ public class Robot extends LoggedRobot {
   public Robot() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+    HeadHoncho.getInstance();
+    configureBindings();
   }
 
   @Override
@@ -45,6 +50,20 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+  }
+
+  private void configureBindings() {
+    HeadHoncho.getInstance()
+        .configureBindings(
+            m_driverController.y(),
+            m_driverController.a(),
+            m_driverController.b(),
+            m_driverController.x());
+    DriveSubsystem.getInstance()
+        .configureBindings(
+            () -> m_driverController.getLeftY(), // drive x
+            () -> m_driverController.getLeftX(), // drive y
+            () -> m_driverController.getRightX());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

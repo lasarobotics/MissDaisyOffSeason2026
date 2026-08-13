@@ -4,13 +4,24 @@
 
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import java.util.function.DoubleSupplier;
 
-public class DriveSubsystem extends StateMachine implements AutoCloseable {
+public class DriveSubsystem extends StateMachine {
 
   public enum DriveStates implements SystemState {
-    REST {
+    AUTO {
+      @Override
+      public SystemState nextState() {
+        if (!DriverStation.isAutonomous()) {
+          return DRIVER_CONTROL;
+        }
+        return AUTO;
+      }
+    },
+    DRIVER_CONTROL {
       @Override
       public void initialize() {}
 
@@ -19,15 +30,31 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return getInstance().m_selectedState;
+      }
+    },
+    CLIMB_ALIGN {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_selectedState;
       }
     }
   }
 
   private static DriveSubsystem s_driveInstance;
+  private DoubleSupplier m_driveRequest;
+  private DoubleSupplier m_strafeRequest;
+  private DoubleSupplier m_rotateRequest;
+  private DriveStates m_selectedState;
 
   public DriveSubsystem() {
-    super(DriveStates.REST);
+    super(DriveStates.DRIVER_CONTROL);
   }
 
   public static DriveSubsystem getInstance() {
@@ -37,11 +64,19 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
     return s_driveInstance;
   }
 
+  public void configureBindings(
+      DoubleSupplier strafeRequest, DoubleSupplier driveRequest, DoubleSupplier rotateRequest) {
+    m_strafeRequest = strafeRequest;
+    m_driveRequest = driveRequest;
+    m_rotateRequest = rotateRequest;
+  }
+
+  public void setState(DriveStates state) {
+    m_selectedState = state;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-  @Override
-  public void close() {}
 }

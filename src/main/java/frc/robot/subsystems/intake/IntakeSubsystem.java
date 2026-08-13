@@ -10,7 +10,7 @@ import frc.robot.fsm.SystemState;
 public class IntakeSubsystem extends StateMachine implements AutoCloseable {
 
   public enum IntakeStates implements SystemState {
-    REST {
+    OFF {
       @Override
       public void initialize() {}
 
@@ -19,15 +19,28 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return getInstance().m_selectedState;
+      }
+    },
+    ON {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_selectedState;
       }
     }
   }
 
   private static IntakeSubsystem s_intakeInstance;
+  private IntakeStates m_selectedState;
 
   public IntakeSubsystem() {
-    super(IntakeStates.REST);
+    super(IntakeStates.OFF);
   }
 
   public static IntakeSubsystem getInstance() {
@@ -35,6 +48,10 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
       s_intakeInstance = new IntakeSubsystem();
     }
     return s_intakeInstance;
+  }
+
+  public void setState(IntakeStates state) {
+    m_selectedState = state;
   }
 
   @Override

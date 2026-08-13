@@ -7,10 +7,10 @@ package frc.robot.subsystems.shooter;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class ShooterSubsystem extends StateMachine implements AutoCloseable {
+public class ShooterSubsystem extends StateMachine {
 
   public enum ShooterStates implements SystemState {
-    REST {
+    OFF {
       @Override
       public void initialize() {}
 
@@ -19,15 +19,28 @@ public class ShooterSubsystem extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return getInstance().m_selectedState;
+      }
+    },
+    ON {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_selectedState;
       }
     }
   }
 
   private static ShooterSubsystem s_shooterInstance;
+  private ShooterStates m_selectedState;
 
   public ShooterSubsystem() {
-    super(ShooterStates.REST);
+    super(ShooterStates.OFF);
   }
 
   public static ShooterSubsystem getInstance() {
@@ -37,11 +50,12 @@ public class ShooterSubsystem extends StateMachine implements AutoCloseable {
     return s_shooterInstance;
   }
 
+  public void setState(ShooterStates state) {
+    m_selectedState = state;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-  @Override
-  public void close() {}
 }
