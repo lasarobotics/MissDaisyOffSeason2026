@@ -4,30 +4,72 @@
 
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class IntakeSubsystem extends StateMachine implements AutoCloseable {
+public class IntakeSubsystem extends StateMachine {
 
   public enum IntakeStates implements SystemState {
-    REST {
+    STOWED {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void initialize() {
+        getInstance().stow();
+      }
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return s_requestedNextState;
+      }
+    },
+    INACTIVE {
+      @Override
+      public void initialize() {
+        getInstance().stopIntaking();
+      }
+
+      @Override
+      public SystemState nextState() {
+        return s_requestedNextState;
+      }
+    },
+    INTAKING {
+      @Override
+      public void initialize() {
+        getInstance().deploy();
+      }
+
+      @Override
+      public SystemState nextState() {
+        return s_requestedNextState;
       }
     }
   }
 
+  public static void setState(IntakeStates nextState) {
+    s_requestedNextState = nextState;
+  }
+
   private static IntakeSubsystem s_intakeInstance;
+  private static IntakeStates s_requestedNextState;
+
+  private TalonFX m_intakeRollerLeader;
+  private TalonFX m_intakeRollerFollower;
+  private TalonFX m_armMotor;
 
   public IntakeSubsystem() {
-    super(IntakeStates.REST);
+    super(IntakeStates.INACTIVE);
+    setState(IntakeStates.INACTIVE);
+
+    m_intakeRollerLeader = new TalonFX(Constants.Intake.LEADER_ROLLER_ID);
+    m_intakeRollerFollower = new TalonFX(Constants.Intake.FOLLOWER_ROLLER_ID);
+    m_armMotor = new TalonFX(Constants.Intake.ARM_MOTOR_ID);
+
+    m_intakeRollerFollower.setControl(
+        new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
   }
 
   public static IntakeSubsystem getInstance() {
@@ -37,11 +79,20 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
     return s_intakeInstance;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  // TODO maybe do fancy running of roller to not be any faster than
+  // drivetrain times 2?
+  private void deploy() {
+    m_intakeRollerLeader.set(Constants.Intake.ROLLER_SPEED);
+    m_armMotor.setPosition(Constants.Intake.ARM_DEPLOY_POSITION);
   }
 
-  @Override
-  public void close() {}
+  private void stopIntaking() {
+    m_intakeRollerLeader.set(0);
+    m_armMotor.setPosition(Constants.Intake.ARM_DEPLOY_POSITION);
+  }
+
+  private void stow() {
+    m_intakeRollerLeader.set(0);
+    m_armMotor.setPosition(Constants.Intake.ARM_STOW_POSITION);
+  }
 }

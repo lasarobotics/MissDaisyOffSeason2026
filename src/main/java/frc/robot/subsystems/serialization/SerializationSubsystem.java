@@ -4,30 +4,61 @@
 
 package frc.robot.subsystems.serialization;
 
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class SerializationSubsystem extends StateMachine implements AutoCloseable {
+public class SerializationSubsystem extends StateMachine {
 
   public enum SerializationStates implements SystemState {
     REST {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void initialize() {
+        getInstance().stop();
+      }
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return s_requestedNextState;
+      }
+    },
+    SERIALIZING {
+      @Override
+      public void initialize() {
+        getInstance().start();
+      }
+
+      @Override
+      public SystemState nextState() {
+        return s_requestedNextState;
       }
     }
   }
 
+  public static void setState(SerializationStates nextState) {
+    s_requestedNextState = nextState;
+  }
+
   private static SerializationSubsystem s_serializationInstance;
+  private static SerializationStates s_requestedNextState;
+
+  private TalonFX m_omniWheelMotor;
+  private TalonFX m_mecanumRollerLeader;
+  private TalonFX m_mecanumRollerFollower;
 
   public SerializationSubsystem() {
     super(SerializationStates.REST);
+    setState(SerializationStates.REST);
+
+    m_omniWheelMotor = new TalonFX(Constants.Serialization.OMNI_WHEEL_MOTOR_ID);
+    m_mecanumRollerLeader = new TalonFX(Constants.Serialization.LEADER_MECANUM_ROLLER_ID);
+    m_mecanumRollerFollower = new TalonFX(Constants.Serialization.FOLLOWER_MECANUM_ROLLER_ID);
+
+    m_mecanumRollerFollower.setControl(
+        new Follower(m_mecanumRollerLeader.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   public static SerializationSubsystem getInstance() {
@@ -37,11 +68,13 @@ public class SerializationSubsystem extends StateMachine implements AutoCloseabl
     return s_serializationInstance;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  private void start() {
+    m_omniWheelMotor.set(Constants.Serialization.OMNI_WHEEL_SPEED);
+    m_mecanumRollerLeader.set(Constants.Serialization.MECANUM_ROLLER_SPEED);
   }
 
-  @Override
-  public void close() {}
+  private void stop() {
+    m_omniWheelMotor.set(0);
+    m_mecanumRollerLeader.set(0);
+  }
 }

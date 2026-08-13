@@ -4,27 +4,73 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.DriveSubsystem.DriveStates;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem.IntakeStates;
+import frc.robot.subsystems.serialization.SerializationSubsystem;
+import frc.robot.subsystems.serialization.SerializationSubsystem.SerializationStates;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem.ShooterStates;
+import java.util.function.BooleanSupplier;
 
-public class HeadHoncho extends StateMachine implements AutoCloseable {
+public class HeadHoncho extends StateMachine {
 
   public enum HeadHonchoStates implements SystemState {
     REST {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void initialize() {
+        getInstance().stopBallFlow();
+        DriveSubsystem.setState(DriveStates.DRIVER_CONTROL);
+      }
 
       @Override
       public SystemState nextState() {
-        return REST;
+        if (getInstance().m_activeToggleButton.getAsBoolean()) {
+          return ACTIVE;
+        }
+
+        return this;
+      }
+    },
+    ACTIVE {
+      @Override
+      public void initialize() {
+        DriveSubsystem.setState(DriveStates.DRIVER_CONTROL);
+      }
+
+      @Override
+      public void execute() {
+        if (getInstance().shouldShoot()) {
+          getInstance().startBallFlow();
+        } else {
+          getInstance().stopBallFlow();
+        }
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (getInstance().m_activeToggleButton.getAsBoolean()) {
+          return REST;
+        }
+
+        return this;
       }
     }
   }
 
   private static HeadHoncho s_headHoncho;
+
+  private BooleanSupplier m_activeToggleButton;
+  private BooleanSupplier m_climbButton;
+  private BooleanSupplier m_climbAlignButton;
 
   public HeadHoncho() {
     super(HeadHonchoStates.REST);
@@ -37,11 +83,42 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
     return s_headHoncho;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void configureBindings(
+      BooleanSupplier activeToggleButton,
+      BooleanSupplier climbButton,
+      BooleanSupplier climbAlignButton) {
+    m_activeToggleButton = activeToggleButton;
+    m_climbButton = climbButton;
+    m_climbAlignButton = climbAlignButton;
   }
 
-  @Override
-  public void close() {}
+  private void startBallFlow() {
+    IntakeSubsystem.setState(IntakeStates.INTAKING);
+    SerializationSubsystem.setState(SerializationStates.SERIALIZING);
+    ShooterSubsystem.setState(ShooterStates.SHOOTING);
+  }
+
+  private void stopBallFlow() {
+    IntakeSubsystem.setState(IntakeStates.INACTIVE);
+    SerializationSubsystem.setState(SerializationStates.REST);
+    ShooterSubsystem.setState(ShooterStates.REST);
+  }
+
+  public boolean shouldShoot() {
+    // return true when in AZ and can shoot
+    return false;
+  }
+
+  public static AngularVelocity getDesiredShooterSpeed() {
+    // TODO
+    return RotationsPerSecond.of(0);
+  }
+
+  public static Angle getDesiredHoodAngle() {
+    return Degrees.of(0);
+  }
+
+  public static Angle getDesiredTurretAngle() {
+    return Degrees.of(0);
+  }
 }

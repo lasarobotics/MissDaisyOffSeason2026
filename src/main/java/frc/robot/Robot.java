@@ -4,8 +4,14 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.climb.ClimbSubsystem;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.serialization.SerializationSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
 
 /**
@@ -14,18 +20,44 @@ import org.littletonrobotics.junction.LoggedRobot;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends LoggedRobot {
-  private Command m_autonomousCommand;
+  private final CommandXboxController m_driverController =
+      new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
 
-  private final RobotContainer m_robotContainer;
+  private boolean activeToggleState;
+  private boolean climbToggleState;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    ClimbSubsystem.getInstance();
+    DriveSubsystem.getInstance();
+    IntakeSubsystem.getInstance();
+    SerializationSubsystem.getInstance();
+    ShooterSubsystem.getInstance();
+
+    HeadHoncho.getInstance()
+        .configureBindings(
+            // active toggle
+            () -> activeToggleState,
+            // climb
+            () -> climbToggleState,
+            // climb align
+            m_driverController.y());
+
+    DriveSubsystem.getInstance()
+        .configureBindings(
+            () -> m_driverController.getLeftX(),
+            () -> m_driverController.getLeftY(),
+            () -> m_driverController.getRightX());
+
+    m_driverController
+        .rightBumper()
+        .onTrue(Commands.runOnce(() -> activeToggleState = !activeToggleState));
+    m_driverController
+        .leftBumper()
+        .onTrue(Commands.runOnce(() -> climbToggleState = !climbToggleState));
   }
 
   @Override
@@ -56,7 +88,9 @@ public class Robot extends LoggedRobot {
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    DriveSubsystem.getInstance().updateDrivetrainRotation();
+  }
 
   /** This function is called periodically during autonomous. */
   @Override
@@ -64,13 +98,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    DriveSubsystem.getInstance().updateDrivetrainRotation();
   }
 
   /** This function is called periodically during operator control. */

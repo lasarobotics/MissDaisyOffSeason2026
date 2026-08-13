@@ -4,30 +4,74 @@
 
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import frc.robot.Constants;
+import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class ShooterSubsystem extends StateMachine implements AutoCloseable {
+public class ShooterSubsystem extends StateMachine {
 
   public enum ShooterStates implements SystemState {
     REST {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void initialize() {
+        getInstance().stop();
+      }
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return s_requestedNextState;
+      }
+    },
+    SHOOTING {
+      @Override
+      public void execute() {
+        getInstance().runShooter();
+      }
+
+      @Override
+      public SystemState nextState() {
+        return s_requestedNextState;
       }
     }
   }
 
+  public static void setState(ShooterStates nextState) {
+    s_requestedNextState = nextState;
+  }
+
   private static ShooterSubsystem s_shooterInstance;
+  private static ShooterStates s_requestedNextState;
+
+  private TalonFX m_shooterMotorLeader;
+  private TalonFX m_shooterMotorFollower;
+  private TalonFX m_hoodMotor;
+  private TalonFX m_turretMotor;
+
+  private VelocityVoltage m_shooterMotorRequest;
+  private PositionVoltage m_hoodMotorRequest;
+  private PositionVoltage m_turretMotorRequest;
 
   public ShooterSubsystem() {
     super(ShooterStates.REST);
+    setState(ShooterStates.REST);
+
+    m_shooterMotorLeader = new TalonFX(Constants.Shooter.SHOOTER_MOTOR_LEADER_ID);
+    m_shooterMotorFollower = new TalonFX(Constants.Shooter.SHOOTER_MOTOR_FOLLOWER_ID);
+    m_hoodMotor = new TalonFX(Constants.Shooter.HOOD_MOTOR_ID);
+    m_turretMotor = new TalonFX(Constants.Shooter.TURRET_MOTOR_ID);
+
+    m_shooterMotorRequest = new VelocityVoltage(0);
+    m_hoodMotorRequest = new PositionVoltage(0);
+    m_turretMotorRequest = new PositionVoltage(0);
+
+    m_shooterMotorFollower.setControl(
+        new Follower(m_shooterMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   public static ShooterSubsystem getInstance() {
@@ -37,11 +81,16 @@ public class ShooterSubsystem extends StateMachine implements AutoCloseable {
     return s_shooterInstance;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void runShooter() {
+    m_shooterMotorLeader.setControl(
+        m_shooterMotorRequest.withVelocity(HeadHoncho.getDesiredShooterSpeed()));
+    m_hoodMotor.setControl(m_hoodMotorRequest.withPosition(HeadHoncho.getDesiredHoodAngle()));
+    m_turretMotor.setControl(m_turretMotorRequest.withPosition(HeadHoncho.getDesiredTurretAngle()));
   }
 
-  @Override
-  public void close() {}
+  public void stop() {
+    m_shooterMotorLeader.set(0);
+    m_hoodMotor.set(0);
+    m_turretMotor.set(0);
+  }
 }

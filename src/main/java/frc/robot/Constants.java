@@ -4,6 +4,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.generated.TunerConstants;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,5 +24,48 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+  }
+
+  public static class Intake {
+    public static final int LEADER_ROLLER_ID = 0;
+    public static final int FOLLOWER_ROLLER_ID = 0;
+    public static final int ARM_MOTOR_ID = 0;
+
+    public static final double ARM_STOW_POSITION = 0;
+    public static final double ARM_DEPLOY_POSITION = 0;
+
+    public static final double ROLLER_SPEED = 1;
+  }
+
+  public static class Serialization {
+    public static final int OMNI_WHEEL_MOTOR_ID = 0;
+    public static final int LEADER_MECANUM_ROLLER_ID = 0;
+    public static final int FOLLOWER_MECANUM_ROLLER_ID = 0;
+
+    public static final double OMNI_WHEEL_SPEED = 1;
+    public static final double MECANUM_ROLLER_SPEED = 1;
+  }
+
+  public static class Shooter {
+    public static final int SHOOTER_MOTOR_LEADER_ID = 0;
+    public static final int SHOOTER_MOTOR_FOLLOWER_ID = 0;
+    public static final int HOOD_MOTOR_ID = 0;
+    public static final int TURRET_MOTOR_ID = 0;
+  }
+
+  public static class Drive {
+    public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
+    // assume all modules equidistant from center
+    public static final Distance MODULE_CENTER_DIST =
+        Meters.of(
+            Math.sqrt(
+                Math.pow(TunerConstants.FrontLeft.LocationX, 2)
+                    + Math.pow(TunerConstants.FrontLeft.LocationY, 2)));
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY =
+        RotationsPerSecond.of(
+            MAX_SPEED.div(MODULE_CENTER_DIST.in(Meters) * 2 * Math.PI).in(MetersPerSecond));
+
+    public static final double MAX_DRIVE_SPEED_SCALAR = 0.8;
+    public static final double MAX_ROTATION_SPEED_SCALAR = 0.5;
   }
 }
