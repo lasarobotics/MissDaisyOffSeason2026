@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.units.measure.Angle;
@@ -110,15 +111,17 @@ public class HeadHoncho extends StateMachine {
   }
 
   public static AngularVelocity getDesiredShooterSpeed() {
-    // TODO
-    return RotationsPerSecond.of(0);
+    return RotationsPerSecond.of(
+        AimUtil.getBallVelocity().in(MetersPerSecond)
+            * Constants.Shooter.EXIT_VELOCITY_TO_MECHANISM_VELOCITY_SCALAR);
   }
 
   public static Angle getDesiredHoodAngle() {
-    return Degrees.of(0);
+    return AimUtil.getExitAngle();
   }
 
   public static Angle getDesiredTurretAngle() {
+    // TODO
     return Degrees.of(0);
   }
 }

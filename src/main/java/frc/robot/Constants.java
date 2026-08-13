@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -12,6 +13,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -51,6 +53,33 @@ public final class Constants {
     public static final int SHOOTER_MOTOR_FOLLOWER_ID = 0;
     public static final int HOOD_MOTOR_ID = 0;
     public static final int TURRET_MOTOR_ID = 0;
+
+    // TODO
+    public static final Distance SHOOTER_OFFSET_X = Meters.of(0);
+    public static final Distance SHOOTER_OFFSET_Y = Meters.of(0);
+    public static final Distance SHOOTER_OFFSET_Z = Meters.of(0);
+
+    public static final Distance SHOOTER_DISTANCE_FROM_CENTER =
+        Meters.of(
+            Math.sqrt(
+                Math.pow(SHOOTER_OFFSET_X.in(Meters), 2)
+                    + Math.pow(SHOOTER_OFFSET_Y.in(Meters), 2)));
+
+    public static final Distance BIG_ROLLER_RADIUS = Inches.of(2);
+
+    // ball velocity multiplied by this to get rot/s of big roller
+    public static final double EXIT_VELOCITY_TO_MECHANISM_VELOCITY_SCALAR =
+        (4.0 / 3) / (2 * Math.PI * BIG_ROLLER_RADIUS.in(Meters));
+
+    // in m/s exit velocity
+    public static final LoggedNetworkNumber AIMUTIL_SHOOTER_SPEED_ADDEND =
+        new LoggedNetworkNumber("/Tuning/shooterSpeedFudger", 0);
+    public static final LoggedNetworkNumber AIMUTIL_SHOOTER_SPEED_SCALAR =
+        new LoggedNetworkNumber("/Tuning/shooterSpeedScalar", 0);
+    public static final LoggedNetworkNumber AIMUTIL_HOOD_ANGLE_ADDEND =
+        new LoggedNetworkNumber("/Tuning/hoodAngleFudger", 0);
+    public static final LoggedNetworkNumber AIMUTIL_HOOD_ANGLE_SCALAR =
+        new LoggedNetworkNumber("/Tuning/hoodAngleScalar", 0);
   }
 
   public static class Drive {
@@ -67,5 +96,14 @@ public final class Constants {
 
     public static final double MAX_DRIVE_SPEED_SCALAR = 0.8;
     public static final double MAX_ROTATION_SPEED_SCALAR = 0.5;
+
+    public static final double ROBOT_LATENCY = 0;
+  }
+
+  public static class Field {
+    public static final double GRAVITY_VALUE = 9.81;
+
+    public static final LoggedNetworkNumber MAX_BALL_Y_POS =
+        new LoggedNetworkNumber("/Tuning/maxBallYPos", 2.7);
   }
 }
