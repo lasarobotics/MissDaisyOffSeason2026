@@ -18,6 +18,7 @@ import frc.robot.generated.TunerConstants;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveSubsystem extends StateMachine {
 
@@ -147,6 +148,7 @@ public class DriveSubsystem extends StateMachine {
   public void periodic() {
     m_currentSpeedScalar =
         m_slowdownRequest.getAsBoolean() ? Constants.DriveConstants.SLOWDOWN_SPEED : 1;
+    Logger.recordOutput(getName() + "/Pose", s_drivetrain.getState().Pose);
     // This method will be called once per scheduler run
   }
 }

@@ -63,6 +63,7 @@ public final class Constants {
     public static final int SHOOTER_LEADER_ID = 30;
     public static final int SHOOTER_FOLLOWER_ID = 31;
     public static final int HOOD_MOTOR_ID = 32;
+    public static final int TURRET_MOTOR_ID = 33;
     public static final double HOOD_MIN_POS = 0;
     public static final double HOOD_MAX_ANGLE = 0;
     public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
