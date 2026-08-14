@@ -23,6 +23,7 @@ public class Robot extends LoggedRobot {
   private final CommandXboxController m_driverController;
   private boolean m_activeToggle;
   private boolean m_climbToggle;
+  private boolean m_slowdownToggle;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -37,6 +38,7 @@ public class Robot extends LoggedRobot {
         .rightBumper()
         .onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
     m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climbToggle = !m_climbToggle));
+    m_driverController.a().onTrue(Commands.runOnce(() -> m_slowdownToggle = !m_slowdownToggle));
     configureBindings();
   }
 
@@ -70,7 +72,8 @@ public class Robot extends LoggedRobot {
         .configureBindings(
             () -> m_driverController.getLeftY(), // drive x
             () -> m_driverController.getLeftX(), // drive y
-            () -> m_driverController.getRightX());
+            () -> m_driverController.getRightX(),
+            () -> m_slowdownToggle);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

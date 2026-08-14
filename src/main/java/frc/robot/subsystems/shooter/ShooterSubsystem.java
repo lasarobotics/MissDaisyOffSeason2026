@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -47,6 +48,8 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFX m_shooterFollower;
   private TalonFX m_hoodMotor;
   private VelocityVoltage m_velocityVoltage;
+  private TalonFXConfiguration m_shooterConfig;
+  private TalonFXConfiguration m_hoodConfig;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
@@ -56,6 +59,13 @@ public class ShooterSubsystem extends StateMachine {
     m_velocityVoltage = new VelocityVoltage(0);
     m_shooterFollower.setControl(
         new Follower(m_shooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    m_shooterConfig = new TalonFXConfiguration();
+    m_shooterConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_hoodConfig = new TalonFXConfiguration();
+    m_hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_shooterLeader.getConfigurator().apply(m_shooterConfig); // TODO add individual configs
+    m_shooterFollower.getConfigurator().apply(m_shooterConfig);
+    m_hoodMotor.getConfigurator().apply(m_hoodConfig);
   }
 
   public static ShooterSubsystem getInstance() {

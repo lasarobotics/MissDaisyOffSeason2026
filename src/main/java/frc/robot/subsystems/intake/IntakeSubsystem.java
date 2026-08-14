@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -12,6 +13,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends StateMachine {
 
@@ -68,8 +70,10 @@ public class IntakeSubsystem extends StateMachine {
   private final TalonFX m_intakeRollerLeader;
   private final TalonFX m_intakeRollerFollower;
   private final TalonFX m_intakeSlapdown;
-  private final PositionVoltage m_intakeDownPos;
+  private final PositionVoltage m_slapdownPositionVoltage;
   private VelocityVoltage m_velocityVoltage;
+  private TalonFXConfiguration m_rollerConfig;
+  private TalonFXConfiguration m_slapdownConfig;
 
   public IntakeSubsystem() {
     super(IntakeStates.OFF);
@@ -78,8 +82,15 @@ public class IntakeSubsystem extends StateMachine {
     m_intakeSlapdown = new TalonFX(Constants.IntakeConstants.INTAKE_SLAPDOWN_ID);
     m_intakeRollerFollower.setControl(
         new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
-    m_intakeDownPos = new PositionVoltage(Constants.IntakeConstants.SLAPDOWN_POS);
+    m_slapdownPositionVoltage = new PositionVoltage(0);
     m_velocityVoltage = new VelocityVoltage(0);
+    m_rollerConfig = new TalonFXConfiguration();
+    m_slapdownConfig = new TalonFXConfiguration();
+    m_rollerConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_slapdownConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_intakeRollerLeader.getConfigurator().apply(m_rollerConfig); // TODO add individual configs
+    m_intakeRollerFollower.getConfigurator().apply(m_rollerConfig);
+    m_intakeSlapdown.getConfigurator().apply(m_slapdownConfig);
   }
 
   public static IntakeSubsystem getInstance() {
@@ -93,12 +104,19 @@ public class IntakeSubsystem extends StateMachine {
     m_selectedState = state;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void deploy() {
+    m_intakeSlapdown.setControl(
+        m_slapdownPositionVoltage.withPosition(Constants.IntakeConstants.SLAPDOWN_POS));
   }
 
-  public void deploy() {
-    m_intakeSlapdown.setControl(m_intakeDownPos);
+  @Override
+  public void periodic() {
+    Logger.recordOutput(getName() + "/currentState", getState().toString());
+    Logger.recordOutput(getName() + "/selectedState", m_selectedState);
+    Logger.recordOutput(
+        getName() + "/slapdownPos", m_intakeSlapdown.getPosition().getValueAsDouble());
+    Logger.recordOutput(
+        getName() + "/rollerSpeed", m_intakeRollerLeader.getVelocity().getValueAsDouble());
+    // This method will be called once per scheduler run
   }
 }

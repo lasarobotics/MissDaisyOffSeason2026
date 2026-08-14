@@ -17,6 +17,7 @@ import frc.robot.subsystems.serialization.SerializationSubsystem.SerializationSt
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem.ShooterStates;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class HeadHoncho extends StateMachine {
 
@@ -177,5 +178,11 @@ public class HeadHoncho extends StateMachine {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    Logger.recordOutput(getName() + "/currentState", getState().toString());
+    Logger.recordOutput(getName() + "/activeToggle", m_activeToggle);
+    Logger.recordOutput(getName() + "/climbToggle", m_climbToggle);
+    Logger.recordOutput(getName() + "/reverse", m_reverseButton);
+    Logger.recordOutput(getName() + "/climbAlign", m_climbAlignButton);
+  }
 }

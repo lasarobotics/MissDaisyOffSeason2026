@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -35,6 +36,11 @@ public final class Constants {
         RotationsPerSecond.of(0.75); // TODO measure
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION =
         RotationsPerSecondPerSecond.of(1); // TODO}
+    public static final double SLOWDOWN_SPEED = 0.3;
+    public static final double DEADBAND_SCALAR = 0.1;
+    public static final double TURN_P = 0;
+    public static final double TURN_I = 0;
+    public static final double TURN_D = 0;
   }
 
   public static class IntakeConstants {
@@ -59,13 +65,18 @@ public final class Constants {
     public static final int HOOD_MOTOR_ID = 32;
     public static final double HOOD_MIN_POS = 0;
     public static final double HOOD_MAX_ANGLE = 0;
+    public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
+    public static final Translation2d RED_HUB_POS = new Translation2d(11.9, 4.021);
+    public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(4.61, 6.03);
+    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(4.61, 2.01);
+    public static final Translation2d RED_LEFT_BUMP = new Translation2d(11.9, 2.01);
+    public static final Translation2d RED_RIGHT_BUMP = new Translation2d(11.9, 6.03);
   }
 
   public static class ClimbConstants {
     public static final int CLIMB_MOTOR_ID = 40;
-    public static final int SERIALIZATION_FEEDER_LEADER_ID = 20;
-    public static final int SERIALIZATION_OMNI_ID = 22;
-    public static final double SERIALIZATION_OMNI_SPEED = 0;
-    public static final double SERIALIZATION_FEEDER_SPEED = 0;
+    public static final double CLIMB_DOWN_POS = 0;
+    public static final double CLIMB_UP_POS = 0;
+    public static final double CLIMB_MOTOR_FEEDFORWARD = 0;
   }
 }

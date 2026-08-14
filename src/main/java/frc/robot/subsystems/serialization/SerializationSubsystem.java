@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.serialization;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -11,6 +12,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import org.littletonrobotics.junction.Logger;
 
 public class SerializationSubsystem extends StateMachine {
 
@@ -83,6 +85,7 @@ public class SerializationSubsystem extends StateMachine {
   private TalonFX m_serializationFeederFollower;
   private TalonFX m_serializationOmni;
   private VelocityVoltage m_velocityVoltage;
+  private TalonFXConfiguration m_motorConfig;
 
   public SerializationSubsystem() {
     super(SerializationStates.OFF);
@@ -94,6 +97,13 @@ public class SerializationSubsystem extends StateMachine {
     m_velocityVoltage = new VelocityVoltage(0);
     m_serializationFeederFollower.setControl(
         new Follower(m_serializationFeederLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    m_motorConfig = new TalonFXConfiguration();
+    m_motorConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_serializationFeederLeader
+        .getConfigurator()
+        .apply(m_motorConfig); // TODO add individual configs
+    m_serializationFeederFollower.getConfigurator().apply(m_motorConfig);
+    m_serializationOmni.getConfigurator().apply(m_motorConfig);
   }
 
   public static SerializationSubsystem getInstance() {
@@ -110,5 +120,13 @@ public class SerializationSubsystem extends StateMachine {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    Logger.recordOutput(getName() + "/currentState", getState().toString());
+    Logger.recordOutput(getName() + "/selectedState", m_selectedState);
+    Logger.recordOutput(
+        getName() + "/serializationFeederSpeed",
+        m_serializationFeederLeader.getVelocity().getValueAsDouble());
+    Logger.recordOutput(
+        getName() + "/serializationOmniSpeed",
+        m_serializationOmni.getVelocity().getValueAsDouble());
   }
 }
