@@ -4,18 +4,25 @@
 
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class IntakeSubsystem extends StateMachine implements AutoCloseable {
+public class IntakeSubsystem extends StateMachine {
 
   public enum IntakeStates implements SystemState {
     OFF {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void initialize() {
+        getInstance()
+            .m_intakeRollerLeader
+            .setControl(getInstance().m_velocityVoltage.withVelocity(0));
+      }
 
       @Override
       public SystemState nextState() {
@@ -24,10 +31,30 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
     },
     ON {
       @Override
-      public void initialize() {}
+      public void initialize() {
+        getInstance()
+            .m_intakeRollerLeader
+            .setControl(
+                getInstance()
+                    .m_velocityVoltage
+                    .withVelocity(Constants.IntakeConstants.INTAKE_ROLLER_SPEED));
+      }
 
       @Override
-      public void execute() {}
+      public SystemState nextState() {
+        return getInstance().m_selectedState;
+      }
+    },
+    REVERSE {
+      @Override
+      public void initialize() {
+        getInstance()
+            .m_intakeRollerLeader
+            .setControl(
+                getInstance()
+                    .m_velocityVoltage
+                    .withVelocity(-Constants.IntakeConstants.INTAKE_ROLLER_SPEED));
+      }
 
       @Override
       public SystemState nextState() {
@@ -38,9 +65,21 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
 
   private static IntakeSubsystem s_intakeInstance;
   private IntakeStates m_selectedState;
+  private final TalonFX m_intakeRollerLeader;
+  private final TalonFX m_intakeRollerFollower;
+  private final TalonFX m_intakeSlapdown;
+  private final PositionVoltage m_intakeDownPos;
+  private VelocityVoltage m_velocityVoltage;
 
   public IntakeSubsystem() {
     super(IntakeStates.OFF);
+    m_intakeRollerFollower = new TalonFX(Constants.IntakeConstants.INTAKE_ROLLER_FOLLOWER_ID);
+    m_intakeRollerLeader = new TalonFX(Constants.IntakeConstants.INTAKE_ROLLER_LEADER_ID);
+    m_intakeSlapdown = new TalonFX(Constants.IntakeConstants.INTAKE_SLAPDOWN_ID);
+    m_intakeRollerFollower.setControl(
+        new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
+    m_intakeDownPos = new PositionVoltage(Constants.IntakeConstants.SLAPDOWN_POS);
+    m_velocityVoltage = new VelocityVoltage(0);
   }
 
   public static IntakeSubsystem getInstance() {
@@ -59,6 +98,7 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
     // This method will be called once per scheduler run
   }
 
-  @Override
-  public void close() {}
+  public void deploy() {
+    m_intakeSlapdown.setControl(m_intakeDownPos);
+  }
 }

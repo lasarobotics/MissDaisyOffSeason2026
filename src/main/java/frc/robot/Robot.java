@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -20,6 +21,8 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final CommandXboxController m_driverController;
+  private boolean m_activeToggle;
+  private boolean m_climbToggle;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -30,6 +33,10 @@ public class Robot extends LoggedRobot {
     // autonomous chooser on the dashboard.
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     HeadHoncho.getInstance();
+    m_driverController
+        .rightBumper()
+        .onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
+    m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climbToggle = !m_climbToggle));
     configureBindings();
   }
 
@@ -56,9 +63,9 @@ public class Robot extends LoggedRobot {
     HeadHoncho.getInstance()
         .configureBindings(
             m_driverController.y(),
-            m_driverController.a(),
-            m_driverController.b(),
-            m_driverController.x());
+            () -> m_activeToggle,
+            () -> m_climbToggle,
+            m_driverController.rightTrigger());
     DriveSubsystem.getInstance()
         .configureBindings(
             () -> m_driverController.getLeftY(), // drive x
