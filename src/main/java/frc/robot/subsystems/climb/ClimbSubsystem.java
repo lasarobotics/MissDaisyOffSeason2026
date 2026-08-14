@@ -7,7 +7,7 @@ package frc.robot.subsystems.climb;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class ClimbSubsystem extends StateMachine implements AutoCloseable {
+public class ClimbSubsystem extends StateMachine {
 
   public enum ClimbStates implements SystemState {
     REST {
@@ -21,10 +21,38 @@ public class ClimbSubsystem extends StateMachine implements AutoCloseable {
       public SystemState nextState() {
         return REST;
       }
-    }
+    },
+
+    READY {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    },
+
+    CLIMB {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    },
   }
 
   private static ClimbSubsystem s_climbInstance;
+
+  private ClimbStates m_requestedState;
 
   public ClimbSubsystem() {
     super(ClimbStates.REST);
@@ -37,11 +65,12 @@ public class ClimbSubsystem extends StateMachine implements AutoCloseable {
     return s_climbInstance;
   }
 
+  public void setState(ClimbStates state) {
+    getInstance().m_requestedState = state;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-  @Override
-  public void close() {}
 }

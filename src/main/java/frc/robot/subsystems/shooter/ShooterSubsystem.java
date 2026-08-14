@@ -4,10 +4,13 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
+
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
-public class ShooterSubsystem extends StateMachine implements AutoCloseable {
+public class ShooterSubsystem extends StateMachine {
 
   public enum ShooterStates implements SystemState {
     REST {
@@ -21,13 +24,66 @@ public class ShooterSubsystem extends StateMachine implements AutoCloseable {
       public SystemState nextState() {
         return REST;
       }
-    }
+    },
+
+    SHOOT {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    },
+
+    PASS_AZ {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    },
+
+    PASS_NZ {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return REST;
+      }
+    },
   }
 
   private static ShooterSubsystem s_shooterInstance;
 
+  private ShooterStates m_requestedState;
+
   public ShooterSubsystem() {
     super(ShooterStates.REST);
+  }
+
+  public double getDesiredShooterVelocity() {
+    return 0;
+  }
+
+  public Angle getDesiredHoodAngle() {
+    return Degrees.of(0);
+  }
+
+  public boolean atGoodShootingPosition() {
+    return true;
   }
 
   public static ShooterSubsystem getInstance() {
@@ -37,11 +93,12 @@ public class ShooterSubsystem extends StateMachine implements AutoCloseable {
     return s_shooterInstance;
   }
 
+  public void setState(ShooterStates state) {
+    getInstance().m_requestedState = state;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-  @Override
-  public void close() {}
 }
