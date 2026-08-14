@@ -4,12 +4,18 @@
 
 package frc.robot.subsystems.serialization;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 
 public class SerializationSubsystem extends StateMachine {
 
@@ -28,7 +34,7 @@ public class SerializationSubsystem extends StateMachine {
     SERIALIZING {
       @Override
       public void initialize() {
-        getInstance().start();
+        getInstance().runRollers();
       }
 
       @Override
@@ -49,6 +55,9 @@ public class SerializationSubsystem extends StateMachine {
   private TalonFX m_mecanumRollerLeader;
   private TalonFX m_mecanumRollerFollower;
 
+  private VelocityVoltage m_omniWheelRequest;
+  private VelocityVoltage m_mecanumRollerRequest;
+
   public SerializationSubsystem() {
     super(SerializationStates.REST);
     setState(SerializationStates.REST);
@@ -56,6 +65,9 @@ public class SerializationSubsystem extends StateMachine {
     m_omniWheelMotor = new TalonFX(Constants.Serialization.OMNI_WHEEL_MOTOR_ID);
     m_mecanumRollerLeader = new TalonFX(Constants.Serialization.LEADER_MECANUM_ROLLER_ID);
     m_mecanumRollerFollower = new TalonFX(Constants.Serialization.FOLLOWER_MECANUM_ROLLER_ID);
+
+    m_omniWheelRequest = new VelocityVoltage(0);
+    m_mecanumRollerRequest = new VelocityVoltage(0);
 
     m_mecanumRollerFollower.setControl(
         new Follower(m_mecanumRollerLeader.getDeviceID(), MotorAlignmentValue.Opposed));
@@ -68,9 +80,21 @@ public class SerializationSubsystem extends StateMachine {
     return s_serializationInstance;
   }
 
-  private void start() {
-    m_omniWheelMotor.set(Constants.Serialization.OMNI_WHEEL_SPEED);
-    m_mecanumRollerLeader.set(Constants.Serialization.MECANUM_ROLLER_SPEED);
+  private void runRollers() {
+    m_omniWheelMotor.setControl(
+        m_omniWheelRequest.withVelocity(
+            RotationsPerSecond.of(
+                IntakeSubsystem.getBallEntrySpeed()
+                    .div(Constants.Serialization.OMNI_WHEEL_RADIUS.in(Meters))
+                    .times(Constants.Serialization.OMNI_WHEEL_SPEED_SCALAR)
+                    .in(MetersPerSecond))));
+    m_mecanumRollerLeader.setControl(
+        m_mecanumRollerRequest.withVelocity(
+            RotationsPerSecond.of(
+                IntakeSubsystem.getBallEntrySpeed()
+                    .div(Constants.Serialization.MECANUM_ROLLER_RADIUS.in(Meters))
+                    .times(Constants.Serialization.MECANUM_ROLLER_SPEED_SCALAR)
+                    .in(MetersPerSecond))));
   }
 
   private void stop() {

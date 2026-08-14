@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.climb;
 
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 
@@ -37,6 +40,10 @@ public class ClimbSubsystem extends StateMachine {
   private static ClimbSubsystem s_climbInstance;
   private static ClimbStates s_requestedNextState;
 
+  private TalonFX m_climbMotor;
+
+  private PositionVoltage m_climbMotorRequest;
+
   public static void setState(ClimbStates nextState) {
     s_requestedNextState = nextState;
   }
@@ -44,6 +51,10 @@ public class ClimbSubsystem extends StateMachine {
   public ClimbSubsystem() {
     super(ClimbStates.RETRACTED);
     setState(ClimbStates.RETRACTED);
+
+    m_climbMotor = new TalonFX(Constants.Climb.CLIMB_MOTOR_ID);
+
+    m_climbMotorRequest = new PositionVoltage(0);
   }
 
   public static ClimbSubsystem getInstance() {
@@ -53,7 +64,13 @@ public class ClimbSubsystem extends StateMachine {
     return s_climbInstance;
   }
 
-  private void retractClimber() {}
+  private void retractClimber() {
+    m_climbMotor.setControl(
+        m_climbMotorRequest.withPosition(Constants.Climb.CLIMB_RETRACTED_SETPOINT));
+  }
 
-  private void extendClimber() {}
+  private void extendClimber() {
+    m_climbMotor.setControl(
+        m_climbMotorRequest.withPosition(Constants.Climb.CLIMB_EXTENDED_SETPOINT));
+  }
 }

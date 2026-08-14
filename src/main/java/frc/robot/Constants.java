@@ -37,6 +37,9 @@ public final class Constants {
     public static final double ARM_DEPLOY_POSITION = 0;
 
     public static final double ROLLER_SPEED = 1;
+    // there are multiple roller sizes
+    // this is the radius of the one that is farthest out
+    public static final Distance OUTER_ROLLER_RADIUS = Inches.of(1.375 / 2);
   }
 
   public static class Serialization {
@@ -44,8 +47,12 @@ public final class Constants {
     public static final int LEADER_MECANUM_ROLLER_ID = 0;
     public static final int FOLLOWER_MECANUM_ROLLER_ID = 0;
 
-    public static final double OMNI_WHEEL_SPEED = 1;
-    public static final double MECANUM_ROLLER_SPEED = 1;
+    public static final Distance MECANUM_ROLLER_RADIUS = Inches.of(2.5);
+    public static final Distance OMNI_WHEEL_RADIUS = Inches.of(6);
+
+    // ball entry speed is multiplied by this
+    public static final double OMNI_WHEEL_SPEED_SCALAR = 1.25;
+    public static final double MECANUM_ROLLER_SPEED_SCALAR = 1.75;
   }
 
   public static class Shooter {
@@ -80,6 +87,13 @@ public final class Constants {
         new LoggedNetworkNumber("/Tuning/hoodAngleFudger", 0);
     public static final LoggedNetworkNumber AIMUTIL_HOOD_ANGLE_SCALAR =
         new LoggedNetworkNumber("/Tuning/hoodAngleScalar", 0);
+  }
+
+  public static class Climb {
+    public static final int CLIMB_MOTOR_ID = 0;
+
+    public static final double CLIMB_EXTENDED_SETPOINT = 0;
+    public static final double CLIMB_RETRACTED_SETPOINT = 0;
   }
 
   public static class Drive {
