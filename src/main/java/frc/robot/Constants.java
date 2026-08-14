@@ -67,7 +67,8 @@ public final class Constants {
     public static final PositionVoltage ARM_STOW_SETPOINT = new PositionVoltage(0);
     public static final PositionVoltage ARM_DEPLOY_SETPOINT = new PositionVoltage(0);
     public static final double INTAKE_STOW_SPEED = 0;
-    public static final double INTAKE_SPEED = 0;
+    public static final double INTAKE_ROLLER_CIRCUMFIRENCE = 0;
+    public static final double INTAKE_MOTOR_GEAR_RATIO = 0;
   }
 
   public static class SerializationConstants {

@@ -38,7 +38,7 @@ public class IntakeSubsystem extends StateMachine {
 
       @Override
       public SystemState nextState() {
-        return this;
+        return getInstance().m_requestedState;
       }
     },
 
@@ -51,7 +51,7 @@ public class IntakeSubsystem extends StateMachine {
 
       @Override
       public SystemState nextState() {
-        return this;
+        return getInstance().m_requestedState;
       }
     },
 
@@ -64,7 +64,7 @@ public class IntakeSubsystem extends StateMachine {
 
       @Override
       public SystemState nextState() {
-        return this;
+        return getInstance().m_requestedState;
       }
     },
   }
@@ -105,6 +105,10 @@ public class IntakeSubsystem extends StateMachine {
     return s_intakeInstance;
   }
 
+  public double getIntakeRollerSpeed() {
+    return 0;
+  }
+
   public void setState(IntakeStates state) {
     getInstance().m_requestedState = state;
   }
@@ -120,9 +124,7 @@ public class IntakeSubsystem extends StateMachine {
 
   public void activateIntake(boolean reverse) {
     double intakeSpeed =
-        (reverse)
-            ? -Constants.IntakeConstants.INTAKE_SPEED
-            : Constants.IntakeConstants.INTAKE_SPEED;
+        (reverse) ? -getInstance().getIntakeRollerSpeed() : getInstance().getIntakeRollerSpeed();
     getInstance()
         .m_intakeMotorLeader
         .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(intakeSpeed));
