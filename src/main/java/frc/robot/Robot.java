@@ -4,8 +4,15 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.climb.ClimbSubsystem;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.serialization.SerializationSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
 
 /**
@@ -14,9 +21,9 @@ import org.littletonrobotics.junction.LoggedRobot;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends LoggedRobot {
-  private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  private final CommandXboxController m_driverController =
+      new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -25,7 +32,44 @@ public class Robot extends LoggedRobot {
   public Robot() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    ClimbSubsystem.getInstance();
+    DriveSubsystem.getInstance();
+    IntakeSubsystem.getInstance();
+    SerializationSubsystem.getInstance();
+    ShooterSubsystem.getInstance();
+    configureBindings();
+  }
+
+  private boolean m_activeAll;
+  private boolean m_climb;
+  private boolean m_reverseActive;
+
+  private void configureBindings() {
+    HeadHoncho.getInstance()
+        .configureBindings(
+            // Intake, Serialization, Shooter active
+            () -> m_activeAll,
+            // Intake stowed and inactive, Serialization, Shooter active
+            () -> m_climb,
+            // activeAll/activeFeed reverse
+            m_driverController.rightTrigger(),
+            // Intake stowed and inactive, climb align
+            m_driverController.y());
+    DriveSubsystem.getInstance()
+        .configureBindings(
+            // strafe
+            () -> m_driverController.getLeftY(),
+            // drive
+            () -> m_driverController.getLeftX(),
+            // rotate
+            () -> m_driverController.getRightX());
+  }
+
+  public void checkButtons() {
+    // Toggle full robot active
+    m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
+    // Toggle climb
+    m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climb = !m_climb));
   }
 
   @Override
@@ -68,9 +112,6 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
   }
 
   /** This function is called periodically during operator control. */
