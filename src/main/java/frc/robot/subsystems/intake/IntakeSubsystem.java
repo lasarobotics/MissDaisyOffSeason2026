@@ -103,19 +103,8 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   public static LinearVelocity getBallEntrySpeed() {
-    SwerveDriveState robotState = DriveSubsystem.getDrivetrain().getState();
-    ChassisSpeeds fieldRelativeSpeeds = robotState.Speeds;
-    ChassisSpeeds robotRelativeSpeeds =
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            fieldRelativeSpeeds.vxMetersPerSecond,
-            fieldRelativeSpeeds.vyMetersPerSecond,
-            fieldRelativeSpeeds.omegaRadiansPerSecond,
-            robotState.Pose.getRotation().unaryMinus());
-    // don't go too slow or too fast
-    return MetersPerSecond.of(
-        Math.min(
-            AimUtil.getBallVelocity().in(MetersPerSecond) / 2,
-            Math.max(robotRelativeSpeeds.vxMetersPerSecond * 2, 2)));
+    // https://www.chiefdelphi.com/t/besiktas-rsports-9483-2023-off-season-build-blog/440340/15
+    return Constants.Drive.MAX_SPEED.times(2);
   }
 
   private void runIntake() {
