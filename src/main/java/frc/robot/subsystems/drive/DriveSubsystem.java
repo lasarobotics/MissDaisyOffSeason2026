@@ -109,4 +109,9 @@ public class DriveSubsystem extends StateMachine {
       s_drivetrain.setOperatorPerspectiveForward(Rotation2d.k180deg);
     }
   }
+
+  // TODO
+  public static boolean underTrench() {
+    return false;
+  }
 }

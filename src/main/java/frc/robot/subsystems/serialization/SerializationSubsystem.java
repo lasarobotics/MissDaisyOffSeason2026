@@ -16,6 +16,7 @@ import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 
 public class SerializationSubsystem extends StateMachine {
 
@@ -33,8 +34,12 @@ public class SerializationSubsystem extends StateMachine {
     },
     SERIALIZING {
       @Override
-      public void initialize() {
-        getInstance().runRollers();
+      public void execute() {
+        if (ShooterSubsystem.getInstance().shooterReady()) {
+          getInstance().runRollers();
+        } else {
+          getInstance().stop();
+        }
       }
 
       @Override
@@ -69,8 +74,8 @@ public class SerializationSubsystem extends StateMachine {
     m_omniWheelRequest = new VelocityVoltage(0);
     m_mecanumRollerRequest = new VelocityVoltage(0);
 
-    m_mecanumRollerFollower.setControl(
-        new Follower(m_mecanumRollerLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    m_mecanumRollerFollower
+        .setControl(new Follower(m_mecanumRollerLeader.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   public static SerializationSubsystem getInstance() {
@@ -81,20 +86,14 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   private void runRollers() {
-    m_omniWheelMotor.setControl(
-        m_omniWheelRequest.withVelocity(
-            RotationsPerSecond.of(
-                IntakeSubsystem.getBallEntrySpeed()
-                    .div(Constants.Serialization.OMNI_WHEEL_RADIUS.in(Meters))
-                    .times(Constants.Serialization.OMNI_WHEEL_SPEED_SCALAR)
-                    .in(MetersPerSecond))));
-    m_mecanumRollerLeader.setControl(
-        m_mecanumRollerRequest.withVelocity(
-            RotationsPerSecond.of(
-                IntakeSubsystem.getBallEntrySpeed()
-                    .div(Constants.Serialization.MECANUM_ROLLER_RADIUS.in(Meters))
-                    .times(Constants.Serialization.MECANUM_ROLLER_SPEED_SCALAR)
-                    .in(MetersPerSecond))));
+    m_omniWheelMotor
+        .setControl(m_omniWheelRequest.withVelocity(RotationsPerSecond.of(IntakeSubsystem
+            .getBallEntrySpeed().div(Constants.Serialization.OMNI_WHEEL_RADIUS.in(Meters))
+            .times(Constants.Serialization.OMNI_WHEEL_SPEED_SCALAR).in(MetersPerSecond))));
+    m_mecanumRollerLeader
+        .setControl(m_mecanumRollerRequest.withVelocity(RotationsPerSecond.of(IntakeSubsystem
+            .getBallEntrySpeed().div(Constants.Serialization.MECANUM_ROLLER_RADIUS.in(Meters))
+            .times(Constants.Serialization.MECANUM_ROLLER_SPEED_SCALAR).in(MetersPerSecond))));
   }
 
   private void stop() {

@@ -91,8 +91,8 @@ public class IntakeSubsystem extends StateMachine {
     m_intakeRollerRequest = new VelocityVoltage(0);
     m_armMotorRequest = new PositionVoltage(0);
 
-    m_intakeRollerFollower.setControl(
-        new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
+    m_intakeRollerFollower
+        .setControl(new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
   }
 
   public static IntakeSubsystem getInstance() {
@@ -113,10 +113,8 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   private void updateRollerSpeed() {
-    AngularVelocity intakeVelocity =
-        RotationsPerSecond.of(
-            getBallEntrySpeed().in(MetersPerSecond)
-                / (2 * Math.PI * Constants.Intake.OUTER_ROLLER_RADIUS.in(Meters)));
+    AngularVelocity intakeVelocity = RotationsPerSecond.of(getBallEntrySpeed().in(MetersPerSecond)
+        / (2 * Math.PI * Constants.Intake.OUTER_ROLLER_RADIUS.in(Meters)));
     m_intakeRollerLeader.setControl(m_intakeRollerRequest.withVelocity(intakeVelocity));
   }
 
