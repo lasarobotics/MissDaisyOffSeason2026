@@ -51,8 +51,8 @@ public final class Constants {
     public static final Distance OMNI_WHEEL_RADIUS = Inches.of(6);
 
     // ball entry speed is multiplied by this
-    public static final double OMNI_WHEEL_SPEED_SCALAR = 1.1;
-    public static final double MECANUM_ROLLER_SPEED_SCALAR = 1.2;
+    public static final double MECANUM_ROLLER_SPEED_SCALAR = 1.1;
+    public static final double OMNI_WHEEL_SPEED_SCALAR = 1.2;
   }
 
   public static class Shooter {
