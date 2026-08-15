@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -48,7 +49,14 @@ public final class Constants {
     public static final int INTAKE_ROLLER_FOLLOWER_ID = 11;
     public static final int INTAKE_SLAPDOWN_ID = 12;
     public static final double SLAPDOWN_POS = 0;
-    public static final double INTAKE_ROLLER_SPEED = 0;
+    public static final double INTAKE_ROLLER_DIAMETER = 0.035; // meters
+    public static final int INTAKE_BOTTOM_ROLLER_GEAR_RATIO = 1; // motor : bottom roller
+    public static final double INTAKE_DRIVETRAIN_SPEED_RATIO = 2;
+    public static final double INTAKE_ROLLER_SPEED =
+        (DriveConstants.MAX_SPEED.in(MetersPerSecond)
+                * INTAKE_BOTTOM_ROLLER_GEAR_RATIO
+                * INTAKE_DRIVETRAIN_SPEED_RATIO)
+            / (Math.PI * INTAKE_ROLLER_DIAMETER);
   }
 
   public static class SerializationConstants {
