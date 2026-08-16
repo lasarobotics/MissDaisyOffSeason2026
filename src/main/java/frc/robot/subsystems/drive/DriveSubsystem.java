@@ -13,6 +13,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -95,6 +96,19 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
         return this;
       }
     },
+
+    UNWIND {
+      @Override
+      public void initialize() {}
+
+      @Override
+      public void execute() {}
+
+      @Override
+      public SystemState nextState() {
+        return this;
+      }
+    }
   }
 
   private static DriveSubsystem s_driveInstance;
@@ -140,6 +154,14 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
         : Constants.ClimbConstants.CLIMB_POS_LEFT;
   }
 
+  public Pose2d getRobotPose() {
+    return s_drivetrain.getState().Pose;
+  }
+
+  public boolean isUnderTrench() {
+    return true;
+  }
+
   public void goTo(
       Pose2d location,
       double maxVelocity,
@@ -179,6 +201,21 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
     s_strafeRequest = strafeRequest;
     s_driveRequest = driveRequest;
     s_rotateRequest = rotateRequest;
+  }
+
+  public static CommandSwerveDrivetrain getDrivetrain() {
+    return s_drivetrain;
+  }
+
+  public static boolean isCommandedMoving() {
+    ChassisSpeeds speeds = getSpeeds();
+    return Math.abs(speeds.vxMetersPerSecond) > Constants.DriveConstants.MOVEMENT_THRESHOLD
+        || Math.abs(speeds.vyMetersPerSecond) > Constants.DriveConstants.MOVEMENT_THRESHOLD
+        || Math.abs(speeds.omegaRadiansPerSecond) > Constants.DriveConstants.MOVEMENT_THRESHOLD;
+  }
+
+  public static ChassisSpeeds getSpeeds() {
+    return s_drivetrain.getState().Speeds;
   }
 
   @Override
