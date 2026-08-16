@@ -17,8 +17,9 @@ import frc.robot.subsystems.serialization.SerializationSubsystem.SerializationSt
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem.ShooterStates;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
-public class HeadHoncho extends StateMachine implements AutoCloseable {
+public class HeadHoncho extends StateMachine {
 
   public enum HeadHonchoStates implements SystemState {
     AUTO {
@@ -42,6 +43,9 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
+        if (getInstance().wantsToDriveUnwind()) {
+          return DRIVE_UNWIND;
+        }
         if (getInstance().wantToActive()) {
           return ACTIVE;
         }
@@ -66,6 +70,9 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
+        if (getInstance().wantsToDriveUnwind()) {
+          return DRIVE_UNWIND;
+        }
         if (getInstance().wantToActive()) {
           return ACTIVE;
         }
@@ -90,6 +97,9 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
+        if (getInstance().wantsToDriveUnwind()) {
+          return DRIVE_UNWIND;
+        }
         if (getInstance().wantToActive()) {
           return ACTIVE;
         }
@@ -114,6 +124,9 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
+        if (getInstance().wantsToDriveUnwind()) {
+          return DRIVE_UNWIND;
+        }
         if (getInstance().wantToActive()) {
           return ACTIVE;
         }
@@ -138,6 +151,36 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
       @Override
       public SystemState nextState() {
+        if (getInstance().wantsToDriveUnwind()) {
+          return DRIVE_UNWIND;
+        }
+        if (getInstance().wantToActive()) {
+          return ACTIVE;
+        }
+        if (getInstance().wantToClimb()) {
+          return CLIMB;
+        }
+        if (getInstance().wantToClimbPrepare()) {
+          return CLIMB_PREPARE;
+        }
+        if (getInstance().wantToReverse()) {
+          return REVERSE;
+        }
+        return REST;
+      }
+    },
+
+    DRIVE_UNWIND {
+      @Override
+      public void initialize() {
+        getInstance().climbRobot();
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (getInstance().wantsToDriveUnwind()) {
+          return DRIVE_UNWIND;
+        }
         if (getInstance().wantToActive()) {
           return ACTIVE;
         }
@@ -167,8 +210,13 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
   private BooleanSupplier m_climb;
   private BooleanSupplier m_reverseActive;
 
+  private boolean m_driveUnwindRequested;
+
   public HeadHoncho() {
     super(HeadHonchoStates.ACTIVE);
+
+    m_driveUnwindRequested = false;
+
     s_climbSubsystem = ClimbSubsystem.getInstance();
     s_driveSubsystem = DriveSubsystem.getInstance();
     s_intakeSubsystem = IntakeSubsystem.getInstance();
@@ -194,6 +242,14 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
     getInstance().m_reverseActive = reverseActive;
   }
 
+  public void requestDriveUnwind() {
+    getInstance().m_driveUnwindRequested = true;
+  }
+
+  public void driveUnwindEnded() {
+    getInstance().m_driveUnwindRequested = false;
+  }
+
   public boolean wantToActive() {
     return getInstance().m_active.getAsBoolean();
   }
@@ -208,6 +264,10 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
   public boolean wantToClimbPrepare() {
     return getInstance().m_climbPrepareButton.getAsBoolean();
+  }
+
+  public boolean wantsToDriveUnwind() {
+    return getInstance().m_driveUnwindRequested;
   }
 
   public void restRobot() {
@@ -250,11 +310,43 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
     s_shooterSubsystem.setState(ShooterStates.REST);
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void driveUnwindRobot() {
+    s_climbSubsystem.setState(ClimbStates.REST);
+    s_driveSubsystem.setState(DriveStates.UNWIND);
+    s_intakeSubsystem.setState(IntakeStates.INTAKE);
+    s_serializationSubsystem.setState(SerializationStates.ACTIVE);
+    s_shooterSubsystem.setState(ShooterStates.SHOOT);
   }
 
   @Override
-  public void close() {}
+  public void periodic() {
+
+    // Log all field values for verification
+    Logger.recordOutput(
+        "Field/BLUE_HUB_COORDINATES", Constants.FieldConstants.BLUE_HUB_COORDINATES);
+    Logger.recordOutput("Field/RED_HUB_COORDINATES", Constants.FieldConstants.RED_HUB_COORDINATES);
+    Logger.recordOutput("Field/BLUE_DEPOT_CENTER", Constants.FieldConstants.BLUE_DEPOT_CENTER);
+    Logger.recordOutput("Field/RED_DEPOT_CENTER", Constants.FieldConstants.RED_DEPOT_CENTER);
+    Logger.recordOutput("Field/BLUE_TOWER_LEFT", Constants.FieldConstants.BLUE_TOWER_LEFT);
+    Logger.recordOutput("Field/BLUE_TOWER_RIGHT", Constants.FieldConstants.BLUE_TOWER_RIGHT);
+    Logger.recordOutput(
+        "Field/BLUE_TOWER_CLIMB_LEFT", Constants.FieldConstants.BLUE_TOWER_CLIMB_LEFT);
+    Logger.recordOutput(
+        "Field/BLUE_TOWER_CLIMB_RIGHT", Constants.FieldConstants.BLUE_TOWER_CLIMB_RIGHT);
+    Logger.recordOutput("Field/RED_TOWER_LEFT", Constants.FieldConstants.RED_TOWER_LEFT);
+    Logger.recordOutput("Field/RED_TOWER_RIGHT", Constants.FieldConstants.RED_TOWER_RIGHT);
+    Logger.recordOutput(
+        "Field/RED_TOWER_CLIMB_LEFT", Constants.FieldConstants.RED_TOWER_CLIMB_LEFT);
+    Logger.recordOutput(
+        "Field/RED_TOWER_CLIMB_RIGHT", Constants.FieldConstants.RED_TOWER_CLIMB_RIGHT);
+    Logger.recordOutput("Field/BLUE_AZ_PASS_LEFT", Constants.FieldConstants.BLUE_AZ_PASS_LEFT);
+    Logger.recordOutput("Field/BLUE_AZ_PASS_RIGHT", Constants.FieldConstants.BLUE_AZ_PASS_RIGHT);
+    Logger.recordOutput("Field/RED_AZ_PASS_LEFT", Constants.FieldConstants.RED_AZ_PASS_LEFT);
+    Logger.recordOutput("Field/RED_AZ_PASS_RIGHT", Constants.FieldConstants.RED_AZ_PASS_RIGHT);
+    Logger.recordOutput("Field/BLUE_NZ_PASS_LEFT", Constants.FieldConstants.BLUE_NZ_PASS_LEFT);
+    Logger.recordOutput("Field/BLUE_NZ_PASS_RIGHT", Constants.FieldConstants.BLUE_NZ_PASS_RIGHT);
+    Logger.recordOutput("Field/RED_NZ_PASS_LEFT", Constants.FieldConstants.RED_NZ_PASS_LEFT);
+    Logger.recordOutput("Field/RED_NZ_PASS_RIGHT", Constants.FieldConstants.RED_NZ_PASS_RIGHT);
+    Logger.recordOutput("Field/HALF_FIELD_Y_POS", Constants.FieldConstants.HALF_FIELD_Y_POS);
+  }
 }
