@@ -77,7 +77,7 @@ public class IntakeSubsystem extends StateMachine {
   private TalonFX m_intakeMotorLeader;
   private TalonFX m_intakeMotorFollower;
 
-  private VelocityDutyCycle m_shooterVelocityDutyCycle;
+  private VelocityDutyCycle m_intakeVelocityDutyCycle;
 
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
@@ -118,7 +118,7 @@ public class IntakeSubsystem extends StateMachine {
         .m_intakeMotorLeader
         .setControl(
             getInstance()
-                .m_shooterVelocityDutyCycle
+                .m_intakeVelocityDutyCycle
                 .withVelocity(Constants.IntakeConstants.INTAKE_STOW_SPEED));
   }
 
@@ -127,7 +127,7 @@ public class IntakeSubsystem extends StateMachine {
         (reverse) ? -getInstance().getIntakeRollerSpeed() : getInstance().getIntakeRollerSpeed();
     getInstance()
         .m_intakeMotorLeader
-        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(intakeSpeed));
+        .setControl(getInstance().m_intakeVelocityDutyCycle.withVelocity(intakeSpeed));
   }
 
   public void deployIntake() {

@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 
 public class SerializationSubsystem extends StateMachine {
 
@@ -19,54 +20,43 @@ public class SerializationSubsystem extends StateMachine {
     REST {
       @Override
       public void execute() {
-        getInstance().restSerialization();
+        getInstance().restOmni();
+        getInstance().restMecanum();
       }
 
       @Override
       public SystemState nextState() {
-        if (getInstance().m_isActive) {
-          if (getInstance().m_isReversing) {
-            return REVERSE;
-          }
-          return ACTIVE;
-        }
-        return this;
+        return getInstance().m_requestedState;
       }
     },
 
     ACTIVE {
       @Override
       public void execute() {
-        getInstance().activateSerialization(false);
+        getInstance().activateOmni(false);
+        if (ShooterSubsystem.getInstance().isShooterReady()) {
+          getInstance().activateMecanum(false);
+        } else {
+          getInstance().restMecanum();
+        }
       }
 
       @Override
       public SystemState nextState() {
-        if (!getInstance().m_isActive) {
-          return REST;
-        }
-        if (getInstance().m_isReversing) {
-          return REVERSE;
-        }
-        return this;
+        return getInstance().m_requestedState;
       }
     },
 
     REVERSE {
       @Override
       public void execute() {
-        getInstance().activateSerialization(true);
+        getInstance().activateOmni(true);
+        getInstance().activateMecanum(true);
       }
 
       @Override
       public SystemState nextState() {
-        if (getInstance().m_isActive) {
-          return ACTIVE;
-        }
-        if (!getInstance().m_isActive) {
-          return REST;
-        }
-        return this;
+        return getInstance().m_requestedState;
       }
     },
   }
@@ -81,14 +71,8 @@ public class SerializationSubsystem extends StateMachine {
 
   private VelocityDutyCycle m_shooterVelocityDutyCycle;
 
-  private boolean m_isActive;
-  private boolean m_isReversing;
-
   public SerializationSubsystem() {
     super(SerializationStates.REST);
-
-    m_isActive = true;
-    m_isReversing = false;
 
     m_omniMotor = new TalonFX(Constants.SerializationConstants.OMNI_CAN_ID);
     m_mecanumMotorLeader = new TalonFX(Constants.SerializationConstants.MECANUM_LEADER_CAN_ID);
@@ -118,23 +102,16 @@ public class SerializationSubsystem extends StateMachine {
     return s_serializationInstance;
   }
 
-  public void setIsActive(boolean value) {
-    getInstance().m_isActive = value;
-    getInstance().m_isReversing = !value;
-  }
-
-  public void setIsReversing(boolean value) {
-    getInstance().m_isReversing = value;
-    getInstance().m_isActive = !value;
-  }
-
-  public void restSerialization() {
+  public void restOmni() {
     getInstance()
         .m_omniMotor
         .setControl(
             getInstance()
                 .m_shooterVelocityDutyCycle
                 .withVelocity(Constants.SerializationConstants.OMNI_REST_SPEED));
+  }
+
+  public void restMecanum() {
     getInstance()
         .m_mecanumMotorLeader
         .setControl(
@@ -143,21 +120,24 @@ public class SerializationSubsystem extends StateMachine {
                 .withVelocity(Constants.SerializationConstants.MECANUM_REST_SPEED));
   }
 
-  public void activateSerialization(boolean reverse) {
-    double omniSpeed, mecanumSpeed;
-    if (reverse) {
-      omniSpeed = -Constants.SerializationConstants.OMNI_SPEED;
-      mecanumSpeed = -Constants.SerializationConstants.MECANUM_SPEED;
-    } else {
-      omniSpeed = Constants.SerializationConstants.OMNI_SPEED;
-      mecanumSpeed = Constants.SerializationConstants.MECANUM_SPEED;
-    }
+  public void activateOmni(boolean reverse) {
+    double speed =
+        (reverse)
+            ? -Constants.SerializationConstants.OMNI_SPEED
+            : Constants.SerializationConstants.OMNI_SPEED;
     getInstance()
         .m_omniMotor
-        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(omniSpeed));
+        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(speed));
+  }
+
+  public void activateMecanum(boolean reverse) {
+    double speed =
+        (reverse)
+            ? -Constants.SerializationConstants.MECANUM_SPEED
+            : Constants.SerializationConstants.MECANUM_SPEED;
     getInstance()
         .m_mecanumMotorLeader
-        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(mecanumSpeed));
+        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(speed));
   }
 
   @Override
