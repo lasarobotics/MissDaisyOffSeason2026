@@ -38,6 +38,10 @@ public class Robot extends LoggedRobot {
     SerializationSubsystem.getInstance();
     ShooterSubsystem.getInstance();
     configureBindings();
+    // Toggle full robot active
+    m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
+    // Toggle climb
+    m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climb = !m_climb));
   }
 
   private boolean m_activeAll;
@@ -63,13 +67,6 @@ public class Robot extends LoggedRobot {
             () -> m_driverController.getLeftX(),
             // rotate
             () -> m_driverController.getRightX());
-  }
-
-  public void checkButtons() {
-    // Toggle full robot active
-    m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
-    // Toggle climb
-    m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climb = !m_climb));
   }
 
   @Override
