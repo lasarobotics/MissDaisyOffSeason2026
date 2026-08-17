@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.serialization.SerializationSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -38,8 +41,12 @@ public class Robot extends LoggedRobot {
     Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
     Logger.addDataReceiver(new NT4Publisher());
     Logger.start();
-    m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+    DriveSubsystem.getInstance();
+    IntakeSubsystem.getInstance();
+    ShooterSubsystem.getInstance();
+    SerializationSubsystem.getInstance();
     HeadHoncho.getInstance();
+    m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     m_driverController
         .rightBumper()
         .onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));

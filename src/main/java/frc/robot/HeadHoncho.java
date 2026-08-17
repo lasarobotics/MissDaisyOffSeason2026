@@ -141,11 +141,6 @@ public class HeadHoncho extends StateMachine {
   }
 
   private static HeadHoncho s_headHoncho;
-  private static DriveSubsystem DRIVE_SUBSYSTEM = DriveSubsystem.getInstance();
-  private static IntakeSubsystem INTAKE_SUBSYSTEM = IntakeSubsystem.getInstance();
-  private static ShooterSubsystem SHOOTER_SUBSYSTEM = ShooterSubsystem.getInstance();
-  private static SerializationSubsystem SERIALIZATION_SUBSYSTEM =
-      SerializationSubsystem.getInstance();
   private BooleanSupplier m_climbAlignButton;
   private BooleanSupplier m_climbToggle;
   private BooleanSupplier m_activeToggle;
@@ -153,10 +148,6 @@ public class HeadHoncho extends StateMachine {
 
   public HeadHoncho() {
     super(HeadHonchoStates.REST);
-    DRIVE_SUBSYSTEM = DriveSubsystem.getInstance();
-    INTAKE_SUBSYSTEM = IntakeSubsystem.getInstance();
-    SHOOTER_SUBSYSTEM = ShooterSubsystem.getInstance();
-    SERIALIZATION_SUBSYSTEM = SerializationSubsystem.getInstance();
   }
 
   public void configureBindings(
