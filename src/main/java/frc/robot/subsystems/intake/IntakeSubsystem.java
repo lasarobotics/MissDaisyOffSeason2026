@@ -77,6 +77,7 @@ public class IntakeSubsystem extends StateMachine {
 
   public IntakeSubsystem() {
     super(IntakeStates.OFF);
+    setState(IntakeStates.OFF);
     m_intakeRollerFollower = new TalonFX(Constants.IntakeConstants.INTAKE_ROLLER_FOLLOWER_ID);
     m_intakeRollerLeader = new TalonFX(Constants.IntakeConstants.INTAKE_ROLLER_LEADER_ID);
     m_intakeSlapdown = new TalonFX(Constants.IntakeConstants.INTAKE_SLAPDOWN_ID);

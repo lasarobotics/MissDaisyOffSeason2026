@@ -55,10 +55,8 @@ public class StateCommand extends Command {
   @Override
   public boolean isFinished() {
     m_nextState = m_selectedState.nextState();
-    if (m_selectedState == null || m_nextState == null) { // TODO why did i need to add this
-      return false;
-    }
-    return !m_selectedState.equals(m_nextState);
+
+    return !m_nextState.equals(m_selectedState);
   }
 
   @Override

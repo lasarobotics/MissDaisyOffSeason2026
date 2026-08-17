@@ -90,6 +90,7 @@ public class DriveSubsystem extends StateMachine {
 
   public DriveSubsystem() {
     super(DriveStates.DRIVER_CONTROL);
+    setState(DriveStates.DRIVER_CONTROL);
     s_drivetrain = TunerConstants.createDrivetrain();
     setPerspective();
     s_drive =

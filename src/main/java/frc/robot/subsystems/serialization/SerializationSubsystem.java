@@ -89,6 +89,7 @@ public class SerializationSubsystem extends StateMachine {
 
   public SerializationSubsystem() {
     super(SerializationStates.OFF);
+    setState(SerializationStates.OFF);
     m_serializationFeederLeader =
         new TalonFX(Constants.SerializationConstants.SERIALIZATION_FEEDER_LEADER_ID);
     m_serializationFeederFollower =

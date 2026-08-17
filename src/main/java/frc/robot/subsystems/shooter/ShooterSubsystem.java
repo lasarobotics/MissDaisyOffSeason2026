@@ -54,6 +54,7 @@ public class ShooterSubsystem extends StateMachine {
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
+    setState(ShooterStates.OFF);
     m_shooterLeader = new TalonFX(Constants.ShooterConstants.SHOOTER_LEADER_ID);
     m_shooterFollower = new TalonFX(Constants.ShooterConstants.SHOOTER_FOLLOWER_ID);
     m_hoodMotor = new TalonFX(Constants.ShooterConstants.HOOD_MOTOR_ID);

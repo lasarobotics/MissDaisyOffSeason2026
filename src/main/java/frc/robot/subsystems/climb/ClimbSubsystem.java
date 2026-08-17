@@ -57,6 +57,7 @@ public class ClimbSubsystem extends StateMachine {
 
   public ClimbSubsystem() {
     super(ClimbStates.OFF);
+    setState(ClimbStates.OFF);
     m_climbMotor = new TalonFX(Constants.ClimbConstants.CLIMB_MOTOR_ID);
     m_positionVoltage =
         new PositionVoltage(0).withFeedForward(Constants.ClimbConstants.CLIMB_MOTOR_FEEDFORWARD);
