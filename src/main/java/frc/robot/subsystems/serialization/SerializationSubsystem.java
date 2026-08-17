@@ -120,8 +120,8 @@ public class SerializationSubsystem extends StateMachine {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    Logger.recordOutput(getName() + "/currentState", getState().toString());
-    Logger.recordOutput(getName() + "/selectedState", m_selectedState);
+    // Logger.recordOutput(getName() + "/currentState", getState().toString());
+    // Logger.recordOutput(getName() + "/selectedState", m_selectedState);
     Logger.recordOutput(
         getName() + "/serializationFeederSpeed",
         m_serializationFeederLeader.getVelocity().getValueAsDouble());
