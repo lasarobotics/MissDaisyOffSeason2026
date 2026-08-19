@@ -92,7 +92,6 @@ public class DriveSubsystem extends StateMachine {
     super(DriveStates.DRIVER_CONTROL);
     setState(DriveStates.DRIVER_CONTROL);
     s_drivetrain = TunerConstants.createDrivetrain();
-    setPerspective();
     s_drive =
         new SwerveRequest.FieldCentric()
             .withDeadband(
@@ -147,9 +146,14 @@ public class DriveSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
+
+    for (int i = 0; i < 4; i++) {
+      Logger.recordOutput("DriveSubsystem", s_drivetrain.getState().ModuleStates[i]);
+    }
     m_currentSpeedScalar =
         m_slowdownRequest.getAsBoolean() ? Constants.DriveConstants.SLOWDOWN_SPEED : 1;
-    Logger.recordOutput(getName() + "/Pose", s_drivetrain.getState().Pose);
-    // This method will be called once per scheduler run
+    Logger.recordOutput("DriveSubsystem/Pose", s_drivetrain.getState().Pose);
+    // Logger.recordOutput("DriveSubsystem/SwerveStates", );
+    // This method will be called once per scheduler ru
   }
 }
