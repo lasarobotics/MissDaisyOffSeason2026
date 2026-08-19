@@ -6,9 +6,11 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,11 +22,15 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
+import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.generated.TunerConstants;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
-public class DriveSubsystem extends StateMachine implements AutoCloseable {
+public class DriveSubsystem extends StateMachine {
 
   public enum DriveStates implements SystemState {
     AUTO {
@@ -56,41 +62,6 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
                             -s_driveRequest.getAsDouble() * Math.abs(s_driveRequest.getAsDouble()))
                         .times(s_currentSpeedScalar))
                 .withRotationalRate(rotationRate));
-      }
-
-      @Override
-      public SystemState nextState() {
-        return this;
-      }
-    },
-
-    CLIMB_ALIGN {
-      @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {
-        double currentRotation = s_drivetrain.getState().Pose.getRotation().getRadians();
-        double pidOutputAngle =
-            getInstance()
-                .m_rotationPIDController
-                .calculate(
-                    currentRotation,
-                    DriverStation.getAlliance().get() == Alliance.Blue ? 0 : Math.PI);
-        double pidInput =
-            Constants.DriveConstants.MAX_ANGULAR_RATE.times(pidOutputAngle).in(RadiansPerSecond);
-        pidInput = pidInput > 0 ? Math.min(pidInput, 8.0) : Math.max(pidInput, -8.0);
-        s_drivetrain.setControl(
-            s_drive
-                .withVelocityX(
-                    Constants.DriveConstants.MAX_SPEED
-                        .times(-s_strafeRequest.getAsDouble())
-                        .times(s_currentSpeedScalar))
-                .withVelocityY(
-                    Constants.DriveConstants.MAX_SPEED
-                        .times(-s_driveRequest.getAsDouble())
-                        .times(s_currentSpeedScalar))
-                .withRotationalRate(pidInput));
       }
 
       @Override
@@ -132,6 +103,31 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
     s_currentSpeedScalar = Constants.DriveConstants.FAST_SPEED_SCALAR;
 
     m_requestedState = DriveStates.DRIVER_CONTROL;
+
+    s_drivetrain = TunerConstants.createDrivetrain();
+    s_drive =
+        new SwerveRequest.FieldCentric()
+            .withDeadband(
+                Constants.DriveConstants.MAX_SPEED.times(Constants.DriveConstants.DEADBAND_SCALAR))
+            .withRotationalDeadband(Constants.DriveConstants.MAX_ANGULAR_RATE.times(0.1)) // Add a
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+    setPerspective();
+  }
+
+  public void setPerspective() {
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+      if (ally.get() == Alliance.Red) {
+        s_drivetrain.setOperatorPerspectiveForward(
+            CommandSwerveDrivetrain.kRedAlliancePerspectiveRotation);
+      }
+      if (ally.get() == Alliance.Blue) {
+        s_drivetrain.setOperatorPerspectiveForward(
+            CommandSwerveDrivetrain.kBlueAlliancePerspectiveRotation);
+      }
+    }
   }
 
   public void setState(DriveStates state) {
@@ -147,15 +143,6 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
 
   public void setShouldAlign(Boolean value) {
     getInstance().m_shouldAlign = value;
-  }
-
-  public Translation2d getClosestClimbPos() {
-    Translation2d robotTranslation = s_drivetrain.getState().Pose.getTranslation();
-
-    return (robotTranslation.getDistance(Constants.ClimbConstants.CLIMB_POS_LEFT)
-            > robotTranslation.getDistance(Constants.ClimbConstants.CLIMB_POS_RIGHT))
-        ? Constants.ClimbConstants.CLIMB_POS_RIGHT
-        : Constants.ClimbConstants.CLIMB_POS_LEFT;
   }
 
   public Pose2d getRobotPose() {
@@ -192,7 +179,56 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
   }
 
   public boolean isUnderTrench() {
-    return true;
+    Translation2d robotTranslation = getInstance().getRobotPose().getTranslation();
+    if ((HeadHoncho.getInstance()
+                    .numberWithinThreshold(
+                        Constants.FieldConstants.BLUE_TRENCH_LEFT_CENTER.getX(),
+                        robotTranslation.getX(),
+                        Constants.FieldConstants.TRENCH_THRESHOLD)
+                || HeadHoncho.getInstance()
+                    .numberWithinThreshold(
+                        Constants.FieldConstants.RED_TRENCH_RIGHT_CENTER.getX(),
+                        robotTranslation.getX(),
+                        Constants.FieldConstants.TRENCH_THRESHOLD))
+            && (HeadHoncho.getInstance()
+                    .numberWithinThreshold(
+                        Constants.FieldConstants.BLUE_TRENCH_LEFT_CENTER.getY(),
+                        robotTranslation.getY(),
+                        Constants.FieldConstants.TRENCH_THRESHOLD)
+                || HeadHoncho.getInstance()
+                    .numberWithinThreshold(
+                        Constants.FieldConstants.BLUE_TRENCH_RIGHT_CENTER.getY(),
+                        robotTranslation.getY(),
+                        Constants.FieldConstants.TRENCH_THRESHOLD)
+                || HeadHoncho.getInstance()
+                    .numberWithinThreshold(
+                        Constants.FieldConstants.RED_TRENCH_LEFT_LEFT.getX(),
+                        robotTranslation.getX(),
+                        Constants.FieldConstants.TRENCH_THRESHOLD))
+        || HeadHoncho.getInstance()
+            .numberWithinThreshold(
+                Constants.FieldConstants.RED_TRENCH_RIGHT_CENTER.getY(),
+                robotTranslation.getY(),
+                Constants.FieldConstants.TRENCH_THRESHOLD)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public boolean atGoodShootingPosition() {
+    Translation2d robotTranslation = getInstance().getRobotPose().getTranslation();
+    if (isUnderTrench()
+        || ((robotTranslation.getX() <= Constants.FieldConstants.BLUE_TOWER_LEFT.getX()
+                || robotTranslation.getX() >= Constants.FieldConstants.RED_TOWER_LEFT.getX())
+            && ((robotTranslation.getY() >= Constants.FieldConstants.RED_TOWER_LEFT.getY()
+                    && robotTranslation.getY() <= Constants.FieldConstants.RED_TOWER_RIGHT.getY())
+                || (robotTranslation.getY() >= Constants.FieldConstants.BLUE_TOWER_LEFT.getY()
+                    && robotTranslation.getY()
+                        <= Constants.FieldConstants.BLUE_TOWER_RIGHT.getY())))) {
+      return true;
+    }
+    return false;
   }
 
   public void goTo(
@@ -253,9 +289,6 @@ public class DriveSubsystem extends StateMachine implements AutoCloseable {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    Logger.recordOutput("DriveSubsystem/Pose", getInstance().getRobotPose());
   }
-
-  @Override
-  public void close() {}
 }

@@ -8,12 +8,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.serialization.SerializationSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -32,33 +34,28 @@ public class Robot extends LoggedRobot {
   public Robot() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    ClimbSubsystem.getInstance();
     DriveSubsystem.getInstance();
     IntakeSubsystem.getInstance();
     SerializationSubsystem.getInstance();
     ShooterSubsystem.getInstance();
     configureBindings();
+
+    Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+    Logger.addDataReceiver(new NT4Publisher());
+    Logger.start();
     // Toggle full robot active
     m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
-    // Toggle climb
-    m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climb = !m_climb));
   }
 
   private boolean m_activeAll;
-  private boolean m_climb;
-  private boolean m_reverseActive;
 
   private void configureBindings() {
     HeadHoncho.getInstance()
         .configureBindings(
             // Intake, Serialization, Shooter active
             () -> m_activeAll,
-            // Intake stowed and inactive, Serialization, Shooter active
-            () -> m_climb,
             // activeAll/activeFeed reverse
-            m_driverController.rightTrigger(),
-            // Intake stowed and inactive, climb align
-            m_driverController.y());
+            m_driverController.rightTrigger());
     DriveSubsystem.getInstance()
         .configureBindings(
             // strafe
@@ -97,7 +94,9 @@ public class Robot extends LoggedRobot {
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    DriveSubsystem.getInstance().setPerspective();
+  }
 
   /** This function is called periodically during autonomous. */
   @Override
@@ -105,6 +104,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    DriveSubsystem.getInstance().setPerspective();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

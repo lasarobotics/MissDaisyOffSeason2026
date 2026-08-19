@@ -69,12 +69,14 @@ public class SerializationSubsystem extends StateMachine {
   private TalonFX m_mecanumMotorLeader;
   private TalonFX m_mecanumMotorFollower;
 
-  private VelocityDutyCycle m_shooterVelocityDutyCycle;
+  private VelocityDutyCycle m_serializationVelocityDutyCycle;
 
   public SerializationSubsystem() {
     super(SerializationStates.REST);
 
     m_requestedState = SerializationStates.ACTIVE;
+
+    m_serializationVelocityDutyCycle = new VelocityDutyCycle(0);
 
     m_omniMotor = new TalonFX(Constants.SerializationConstants.OMNI_CAN_ID);
     m_mecanumMotorLeader = new TalonFX(Constants.SerializationConstants.MECANUM_LEADER_CAN_ID);
@@ -109,7 +111,7 @@ public class SerializationSubsystem extends StateMachine {
         .m_omniMotor
         .setControl(
             getInstance()
-                .m_shooterVelocityDutyCycle
+                .m_serializationVelocityDutyCycle
                 .withVelocity(Constants.SerializationConstants.OMNI_REST_SPEED));
   }
 
@@ -118,7 +120,7 @@ public class SerializationSubsystem extends StateMachine {
         .m_mecanumMotorLeader
         .setControl(
             getInstance()
-                .m_shooterVelocityDutyCycle
+                .m_serializationVelocityDutyCycle
                 .withVelocity(Constants.SerializationConstants.MECANUM_REST_SPEED));
   }
 
@@ -129,7 +131,7 @@ public class SerializationSubsystem extends StateMachine {
             : Constants.SerializationConstants.OMNI_SPEED;
     getInstance()
         .m_omniMotor
-        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(speed));
+        .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
   }
 
   public void activateMecanum(boolean reverse) {
@@ -139,7 +141,7 @@ public class SerializationSubsystem extends StateMachine {
             : Constants.SerializationConstants.MECANUM_SPEED;
     getInstance()
         .m_mecanumMotorLeader
-        .setControl(getInstance().m_shooterVelocityDutyCycle.withVelocity(speed));
+        .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
   }
 
   @Override

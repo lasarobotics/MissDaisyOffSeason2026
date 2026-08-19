@@ -18,11 +18,14 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterSubsystem extends StateMachine {
 
@@ -46,7 +49,7 @@ public class ShooterSubsystem extends StateMachine {
     SHOOT {
       @Override
       public void execute() {
-        if (getInstance().atGoodShootingPosition()) {
+        if (DriveSubsystem.getInstance().atGoodShootingPosition()) {
           if ((getInstance().atUnwindAngle() || getInstance().m_isUnwinding)
               && getInstance().updateCurrentTurretPos() > 0) {
             getInstance().m_isUnwinding = true;
@@ -99,6 +102,8 @@ public class ShooterSubsystem extends StateMachine {
     m_positionRequest = new PositionVoltage(Degrees.of(0));
 
     m_requestedState = ShooterStates.SHOOT;
+
+    m_shooterVelocityDutyCycle = new VelocityDutyCycle(0);
 
     m_isUnwinding = false;
     m_isDriveUnwinding = false;
@@ -178,10 +183,6 @@ public class ShooterSubsystem extends StateMachine {
     return RotationsPerSecond.of(0);
   }
 
-  public boolean atGoodShootingPosition() {
-    return true;
-  }
-
   public boolean atGoodHoodAngle(Angle desiredHoodAngle) {
     return (Math.abs(desiredHoodAngle.in(Degrees))
             < Math.abs(
@@ -252,7 +253,48 @@ public class ShooterSubsystem extends StateMachine {
   public void unwindTurret() {}
 
   public Translation2d getShootingTarget() {
-    return new Translation2d();
+    Translation2d robotTranslation = DriveSubsystem.getInstance().getRobotPose().getTranslation();
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+      if (robotTranslation.getX() < Constants.FieldConstants.BLUE_ZONE_X) {
+        return Constants.FieldConstants.BLUE_HUB_COORDINATES;
+      }
+      if (robotTranslation.getX() > Constants.FieldConstants.BLUE_ZONE_X
+          && robotTranslation.getX() < Constants.FieldConstants.RED_ZONE_X) {
+        if (robotTranslation.getY() < Constants.FieldConstants.HALF_FIELD_Y_POS) {
+          return Constants.FieldConstants.BLUE_AZ_PASS_LEFT;
+        } else {
+          return Constants.FieldConstants.BLUE_AZ_PASS_RIGHT;
+        }
+      }
+      if (robotTranslation.getX() > Constants.FieldConstants.RED_ZONE_X) {
+        if (robotTranslation.getY() < Constants.FieldConstants.HALF_FIELD_Y_POS) {
+          return Constants.FieldConstants.BLUE_NZ_PASS_LEFT;
+        } else {
+          return Constants.FieldConstants.BLUE_NZ_PASS_RIGHT;
+        }
+      }
+    } else {
+      if (robotTranslation.getX() > Constants.FieldConstants.RED_ZONE_X) {
+        return Constants.FieldConstants.RED_HUB_COORDINATES;
+      }
+      if (robotTranslation.getX() > Constants.FieldConstants.BLUE_ZONE_X
+          && robotTranslation.getX() < Constants.FieldConstants.RED_ZONE_X) {
+        if (robotTranslation.getY() < Constants.FieldConstants.HALF_FIELD_Y_POS) {
+          return Constants.FieldConstants.RED_AZ_PASS_LEFT;
+        } else {
+          return Constants.FieldConstants.RED_AZ_PASS_RIGHT;
+        }
+      }
+      if (robotTranslation.getX() < Constants.FieldConstants.BLUE_ZONE_X) {
+        if (robotTranslation.getY() < Constants.FieldConstants.HALF_FIELD_Y_POS) {
+          return Constants.FieldConstants.RED_NZ_PASS_LEFT;
+        } else {
+          return Constants.FieldConstants.RED_NZ_PASS_RIGHT;
+        }
+      }
+    }
+
+    return Constants.FieldConstants.FIELD_CENTER;
   }
 
   public boolean getIsDriveUnwinding() {
@@ -274,12 +316,14 @@ public class ShooterSubsystem extends StateMachine {
     return (getInstance().atGoodHoodAngle(getInstance().getDesiredHoodAngle(getShootingTarget()))
         && getInstance()
             .atGoodShooterVelocity(getInstance().getDesiredHoodAngle(getShootingTarget()))
-        && getInstance().atGoodShootingPosition()
+        && DriveSubsystem.getInstance().atGoodShootingPosition()
         && getInstance().atGoodTurretAngle(getInstance().getDesiredHoodAngle(getShootingTarget())));
   }
 
   @Override
   public void periodic() {
     getInstance().updateCurrentTurretPos();
+    Logger.recordOutput(
+        "ShooterSubsystem/HoodAngle", getInstance().m_hoodMotor.getPosition().getValueAsDouble());
   }
 }

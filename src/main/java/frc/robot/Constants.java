@@ -38,11 +38,6 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static class ClimbConstants {
-    public static final Translation2d CLIMB_POS_LEFT = new Translation2d(4.7, 0);
-    public static final Translation2d CLIMB_POS_RIGHT = new Translation2d(4.7, 0);
-  }
-
   public static class DriveConstants {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
     public static final LinearAcceleration MAX_ACCELERATION =
@@ -73,9 +68,9 @@ public final class Constants {
   }
 
   public static class IntakeConstants {
-    public static final int ARM_CAN_ID = 100;
-    public static final int LEADER_CAN_ID = 100;
-    public static final int FOLLOWER_CAN_ID = 100;
+    public static final int ARM_CAN_ID = 30;
+    public static final int LEADER_CAN_ID = 31;
+    public static final int FOLLOWER_CAN_ID = 32;
 
     public static final PositionVoltage ARM_STOW_SETPOINT = new PositionVoltage(0);
     public static final PositionVoltage ARM_DEPLOY_SETPOINT = new PositionVoltage(0);
@@ -85,9 +80,9 @@ public final class Constants {
   }
 
   public static class SerializationConstants {
-    public static final int OMNI_CAN_ID = 100;
-    public static final int MECANUM_LEADER_CAN_ID = 100;
-    public static final int MECANUM_FOLLOWER_CAN_ID = 100;
+    public static final int OMNI_CAN_ID = 40;
+    public static final int MECANUM_LEADER_CAN_ID = 41;
+    public static final int MECANUM_FOLLOWER_CAN_ID = 42;
 
     public static final double OMNI_SPEED = 0;
     public static final double MECANUM_SPEED = 0;
@@ -97,10 +92,14 @@ public final class Constants {
 
   public static class ShooterConstants {
 
-    public static final int HOOD_CAN_ID = 100;
-    public static final int FLYWHEEL_LEADER_CAN_ID = 100;
-    public static final int FLYWHEEL_FOLLOWER_CAN_ID = 100;
-    public static final int TURRET_CAN_ID = 100;
+    public static final int HOOD_CAN_ID = 52;
+    public static final int FLYWHEEL_LEADER_CAN_ID = 50;
+    public static final int FLYWHEEL_FOLLOWER_CAN_ID = 51;
+    public static final int TURRET_CAN_ID = 53;
+
+    public static final int ENCODER_TEETH_ONE = 17;
+    public static final int ENCODER_TEETH_TWO = 18;
+    public static final int TURRET_GEAR_TEETH = 92;
 
     public static final double TURRET_THRESHOLD = 0.01;
     public static final double HOOD_THRESHOLD = 0.01;
@@ -193,6 +192,34 @@ public final class Constants {
     public static final Pose2d RED_TOWER_CLIMB_RIGHT =
         new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
 
+    // Blue Trench
+    public static final Pose2d BLUE_TRENCH_LEFT_RIGHT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d BLUE_TRENCH_LEFT_LEFT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d BLUE_TRENCH_RIGHT_RIGHT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d BLUE_TRENCH_RIGHT_LEFT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d BLUE_TRENCH_RIGHT_CENTER =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d BLUE_TRENCH_LEFT_CENTER =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+
+    // Red Trench
+    public static final Pose2d RED_TRENCH_LEFT_RIGHT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d RED_TRENCH_LEFT_LEFT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d RED_TRENCH_RIGHT_RIGHT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d RED_TRENCH_RIGHT_LEFT =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d RED_TRENCH_RIGHT_CENTER =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+    public static final Pose2d RED_TRENCH_LEFT_CENTER =
+        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+
     // Passing Locations
     public static final Translation2d BLUE_AZ_PASS_LEFT = new Translation2d(0, 0);
     public static final Translation2d BLUE_AZ_PASS_RIGHT = new Translation2d(0, 0);
@@ -205,5 +232,9 @@ public final class Constants {
 
     // meters
     public static final double HALF_FIELD_Y_POS = 4.022;
+
+    // Thresholds
+    public static final double TRENCH_THRESHOLD = 0.1;
+    public static final double TOWER_THRESHOLD = 0.1;
   }
 }

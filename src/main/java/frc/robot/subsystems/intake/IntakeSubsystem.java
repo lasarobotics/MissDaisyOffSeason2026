@@ -84,6 +84,8 @@ public class IntakeSubsystem extends StateMachine {
 
     m_requestedState = IntakeStates.INTAKE;
 
+    m_intakeVelocityDutyCycle = new VelocityDutyCycle(0);
+
     m_armMotor = new TalonFX(Constants.IntakeConstants.ARM_CAN_ID);
     m_intakeMotorLeader = new TalonFX(Constants.IntakeConstants.LEADER_CAN_ID);
     m_intakeMotorFollower = new TalonFX(Constants.IntakeConstants.FOLLOWER_CAN_ID);
