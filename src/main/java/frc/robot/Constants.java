@@ -39,7 +39,6 @@ public final class Constants {
     public static final int SHOOTER_SPEED_LEADER_MOTOR_ID = 16;
     public static final int SHOOTER_SPEED_FOLLOWER_MOTOR_ID = 17;
     public static final int HOOD_ANGLE_MOTOR_ID = 18;
-    public static final int CLIMB_MOTOR_ID = 19;
   }
 
   public static class DriveConstants {
@@ -59,11 +58,6 @@ public final class Constants {
     public static final double SLOW_SPEED_SCALAR = 0.1;
     public static final double MID_SPEED_SCALAR = 0.5;
     public static final double FAST_SPEED_SCALAR = 0.75;
-  }
-
-  public static class ClimbConstants {
-    public static final int CLIMB_POS = 0;
-    public static final int RETRACTED_POS = 0;
   }
 
   public static class IntakeConstants {

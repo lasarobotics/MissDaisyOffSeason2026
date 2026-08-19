@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
-import frc.robot.subsystems.climb.ClimbSubsystem;
-import frc.robot.subsystems.climb.ClimbSubsystem.ClimbStates;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem.DriveStates;
 import frc.robot.subsystems.intake.IntakeSubsystem;
@@ -31,7 +29,6 @@ public class HeadHoncho extends StateMachine {
   private static final SerializationSubsystem SERIALIZATION_SUBSYSTEM =
       SerializationSubsystem.getInstance();
   private static final ShooterSubsystem SHOOTER_SUBSYSTEM = ShooterSubsystem.getInstance();
-  private static final ClimbSubsystem CLIMB_SUBSYSTEM = ClimbSubsystem.getInstance();
 
   public enum HeadHonchoStates implements SystemState {
     CycleOff {
@@ -40,7 +37,6 @@ public class HeadHoncho extends StateMachine {
         INTAKE_SUBSYSTEM.setIntakeState(IntakeStates.CycleOff);
         SERIALIZATION_SUBSYSTEM.setSerializationState(SerializationStates.CycleOff);
         SHOOTER_SUBSYSTEM.setShooterState(ShooterStates.CycleOff);
-        CLIMB_SUBSYSTEM.setClimbState(ClimbStates.REST);
         DRIVE_SUBSYSTEM.setDriveState(DriveStates.REST);
       }
 
@@ -52,14 +48,6 @@ public class HeadHoncho extends StateMachine {
         if (getInstance().m_ballToggle.getAsBoolean() && !getInstance().m_cycleChangeBlock) {
           getInstance().m_cycleChangeBlock = true;
           return CycleOn;
-        }
-        if (getInstance().m_climbToggle.getAsBoolean() && !getInstance().m_climbChangeBlock) {
-          getInstance().m_climbChangeBlock = true;
-          getInstance().m_climbPreviousState = HeadHonchoStates.CycleOff;
-          return Climbing;
-        }
-        if (getInstance().m_climbAlign.getAsBoolean()) {
-          return Climb_Align;
         }
         if (getInstance().m_reverse.getAsBoolean()) {
           return Reverse;
@@ -74,7 +62,6 @@ public class HeadHoncho extends StateMachine {
         INTAKE_SUBSYSTEM.setIntakeState(IntakeStates.CycleOn);
         SERIALIZATION_SUBSYSTEM.setSerializationState(SerializationStates.CycleOn);
         SHOOTER_SUBSYSTEM.setShooterState(ShooterStates.CycleOn);
-        CLIMB_SUBSYSTEM.setClimbState(ClimbStates.REST);
         DRIVE_SUBSYSTEM.setDriveState(DriveStates.DRIVER_CONTROL);
       }
 
@@ -86,14 +73,6 @@ public class HeadHoncho extends StateMachine {
         if (getInstance().m_ballToggle.getAsBoolean() && !getInstance().m_cycleChangeBlock) {
           getInstance().m_cycleChangeBlock = true;
           return CycleOn;
-        }
-        if (getInstance().m_climbToggle.getAsBoolean() && !getInstance().m_climbChangeBlock) {
-          getInstance().m_climbChangeBlock = true;
-          getInstance().m_climbPreviousState = HeadHonchoStates.CycleOn;
-          return Climbing;
-        }
-        if (getInstance().m_climbAlign.getAsBoolean()) {
-          return Climb_Align;
         }
         if (getInstance().m_reverse.getAsBoolean()) {
           return Reverse;
@@ -108,7 +87,6 @@ public class HeadHoncho extends StateMachine {
         INTAKE_SUBSYSTEM.setIntakeState(IntakeStates.Reverse);
         SERIALIZATION_SUBSYSTEM.setSerializationState(SerializationStates.Reverse);
         SHOOTER_SUBSYSTEM.setShooterState(ShooterStates.Reverse);
-        CLIMB_SUBSYSTEM.setClimbState(ClimbStates.REST);
         DRIVE_SUBSYSTEM.setDriveState(DriveStates.DRIVER_CONTROL);
       }
 
@@ -121,78 +99,18 @@ public class HeadHoncho extends StateMachine {
           getInstance().m_cycleChangeBlock = true;
           return CycleOn;
         }
-        if (getInstance().m_climbToggle.getAsBoolean() && !getInstance().m_climbChangeBlock) {
-          getInstance().m_climbChangeBlock = true;
-          getInstance().m_climbPreviousState = HeadHonchoStates.Reverse;
-          return Climbing;
-        }
-        if (getInstance().m_climbAlign.getAsBoolean()) {
-          return Climb_Align;
-        }
         if (getInstance().m_reverse.getAsBoolean()) {
           return Reverse;
         }
         return CycleOn;
-      }
-    },
-
-    Climb_Align {
-      @Override
-      public void initialize() {
-        INTAKE_SUBSYSTEM.setIntakeState(IntakeStates.CycleOff);
-        SERIALIZATION_SUBSYSTEM.setSerializationState(SerializationStates.CycleOff);
-        SHOOTER_SUBSYSTEM.setShooterState(ShooterStates.CycleOff);
-        CLIMB_SUBSYSTEM.setClimbState(ClimbStates.REST);
-        DRIVE_SUBSYSTEM.setDriveState(DriveStates.CLIMB_ALIGN);
-      }
-
-      @Override
-      public void execute() {}
-
-      @Override
-      public SystemState nextState() {
-        if (getInstance().m_climbAlign.getAsBoolean()) {
-          return Climb_Align;
-        }
-        return CycleOff;
-      }
-    },
-
-    Climbing {
-      @Override
-      public void initialize() {
-        INTAKE_SUBSYSTEM.setIntakeState(IntakeStates.CycleOff);
-        SERIALIZATION_SUBSYSTEM.setSerializationState(SerializationStates.CycleOff);
-        SHOOTER_SUBSYSTEM.setShooterState(ShooterStates.CycleOff);
-        CLIMB_SUBSYSTEM.setClimbState(ClimbStates.CLIMB);
-        DRIVE_SUBSYSTEM.setDriveState(DriveStates.REST);
-      }
-
-      @Override
-      public void execute() {}
-
-      @Override
-      public SystemState nextState() {
-        if (getInstance().m_climbToggle.getAsBoolean() && !getInstance().m_climbChangeBlock) {
-          getInstance().m_climbChangeBlock = true;
-          return getInstance().m_climbPreviousState;
-        }
-        if (getInstance().m_climbAlign.getAsBoolean()) {
-          return Climb_Align;
-        }
-        return Climbing;
       }
     }
   }
 
   private static HeadHoncho s_headHoncho;
   private BooleanSupplier m_ballToggle;
-  private BooleanSupplier m_climbToggle;
-  private BooleanSupplier m_climbAlign;
   private BooleanSupplier m_reverse;
   private boolean m_cycleChangeBlock = false;
-  private boolean m_climbChangeBlock = false;
-  private SystemState m_climbPreviousState = null;
 
   public HeadHoncho() {
     super(HeadHonchoStates.CycleOff);
@@ -200,7 +118,6 @@ public class HeadHoncho extends StateMachine {
     configure_bindings();
 
     PRIMARY_CONTROLLER.rightBumper().onFalse(Commands.runOnce(() -> m_cycleChangeBlock = false));
-    PRIMARY_CONTROLLER.leftBumper().onFalse(Commands.runOnce(() -> m_climbChangeBlock = false));
   }
 
   public static HeadHoncho getInstance() {
@@ -212,8 +129,6 @@ public class HeadHoncho extends StateMachine {
 
   private void configure_bindings() {
     m_ballToggle = PRIMARY_CONTROLLER.rightBumper();
-    m_climbAlign = PRIMARY_CONTROLLER.y();
-    m_climbToggle = PRIMARY_CONTROLLER.leftBumper();
     m_reverse = PRIMARY_CONTROLLER.rightTrigger();
 
     DRIVE_SUBSYSTEM.configure_bindings(
