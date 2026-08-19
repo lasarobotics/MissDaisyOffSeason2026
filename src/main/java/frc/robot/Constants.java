@@ -94,6 +94,10 @@ public final class Constants {
     public static final double SHOOTER_ALLOWED_ERROR = 0.2;
     public static final double HOOD_ALLOWED_ERROR = 0.3;
     public static final double TURRET_ALLOWED_ERROR = 0.2;
+
+    public static final int ENCODER_ONE_TEETH = 17;
+    public static final int ENCODER_TOW_TEETH = 18;
+    public static final int TURRET_GEAR_TEETH = 92;
   }
 
   public static class Climb {

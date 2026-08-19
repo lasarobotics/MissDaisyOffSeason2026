@@ -137,4 +137,11 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodMotor.set(0);
     m_turretMotor.set(0);
   }
+
+  private void updateTurretPosition() {
+    // TODO actually read positions
+    double encoderAPosition = 0;
+    double encoderBPosition = 0;
+    
+  }
 }
