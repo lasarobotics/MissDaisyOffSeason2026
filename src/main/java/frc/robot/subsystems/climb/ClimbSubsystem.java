@@ -56,6 +56,8 @@ public class ClimbSubsystem extends StateMachine {
 
   public ClimbSubsystem() {
     super(ClimbStates.REST);
+
+    m_requestedState = ClimbStates.REST;
   }
 
   public static ClimbSubsystem getInstance() {

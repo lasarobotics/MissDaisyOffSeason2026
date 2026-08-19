@@ -74,6 +74,8 @@ public class SerializationSubsystem extends StateMachine {
   public SerializationSubsystem() {
     super(SerializationStates.REST);
 
+    m_requestedState = SerializationStates.ACTIVE;
+
     m_omniMotor = new TalonFX(Constants.SerializationConstants.OMNI_CAN_ID);
     m_mecanumMotorLeader = new TalonFX(Constants.SerializationConstants.MECANUM_LEADER_CAN_ID);
     m_mecanumMotorFollower = new TalonFX(Constants.SerializationConstants.MECANUM_FOLLOWER_CAN_ID);
