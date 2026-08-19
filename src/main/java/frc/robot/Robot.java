@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.serialization.SerializationSubsystem;
@@ -24,14 +23,12 @@ public class Robot extends LoggedRobot {
       new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
 
   private boolean activeToggleState;
-  private boolean climbToggleState;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    ClimbSubsystem.getInstance();
     DriveSubsystem.getInstance();
     IntakeSubsystem.getInstance();
     SerializationSubsystem.getInstance();
@@ -40,11 +37,7 @@ public class Robot extends LoggedRobot {
     HeadHoncho.getInstance()
         .configureBindings(
             // active toggle
-            () -> activeToggleState,
-            // climb
-            () -> climbToggleState,
-            // climb align
-            m_driverController.y());
+            () -> activeToggleState);
 
     DriveSubsystem.getInstance()
         .configureBindings(
@@ -55,9 +48,6 @@ public class Robot extends LoggedRobot {
     m_driverController
         .rightBumper()
         .onTrue(Commands.runOnce(() -> activeToggleState = !activeToggleState));
-    m_driverController
-        .leftBumper()
-        .onTrue(Commands.runOnce(() -> climbToggleState = !climbToggleState));
   }
 
   @Override

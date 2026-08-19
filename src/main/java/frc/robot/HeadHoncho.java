@@ -12,8 +12,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
-import frc.robot.subsystems.climb.ClimbSubsystem;
-import frc.robot.subsystems.climb.ClimbSubsystem.ClimbStates;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem.DriveStates;
 import frc.robot.subsystems.intake.IntakeSubsystem;
@@ -31,7 +29,6 @@ public class HeadHoncho extends StateMachine {
       @Override
       public void initialize() {
         DriveSubsystem.setState(DriveStates.DRIVER_CONTROL);
-        ClimbSubsystem.setState(ClimbStates.RETRACTED);
         getInstance().stopBallFlow();
       }
 
@@ -41,10 +38,6 @@ public class HeadHoncho extends StateMachine {
           return ACTIVE;
         }
 
-        if (!getInstance().m_climbAlignButton.getAsBoolean()) {
-          return CLIMB_ALIGN;
-        }
-
         return this;
       }
     },
@@ -52,7 +45,6 @@ public class HeadHoncho extends StateMachine {
       @Override
       public void initialize() {
         DriveSubsystem.setState(DriveStates.DRIVER_CONTROL);
-        ClimbSubsystem.setState(ClimbStates.RETRACTED);
       }
 
       @Override
@@ -70,31 +62,6 @@ public class HeadHoncho extends StateMachine {
           return REST;
         }
 
-        if (!getInstance().m_climbAlignButton.getAsBoolean()) {
-          return CLIMB_ALIGN;
-        }
-
-        return this;
-      }
-    },
-    CLIMB_ALIGN {
-      @Override
-      public void initialize() {
-        DriveSubsystem.setState(DriveStates.CLIMB_ALIGN);
-        ClimbSubsystem.setState(ClimbStates.RETRACTED);
-        getInstance().stopBallFlow();
-      }
-
-      @Override
-      public SystemState nextState() {
-        if (!getInstance().m_climbAlignButton.getAsBoolean()) {
-          if (getInstance().m_activeToggleButton.getAsBoolean()) {
-            return ACTIVE;
-          } else {
-            return REST;
-          }
-        }
-
         return this;
       }
     }
@@ -103,8 +70,6 @@ public class HeadHoncho extends StateMachine {
   private static HeadHoncho s_headHoncho;
 
   private BooleanSupplier m_activeToggleButton;
-  private BooleanSupplier m_climbButton;
-  private BooleanSupplier m_climbAlignButton;
 
   public HeadHoncho() {
     super(HeadHonchoStates.REST);
@@ -118,12 +83,8 @@ public class HeadHoncho extends StateMachine {
   }
 
   public void configureBindings(
-      BooleanSupplier activeToggleButton,
-      BooleanSupplier climbButton,
-      BooleanSupplier climbAlignButton) {
+      BooleanSupplier activeToggleButton) {
     m_activeToggleButton = activeToggleButton;
-    m_climbButton = climbButton;
-    m_climbAlignButton = climbAlignButton;
   }
 
   private void startBallFlow() {

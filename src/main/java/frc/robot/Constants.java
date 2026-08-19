@@ -100,13 +100,6 @@ public final class Constants {
     public static final int TURRET_GEAR_TEETH = 92;
   }
 
-  public static class Climb {
-    public static final int CLIMB_MOTOR_ID = 0;
-
-    public static final double CLIMB_EXTENDED_SETPOINT = 0;
-    public static final double CLIMB_RETRACTED_SETPOINT = 0;
-  }
-
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
     // assume all modules equidistant from center

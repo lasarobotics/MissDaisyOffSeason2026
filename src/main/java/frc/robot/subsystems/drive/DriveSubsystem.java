@@ -50,12 +50,6 @@ public class DriveSubsystem extends StateMachine {
       public SystemState nextState() {
         return s_requestedNextState;
       }
-    },
-    CLIMB_ALIGN {
-      @Override
-      public SystemState nextState() {
-        return s_requestedNextState;
-      }
     }
   }
 
