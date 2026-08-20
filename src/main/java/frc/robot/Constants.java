@@ -31,9 +31,9 @@ public final class Constants {
   }
 
   public static class Intake {
-    public static final int LEADER_ROLLER_ID = 0;
-    public static final int FOLLOWER_ROLLER_ID = 0;
-    public static final int ARM_MOTOR_ID = 0;
+    public static final int ARM_MOTOR_ID = 30;
+    public static final int LEADER_ROLLER_ID = 31;
+    public static final int FOLLOWER_ROLLER_ID = 32;
 
     public static final double ARM_STOW_POSITION = 0;
     public static final double ARM_DEPLOY_POSITION = 0;
@@ -45,9 +45,9 @@ public final class Constants {
   }
 
   public static class Serialization {
-    public static final int OMNI_WHEEL_MOTOR_ID = 0;
-    public static final int LEADER_MECANUM_ROLLER_ID = 0;
-    public static final int FOLLOWER_MECANUM_ROLLER_ID = 0;
+    public static final int OMNI_WHEEL_MOTOR_ID = 40;
+    public static final int LEADER_MECANUM_ROLLER_ID = 41;
+    public static final int FOLLOWER_MECANUM_ROLLER_ID = 42;
 
     public static final Distance MECANUM_ROLLER_RADIUS = Inches.of(2.5);
     public static final Distance OMNI_WHEEL_RADIUS = Inches.of(6);
@@ -58,10 +58,12 @@ public final class Constants {
   }
 
   public static class Shooter {
-    public static final int SHOOTER_MOTOR_LEADER_ID = 0;
-    public static final int SHOOTER_MOTOR_FOLLOWER_ID = 0;
-    public static final int HOOD_MOTOR_ID = 0;
-    public static final int TURRET_MOTOR_ID = 0;
+    public static final int SHOOTER_MOTOR_LEADER_ID = 50;
+    public static final int SHOOTER_MOTOR_FOLLOWER_ID = 51;
+    public static final int HOOD_MOTOR_ID = 52;
+    public static final int TURRET_MOTOR_ID = 53;
+    public static final int ENCODER_ONE_ID = 54;
+    public static final int ENCODER_TWO_ID = 55;
 
     // TODO
     // 3 inches left, 4 inches back, approx 20 inches up

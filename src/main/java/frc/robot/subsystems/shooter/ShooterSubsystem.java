@@ -4,13 +4,19 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.Constants;
 import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
@@ -78,6 +84,8 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFX m_shooterMotorFollower;
   private TalonFX m_hoodMotor;
   private TalonFX m_turretMotor;
+  private CANcoder m_encoderOne;
+  private CANcoder m_encoderTwo;
 
   private VelocityVoltage m_shooterMotorRequest;
   private PositionVoltage m_hoodMotorRequest;
@@ -94,6 +102,8 @@ public class ShooterSubsystem extends StateMachine {
     m_shooterMotorFollower = new TalonFX(Constants.Shooter.SHOOTER_MOTOR_FOLLOWER_ID);
     m_hoodMotor = new TalonFX(Constants.Shooter.HOOD_MOTOR_ID);
     m_turretMotor = new TalonFX(Constants.Shooter.TURRET_MOTOR_ID);
+    m_encoderOne = new CANcoder(Constants.Shooter.ENCODER_ONE_ID);
+    m_encoderTwo = new CANcoder(Constants.Shooter.ENCODER_TWO_ID);
 
     m_shooterMotorRequest = new VelocityVoltage(0);
     m_hoodMotorRequest = new PositionVoltage(0);
@@ -102,7 +112,7 @@ public class ShooterSubsystem extends StateMachine {
     m_shooterMotorFollower.setControl(
         new Follower(m_shooterMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
 
-    updateTurretPosition();
+    new Thread(() -> updateTurretPosition()).start();
   }
 
   public static ShooterSubsystem getInstance() {
@@ -142,10 +152,12 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private void updateTurretPosition() {
-    // TODO actually read positions
-    // in degrees
-    double encoderAPosition = 0;
-    double encoderBPosition = 0;
+    StatusSignal<Angle> encoderASignal = m_encoderOne.getPosition();
+    StatusSignal<Angle> encoderBSignal = m_encoderTwo.getPosition();
+    BaseStatusSignal.refreshAll(encoderASignal, encoderBSignal);
+    BaseStatusSignal.waitForAll(0.1, encoderASignal, encoderBSignal);
+    double encoderAPosition = encoderASignal.getValue().in(Degrees);
+    double encoderBPosition = encoderBSignal.getValue().in(Degrees);
 
     double[] encoderOnePossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
     double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_ONE_TEETH];
