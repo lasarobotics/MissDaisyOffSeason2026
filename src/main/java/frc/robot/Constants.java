@@ -74,11 +74,20 @@ public final class Constants {
     public static final int TURRET_MOTOR_ID = 53;
     public static final double HOOD_MIN_POS = 0;
     public static final double HOOD_MAX_POS = 0;
+  }
+
+  public static class FieldConstants {
     public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
     public static final Translation2d RED_HUB_POS = new Translation2d(11.9, 4.021);
     public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(4.61, 6.03);
-    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(4.61, 2.01);
+    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(4.61, 1);
+    public static final Translation2d BLUE_LEFT_TRENCH = new Translation2d(4.61, 7);
+    public static final Translation2d BLUE_RIGHT_TRENCH = new Translation2d(4.61, 2.01);
     public static final Translation2d RED_LEFT_BUMP = new Translation2d(11.9, 2.01);
     public static final Translation2d RED_RIGHT_BUMP = new Translation2d(11.9, 6.03);
+    public static final Translation2d RED_LEFT_TRENCH = new Translation2d(11.9, 1);
+    public static final Translation2d RED_RIGHT_TRENCH = new Translation2d(11.9, 7);
+    public static final double NZ_RED_X = 12.549;
+    public static final double NZ_BLUE_X = 3.964;
   }
 }

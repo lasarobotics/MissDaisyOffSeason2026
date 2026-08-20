@@ -10,9 +10,13 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterSubsystem extends StateMachine {
 
@@ -86,8 +90,24 @@ public class ShooterSubsystem extends StateMachine {
     m_selectedState = state;
   }
 
+  private boolean inAZ() {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+      return DriveSubsystem.getPose().getX() < Constants.FieldConstants.NZ_BLUE_X;
+    } else {
+      return DriveSubsystem.getPose().getX() > Constants.FieldConstants.NZ_RED_X;
+    }
+  }
+
+  private boolean inNZ() {
+    return DriveSubsystem.getPose().getX() > Constants.FieldConstants.NZ_BLUE_X
+        && DriveSubsystem.getPose().getX() < Constants.FieldConstants.NZ_RED_X;
+  }
+
   @Override
   public void periodic() {
+    Logger.recordOutput("ShooterSubsystem/InNZ", inNZ());
+    Logger.recordOutput("ShooterSubsystem/InAZ", inAZ());
+
     // This method will be called once per scheduler run
   }
 }

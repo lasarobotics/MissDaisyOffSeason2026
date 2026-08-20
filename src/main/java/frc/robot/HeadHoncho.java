@@ -96,8 +96,14 @@ public class HeadHoncho extends StateMachine {
 
   @Override
   public void periodic() {
-    Logger.recordOutput(getName() + "/currentState", getState().toString());
-    Logger.recordOutput(getName() + "/activeToggle", m_activeToggle);
-    Logger.recordOutput(getName() + "/reverse", m_reverseButton);
+    Logger.recordOutput("HeadHoncho/currentState", getState().toString());
+    Logger.recordOutput("HeadHoncho/activeToggle", m_activeToggle);
+    Logger.recordOutput("HeadHoncho/reverse", m_reverseButton);
+    Logger.recordOutput("Field/BLUE_HUB_POS", Constants.FieldConstants.BLUE_HUB_POS);
+    Logger.recordOutput("Field/BLUE_LEFT_BUMP", Constants.FieldConstants.BLUE_LEFT_BUMP);
+    Logger.recordOutput("Field/BLUE_RIGHT_BUMP", Constants.FieldConstants.BLUE_RIGHT_BUMP);
+    Logger.recordOutput("Field/RED_HUB_POS", Constants.FieldConstants.RED_HUB_POS);
+    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.FieldConstants.RED_RIGHT_BUMP);
+    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.FieldConstants.RED_RIGHT_BUMP);
   }
 }
