@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -21,8 +22,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  * constants. This class should not be used for any other purpose. All constants should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>
- * It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -72,8 +72,11 @@ public final class Constants {
     // TODO
     public static final Angle LOWERED_HOOD_POSITION = Degrees.of(0);
 
-    public static final Distance SHOOTER_DISTANCE_FROM_CENTER = Meters.of(Math
-        .sqrt(Math.pow(SHOOTER_OFFSET_X.in(Meters), 2) + Math.pow(SHOOTER_OFFSET_Y.in(Meters), 2)));
+    public static final Distance SHOOTER_DISTANCE_FROM_CENTER =
+        Meters.of(
+            Math.sqrt(
+                Math.pow(SHOOTER_OFFSET_X.in(Meters), 2)
+                    + Math.pow(SHOOTER_OFFSET_Y.in(Meters), 2)));
 
     public static final Distance BIG_ROLLER_RADIUS = Inches.of(2);
 
@@ -96,18 +99,23 @@ public final class Constants {
     public static final double TURRET_ALLOWED_ERROR = 0.2;
 
     public static final int ENCODER_ONE_TEETH = 17;
-    public static final int ENCODER_TOW_TEETH = 18;
+    public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
+
+    public static final double CRT_EPSILON = 0.05;
   }
 
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
     // assume all modules equidistant from center
     public static final Distance MODULE_CENTER_DIST =
-        Meters.of(Math.sqrt(Math.pow(TunerConstants.FrontLeft.LocationX, 2)
-            + Math.pow(TunerConstants.FrontLeft.LocationY, 2)));
-    public static final AngularVelocity MAX_ANGULAR_VELOCITY = RotationsPerSecond
-        .of(MAX_SPEED.div(MODULE_CENTER_DIST.in(Meters) * 2 * Math.PI).in(MetersPerSecond));
+        Meters.of(
+            Math.sqrt(
+                Math.pow(TunerConstants.FrontLeft.LocationX, 2)
+                    + Math.pow(TunerConstants.FrontLeft.LocationY, 2)));
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY =
+        RotationsPerSecond.of(
+            MAX_SPEED.div(MODULE_CENTER_DIST.in(Meters) * 2 * Math.PI).in(MetersPerSecond));
 
     public static final double MAX_DRIVE_SPEED_SCALAR = 0.8;
     public static final double MAX_ROTATION_SPEED_SCALAR = 0.5;

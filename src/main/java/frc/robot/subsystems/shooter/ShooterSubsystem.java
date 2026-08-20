@@ -99,8 +99,10 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodMotorRequest = new PositionVoltage(0);
     m_turretMotorRequest = new PositionVoltage(0);
 
-    m_shooterMotorFollower
-        .setControl(new Follower(m_shooterMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    m_shooterMotorFollower.setControl(
+        new Follower(m_shooterMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+
+    updateTurretPosition();
   }
 
   public static ShooterSubsystem getInstance() {
@@ -111,24 +113,25 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean shooterReady() {
-    return (shooterSpeedDebouncer
-        .calculate(m_shooterMotorLeader.getClosedLoopError().isNear(0,
-            Constants.Shooter.SHOOTER_ALLOWED_ERROR))
+    return (shooterSpeedDebouncer.calculate(
+            m_shooterMotorLeader
+                .getClosedLoopError()
+                .isNear(0, Constants.Shooter.SHOOTER_ALLOWED_ERROR))
         && m_hoodMotor.getClosedLoopError().isNear(0, Constants.Shooter.HOOD_ALLOWED_ERROR)
         && m_turretMotor.getClosedLoopError().isNear(0, Constants.Shooter.TURRET_ALLOWED_ERROR));
   }
 
   private void runShooter() {
-    m_shooterMotorLeader
-        .setControl(m_shooterMotorRequest.withVelocity(HeadHoncho.getDesiredShooterSpeed()));
+    m_shooterMotorLeader.setControl(
+        m_shooterMotorRequest.withVelocity(HeadHoncho.getDesiredShooterSpeed()));
     m_hoodMotor.setControl(m_hoodMotorRequest.withPosition(HeadHoncho.getDesiredHoodAngle()));
     m_turretMotor.setControl(m_turretMotorRequest.withPosition(HeadHoncho.getDesiredTurretAngle()));
   }
 
   private void lowerHood() {
     m_shooterMotorLeader.set(0);
-    m_hoodMotor
-        .setControl(m_hoodMotorRequest.withPosition(Constants.Shooter.LOWERED_HOOD_POSITION));
+    m_hoodMotor.setControl(
+        m_hoodMotorRequest.withPosition(Constants.Shooter.LOWERED_HOOD_POSITION));
     m_turretMotor.setControl(m_turretMotorRequest.withPosition(HeadHoncho.getDesiredTurretAngle()));
   }
 
@@ -140,8 +143,42 @@ public class ShooterSubsystem extends StateMachine {
 
   private void updateTurretPosition() {
     // TODO actually read positions
+    // in degrees
     double encoderAPosition = 0;
     double encoderBPosition = 0;
-    
+
+    double[] encoderOnePossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
+    double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_ONE_TEETH];
+
+    // for encoder one
+    for (int i = 0; i < Constants.Shooter.ENCODER_TWO_TEETH; i++) {
+      encoderOnePossible[i] =
+          (i + (encoderAPosition / 360))
+              * ((double) Constants.Shooter.ENCODER_ONE_TEETH
+                  / Constants.Shooter.TURRET_GEAR_TEETH);
+    }
+    // for encoder two
+    for (int i = 0; i < Constants.Shooter.ENCODER_ONE_TEETH; i++) {
+      encoderTwoPossible[i] =
+          (i + (encoderBPosition / 360))
+              * ((double) Constants.Shooter.ENCODER_TWO_TEETH
+                  / Constants.Shooter.TURRET_GEAR_TEETH);
+    }
+
+    double matchingValue = 0;
+    outerLoop:
+    for (double eOnePossible : encoderOnePossible) {
+      for (double eTwoPossible : encoderTwoPossible) {
+        if (Math.abs(eTwoPossible - eOnePossible) < Constants.Shooter.CRT_EPSILON) {
+          matchingValue = (eOnePossible + eTwoPossible) / 2;
+          break outerLoop;
+        }
+
+        if (eTwoPossible > eOnePossible) {
+          break;
+        }
+      }
+    }
+    m_turretMotor.setPosition(matchingValue);
   }
 }
