@@ -13,15 +13,11 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
-import frc.robot.AimUtil;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
-import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class IntakeSubsystem extends StateMachine {
 
@@ -91,8 +87,8 @@ public class IntakeSubsystem extends StateMachine {
     m_intakeRollerRequest = new VelocityVoltage(0);
     m_armMotorRequest = new PositionVoltage(0);
 
-    m_intakeRollerFollower
-        .setControl(new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
+    m_intakeRollerFollower.setControl(
+        new Follower(m_intakeRollerLeader.getDeviceID(), MotorAlignmentValue.Aligned));
   }
 
   public static IntakeSubsystem getInstance() {
@@ -113,8 +109,10 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   private void updateRollerSpeed() {
-    AngularVelocity intakeVelocity = RotationsPerSecond.of(getBallEntrySpeed().in(MetersPerSecond)
-        / (2 * Math.PI * Constants.Intake.OUTER_ROLLER_RADIUS.in(Meters)));
+    AngularVelocity intakeVelocity =
+        RotationsPerSecond.of(
+            getBallEntrySpeed().in(MetersPerSecond)
+                / (2 * Math.PI * Constants.Intake.OUTER_ROLLER_RADIUS.in(Meters)));
     m_intakeRollerLeader.setControl(m_intakeRollerRequest.withVelocity(intakeVelocity));
   }
 
