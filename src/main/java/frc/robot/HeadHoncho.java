@@ -209,6 +209,10 @@ public class HeadHoncho extends StateMachine {
 
   @Override
   public void periodic() {
+    // State Logging
+    Logger.recordOutput("HeadHoncho/State", getState().toString());
+    Logger.recordOutput("HeadHoncho/IsActive", wantToActive());
+    Logger.recordOutput("HeadHoncho/IsReverse", wantToReverse());
 
     // Log all field values for verification
     Logger.recordOutput(

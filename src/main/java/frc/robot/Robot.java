@@ -27,6 +27,8 @@ public class Robot extends LoggedRobot {
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
+  private boolean m_activeAll;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -38,6 +40,7 @@ public class Robot extends LoggedRobot {
     IntakeSubsystem.getInstance();
     SerializationSubsystem.getInstance();
     ShooterSubsystem.getInstance();
+    m_activeAll = true;
     configureBindings();
 
     Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
@@ -46,8 +49,6 @@ public class Robot extends LoggedRobot {
     // Toggle full robot active
     m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
   }
-
-  private boolean m_activeAll;
 
   private void configureBindings() {
     HeadHoncho.getInstance()

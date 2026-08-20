@@ -13,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 public class SerializationSubsystem extends StateMachine {
 
@@ -146,6 +147,6 @@ public class SerializationSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    Logger.recordOutput("SerializationSubsystem/State", getState().toString());
   }
 }

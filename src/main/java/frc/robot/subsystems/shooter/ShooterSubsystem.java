@@ -323,6 +323,7 @@ public class ShooterSubsystem extends StateMachine {
   @Override
   public void periodic() {
     getInstance().updateCurrentTurretPos();
+    Logger.recordOutput("ShooterSubsystem/State", getState().toString());
     Logger.recordOutput(
         "ShooterSubsystem/HoodAngle", getInstance().m_hoodMotor.getPosition().getValueAsDouble());
   }

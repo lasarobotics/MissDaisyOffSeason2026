@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends StateMachine {
 
@@ -109,10 +110,6 @@ public class IntakeSubsystem extends StateMachine {
     return s_intakeInstance;
   }
 
-  public double getIntakeRollerSpeed() {
-    return 0;
-  }
-
   public void setState(IntakeStates state) {
     getInstance().m_requestedState = state;
   }
@@ -128,7 +125,9 @@ public class IntakeSubsystem extends StateMachine {
 
   public void activateIntake(boolean reverse) {
     double intakeSpeed =
-        (reverse) ? -getInstance().getIntakeRollerSpeed() : getInstance().getIntakeRollerSpeed();
+        (reverse)
+            ? -Constants.IntakeConstants.INTAKE_ACTIVE_SPEED
+            : Constants.IntakeConstants.INTAKE_ACTIVE_SPEED;
     getInstance()
         .m_intakeMotorLeader
         .setControl(getInstance().m_intakeVelocityDutyCycle.withVelocity(intakeSpeed));
@@ -144,6 +143,6 @@ public class IntakeSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    Logger.recordOutput("IntakeSubsystem/State", getState().toString());
   }
 }

@@ -290,5 +290,6 @@ public class DriveSubsystem extends StateMachine {
   @Override
   public void periodic() {
     Logger.recordOutput("DriveSubsystem/Pose", getInstance().getRobotPose());
+    Logger.recordOutput("DriveSubsystem/State", getState().toString());
   }
 }
