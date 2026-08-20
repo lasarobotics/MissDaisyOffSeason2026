@@ -8,10 +8,13 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -85,6 +88,9 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFX m_hoodMotor;
   private TalonFX m_turretMotor;
 
+  private CANcoder m_encoderOne;
+  private CANcoder m_encoderTwo;
+
   private ShooterStates m_requestedState;
 
   private boolean m_isUnwinding;
@@ -113,6 +119,9 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodMotor = new TalonFX(Constants.ShooterConstants.HOOD_CAN_ID);
     m_turretMotor = new TalonFX(Constants.ShooterConstants.TURRET_CAN_ID);
 
+    m_encoderOne = new CANcoder(Constants.ShooterConstants.ENCODER_ONE_CAN_ID);
+    m_encoderTwo = new CANcoder(Constants.ShooterConstants.ENCODER_TWO_CAN_ID);
+
     m_currentTurretPosition = m_turretMotor.getPosition().getValueAsDouble();
 
     TalonFXConfiguration flywheelConfig = new TalonFXConfiguration();
@@ -130,6 +139,8 @@ public class ShooterSubsystem extends StateMachine {
     TalonFXConfiguration turretConfig = new TalonFXConfiguration();
     turretConfig.Slot0.withKP(0).withKI(0).withKD(0);
     m_turretMotor.getConfigurator().apply(turretConfig);
+
+    new Thread(() -> updateTurretPosition()).start();
   }
 
   public AngularVelocity getDesiredShooterVelocity(Angle hoodAngle) {
@@ -320,11 +331,60 @@ public class ShooterSubsystem extends StateMachine {
         && getInstance().atGoodTurretAngle(getInstance().getDesiredHoodAngle(getShootingTarget())));
   }
 
+  public void updateTurretPosition() {
+    StatusSignal<Angle> encoderASignal = m_encoderOne.getPosition();
+    StatusSignal<Angle> encoderBSignal = m_encoderTwo.getPosition();
+    BaseStatusSignal.refreshAll(encoderASignal, encoderBSignal);
+    BaseStatusSignal.waitForAll(0.1, encoderASignal, encoderBSignal);
+    double encoderAPosition = encoderASignal.getValue().in(Degrees);
+    double encoderBPosition = encoderBSignal.getValue().in(Degrees);
+
+    double[] encoderOnePossible = new double[Constants.ShooterConstants.ENCODER_TEETH_ONE];
+    double[] encoderTwoPossible = new double[Constants.ShooterConstants.ENCODER_TEETH_TWO];
+
+    // for encoder one
+    for (int i = 0; i < Constants.ShooterConstants.ENCODER_TEETH_TWO; i++) {
+      encoderOnePossible[i] =
+          (i + (encoderAPosition / 360))
+              * ((double) Constants.ShooterConstants.ENCODER_TEETH_ONE
+                  / Constants.ShooterConstants.TURRET_GEAR_TEETH);
+    }
+    // for encoder two
+    for (int i = 0; i < Constants.ShooterConstants.ENCODER_TEETH_ONE; i++) {
+      encoderTwoPossible[i] =
+          (i + (encoderBPosition / 360))
+              * ((double) Constants.ShooterConstants.ENCODER_TEETH_TWO
+                  / Constants.ShooterConstants.TURRET_GEAR_TEETH);
+    }
+
+    double matchingValue = 0;
+    outerLoop:
+    for (double eOnePossible : encoderOnePossible) {
+      for (double eTwoPossible : encoderTwoPossible) {
+        if (Math.abs(eTwoPossible - eOnePossible) < Constants.ShooterConstants.CRT_THRESHOLD) {
+          matchingValue = (eOnePossible + eTwoPossible) / 2;
+          break outerLoop;
+        }
+
+        if (eTwoPossible > eOnePossible) {
+          break;
+        }
+      }
+    }
+    m_turretMotor.setPosition(matchingValue);
+  }
+
   @Override
   public void periodic() {
     getInstance().updateCurrentTurretPos();
     Logger.recordOutput("ShooterSubsystem/State", getState().toString());
+    Logger.recordOutput("ShooterSubsystem/HoodAngle", m_hoodMotor.getPosition().getValueAsDouble());
     Logger.recordOutput(
-        "ShooterSubsystem/HoodAngle", getInstance().m_hoodMotor.getPosition().getValueAsDouble());
+        "ShooterSubsystem/DesiredHoodAngle", getDesiredHoodAngle(getShootingTarget()));
+    Logger.recordOutput(
+        "ShooterSubsystem/DesiredShooterVelocity",
+        getDesiredShooterVelocity(getDesiredHoodAngle(getShootingTarget())));
+    Logger.recordOutput(
+        "ShooterSubsystem/DesiredTurretAngle", getDesiredTurretAngle(getShootingTarget()));
   }
 }

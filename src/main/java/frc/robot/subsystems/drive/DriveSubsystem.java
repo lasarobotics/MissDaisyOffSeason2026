@@ -37,7 +37,7 @@ public class DriveSubsystem extends StateMachine {
 
       @Override
       public SystemState nextState() {
-        return this;
+        return getInstance().m_requestedState;
       }
     },
 
@@ -66,7 +66,7 @@ public class DriveSubsystem extends StateMachine {
 
       @Override
       public SystemState nextState() {
-        return this;
+        return getInstance().m_requestedState;
       }
     },
 
@@ -79,7 +79,7 @@ public class DriveSubsystem extends StateMachine {
 
       @Override
       public SystemState nextState() {
-        return this;
+        return getInstance().m_requestedState;
       }
     }
   }
@@ -95,8 +95,6 @@ public class DriveSubsystem extends StateMachine {
   private PIDController m_rotationPIDController;
   private PIDController m_translationPIDController;
   private static double s_currentSpeedScalar;
-
-  private boolean m_shouldAlign;
 
   public DriveSubsystem() {
     super(DriveStates.DRIVER_CONTROL);
@@ -139,10 +137,6 @@ public class DriveSubsystem extends StateMachine {
       s_driveInstance = new DriveSubsystem();
     }
     return s_driveInstance;
-  }
-
-  public void setShouldAlign(Boolean value) {
-    getInstance().m_shouldAlign = value;
   }
 
   public Pose2d getRobotPose() {

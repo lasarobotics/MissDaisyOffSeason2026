@@ -97,11 +97,14 @@ public final class Constants {
     public static final int FLYWHEEL_LEADER_CAN_ID = 50;
     public static final int FLYWHEEL_FOLLOWER_CAN_ID = 51;
     public static final int TURRET_CAN_ID = 53;
+    public static final int ENCODER_ONE_CAN_ID = 53;
+    public static final int ENCODER_TWO_CAN_ID = 53;
 
     public static final int ENCODER_TEETH_ONE = 17;
     public static final int ENCODER_TEETH_TWO = 18;
     public static final int TURRET_GEAR_TEETH = 92;
 
+    public static final double CRT_THRESHOLD = 0.01;
     public static final double TURRET_THRESHOLD = 0.01;
     public static final double HOOD_THRESHOLD = 0.01;
     public static final double SHOOTER_THRESHOLD = 0.01;
