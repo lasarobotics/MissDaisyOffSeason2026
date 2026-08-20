@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -156,8 +156,8 @@ public class ShooterSubsystem extends StateMachine {
     StatusSignal<Angle> encoderBSignal = m_encoderTwo.getPosition();
     BaseStatusSignal.refreshAll(encoderASignal, encoderBSignal);
     BaseStatusSignal.waitForAll(0.1, encoderASignal, encoderBSignal);
-    double encoderAPosition = encoderASignal.getValue().in(Degrees);
-    double encoderBPosition = encoderBSignal.getValue().in(Degrees);
+    double encoderAPosition = encoderASignal.getValue().in(Rotations);
+    double encoderBPosition = encoderBSignal.getValue().in(Rotations);
 
     double[] encoderOnePossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
     double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_ONE_TEETH];
@@ -165,14 +165,14 @@ public class ShooterSubsystem extends StateMachine {
     // for encoder one
     for (int i = 0; i < Constants.Shooter.ENCODER_TWO_TEETH; i++) {
       encoderOnePossible[i] =
-          (i + (encoderAPosition / 360))
+          (i + encoderAPosition)
               * ((double) Constants.Shooter.ENCODER_ONE_TEETH
                   / Constants.Shooter.TURRET_GEAR_TEETH);
     }
     // for encoder two
     for (int i = 0; i < Constants.Shooter.ENCODER_ONE_TEETH; i++) {
       encoderTwoPossible[i] =
-          (i + (encoderBPosition / 360))
+          (i + encoderBPosition)
               * ((double) Constants.Shooter.ENCODER_TWO_TEETH
                   / Constants.Shooter.TURRET_GEAR_TEETH);
     }

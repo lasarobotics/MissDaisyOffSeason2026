@@ -8,6 +8,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.fsm.StateMachine;
@@ -82,8 +84,7 @@ public class HeadHoncho extends StateMachine {
     return s_headHoncho;
   }
 
-  public void configureBindings(
-      BooleanSupplier activeToggleButton) {
+  public void configureBindings(BooleanSupplier activeToggleButton) {
     m_activeToggleButton = activeToggleButton;
   }
 
@@ -99,8 +100,17 @@ public class HeadHoncho extends StateMachine {
     ShooterSubsystem.setState(ShooterStates.REST);
   }
 
+  public Translation3d getShootingTarget() {
+    Pose2d robotPose = DriveSubsystem.getDrivetrain().getState().Pose;
+
+    // TODO
+    // steal from
+    // https://github.com/lasarobotics/PH2026/blob/main/src/main/java/frc/robot/Constants.java
+    return Translation3d.kZero;
+  }
+
   public boolean shouldShoot() {
-    // return true when in AZ and can shoot
+    // return true when path from robot to shooting target is not obstructed
     return false;
   }
 

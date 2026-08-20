@@ -104,7 +104,7 @@ public final class Constants {
     public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
 
-    public static final double CRT_EPSILON = 0.05;
+    public static final double CRT_EPSILON = 0.01;
   }
 
   public static class Drive {
@@ -127,6 +127,8 @@ public final class Constants {
 
   public static class Field {
     public static final double GRAVITY_VALUE = 9.81;
+    public static final double BLUE_ZONE_X = 3.964;
+    public static final double RED_ZONE_X = 12.549;
 
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("/Tuning/maxBallYPos", 2.7);

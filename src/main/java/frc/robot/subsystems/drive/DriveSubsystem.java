@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -101,6 +102,17 @@ public class DriveSubsystem extends StateMachine {
       s_drivetrain.setOperatorPerspectiveForward(Rotation2d.kZero);
     } else {
       s_drivetrain.setOperatorPerspectiveForward(Rotation2d.k180deg);
+    }
+  }
+
+  public static boolean inAllianceZone() {
+    Pose2d robotPose = s_drivetrain.getState().Pose;
+    if (DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)) {
+      // blue alliance
+      return robotPose.getX() <= Constants.Field.BLUE_ZONE_X;
+    } else {
+      // red alliance
+      return robotPose.getX() >= Constants.Field.RED_ZONE_X;
     }
   }
 
