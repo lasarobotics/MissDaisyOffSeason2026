@@ -72,10 +72,28 @@ public class DriveSubsystem extends StateMachine {
 
     UNWIND {
       @Override
-      public void initialize() {}
+      public void execute() {
+        // double pidOutputAngle =
+        //     getInstance().m_rotationPIDController.calculate(s_currentRotation,
+        // s_desiredRotation);
 
-      @Override
-      public void execute() {}
+        // double pidInput =
+        //     Constants.DriveConstants.MAX_ANGULAR_RATE.times(pidOutputAngle).in(RadiansPerSecond);
+        // pidInput = pidInput > 0 ? Math.min(pidInput, 8.0) : Math.max(pidInput, -8.0);
+        // pidInput = Math.abs(s_currentRotation - s_desiredRotation) < Math.PI / 180 ? 0 :
+        // pidInput;
+        // s_drivetrain.setControl(
+        //     s_drive
+        //         .withVelocityX(
+        //             Constants.DriveConstants.MAX_SPEED
+        //                 .times(-s_strafeRequest.getAsDouble())
+        //                 .times(s_currentSpeedScalar))
+        //         .withVelocityY(
+        //             Constants.DriveConstants.MAX_SPEED
+        //                 .times(-s_driveRequest.getAsDouble())
+        //                 .times(s_currentSpeedScalar))
+        //         .withRotationalRate(pidInput));
+      }
 
       @Override
       public SystemState nextState() {
@@ -285,5 +303,7 @@ public class DriveSubsystem extends StateMachine {
   public void periodic() {
     Logger.recordOutput("DriveSubsystem/Pose", getInstance().getRobotPose());
     Logger.recordOutput("DriveSubsystem/State", getState().toString());
+    Logger.recordOutput("DriveSubsystem/UnderTrench", isUnderTrench());
+    Logger.recordOutput("DriveSubsystem/AtGoodShootPos", atGoodShootingPosition());
   }
 }

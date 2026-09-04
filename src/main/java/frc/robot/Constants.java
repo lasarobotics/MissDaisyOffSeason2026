@@ -97,17 +97,20 @@ public final class Constants {
     public static final int FLYWHEEL_LEADER_CAN_ID = 50;
     public static final int FLYWHEEL_FOLLOWER_CAN_ID = 51;
     public static final int TURRET_CAN_ID = 53;
-    public static final int ENCODER_ONE_CAN_ID = 53;
-    public static final int ENCODER_TWO_CAN_ID = 53;
+    public static final int ENCODER_ONE_CAN_ID = 55;
+    public static final int ENCODER_TWO_CAN_ID = 56;
 
     public static final int ENCODER_TEETH_ONE = 17;
     public static final int ENCODER_TEETH_TWO = 18;
     public static final int TURRET_GEAR_TEETH = 92;
 
+    public static final int FLYWHEEL_SMALL_DIAMETER = 2;
+    public static final int FLYWHEEL_LARGE_DIAMETER = 4;
+
     public static final double CRT_THRESHOLD = 0.01;
-    public static final double TURRET_THRESHOLD = 0.01;
-    public static final double HOOD_THRESHOLD = 0.01;
-    public static final double SHOOTER_THRESHOLD = 0.01;
+    public static final double TURRET_THRESHOLD = 1.01;
+    public static final double HOOD_THRESHOLD = 1.01;
+    public static final double SHOOTER_THRESHOLD = 1.01;
 
     public static final AngularVelocity FLYWHEEL_REST_SPEED = RotationsPerSecond.of(0);
 
@@ -116,6 +119,7 @@ public final class Constants {
 
     public static final Angle TURRET_MAX_ANGLE = Degrees.of(0);
     public static final Angle TURRET_MINIMUM_ANGLE = Degrees.of(0);
+    public static final Angle TURRET_UNWIND_ANGLE = Degrees.of(0);
 
     public static final Distance SHOOTER_OFFSET_X = Meters.of(0);
     public static final Distance SHOOTER_OFFSET_Y = Meters.of(0);

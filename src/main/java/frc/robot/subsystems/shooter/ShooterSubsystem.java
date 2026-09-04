@@ -17,6 +17,8 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -54,7 +56,7 @@ public class ShooterSubsystem extends StateMachine {
       public void execute() {
         if (DriveSubsystem.getInstance().atGoodShootingPosition()) {
           if ((getInstance().atUnwindAngle() || getInstance().m_isUnwinding)
-              && getInstance().updateCurrentTurretPos() > 0) {
+              && !getInstance().finishedUnwind()) {
             getInstance().m_isUnwinding = true;
             if (DriveSubsystem.isCommandedMoving()) {
               getInstance().m_isDriveUnwinding = true;
@@ -96,8 +98,6 @@ public class ShooterSubsystem extends StateMachine {
   private boolean m_isUnwinding;
   private boolean m_isDriveUnwinding;
 
-  private double m_currentTurretPosition;
-
   private VelocityDutyCycle m_shooterVelocityDutyCycle;
 
   private PositionVoltage m_positionRequest;
@@ -122,8 +122,6 @@ public class ShooterSubsystem extends StateMachine {
     m_encoderOne = new CANcoder(Constants.ShooterConstants.ENCODER_ONE_CAN_ID);
     m_encoderTwo = new CANcoder(Constants.ShooterConstants.ENCODER_TWO_CAN_ID);
 
-    m_currentTurretPosition = m_turretMotor.getPosition().getValueAsDouble();
-
     TalonFXConfiguration flywheelConfig = new TalonFXConfiguration();
     flywheelConfig.Slot0.withKP(0).withKI(0).withKD(0);
     m_flywheelLeaderMotor.getConfigurator().apply(flywheelConfig);
@@ -143,8 +141,23 @@ public class ShooterSubsystem extends StateMachine {
     new Thread(() -> updateTurretPosition()).start();
   }
 
-  public AngularVelocity getDesiredShooterVelocity(Angle hoodAngle) {
-    return RotationsPerSecond.of(0);
+  public AngularVelocity getDesiredShooterVelocity(Angle hoodAngle, Translation2d target) {
+    Distance D = DriveSubsystem.getInstance().getDistance(target);
+    Distance dh =
+        Meters.of(
+            Constants.FieldConstants.HUB_Y_POS
+                - Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters));
+    double v =
+        Math.sqrt(
+            (Constants.FieldConstants.GRAVITY_VALUE * Math.pow(D.in(Meters), 2))
+                / ((2 * Math.pow(Math.pow(hoodAngle.in(Degrees), 2), 2))
+                    * (D.in(Meters) * Math.tan(hoodAngle.in(Degrees)) - dh.in(Meters))));
+    return RotationsPerSecond.of(
+        v
+            / (Math.PI
+                * ((Constants.ShooterConstants.FLYWHEEL_SMALL_DIAMETER
+                        + Constants.ShooterConstants.FLYWHEEL_LARGE_DIAMETER)
+                    / 2)));
   }
 
   public Angle getDesiredHoodAngle(Translation2d target) {
@@ -157,13 +170,24 @@ public class ShooterSubsystem extends StateMachine {
             Constants.FieldConstants.HUB_Y_POS
                 - Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters));
     return Degrees.of(
-        Math.atan(
-            (dh.in(Meters) + Math.sqrt(Math.pow(D.in(Meters), 2) + Math.pow(dh.in(Meters), 2)))
-                / D.in(Meters)));
+        MathUtil.clamp(
+            Degrees.of(
+                    Math.atan(
+                        (dh.in(Meters)
+                                + Math.sqrt(Math.pow(D.in(Meters), 2) + Math.pow(dh.in(Meters), 2)))
+                            / D.in(Meters)))
+                .in(Degrees),
+            Constants.ShooterConstants.HOOD_MINIMUM_ANGLE.in(Degrees),
+            Constants.ShooterConstants.HOOD_MAX_ANGLE.in(Degrees)));
   }
 
   public Angle getDesiredTurretAngle(Translation2d target) {
-    return Degrees.of(0);
+    Pose2d robotPose = DriveSubsystem.getInstance().getRobotPose();
+    Translation2d robotTranslation = robotPose.getTranslation();
+    Distance distanceToTarget = DriveSubsystem.getInstance().getDistance(target);
+    double robotRotationDiff =
+        Math.acos((target.getX() - robotTranslation.getX() / distanceToTarget.in(Meters)));
+    return Degrees.of(robotRotationDiff);
   }
 
   public double getFlightTime(Translation2d target, Angle desiredHoodAngle) {
@@ -177,23 +201,6 @@ public class ShooterSubsystem extends StateMachine {
             / Constants.FieldConstants.GRAVITY_VALUE);
   }
 
-  public double getVelocityX(Translation2d target) {
-    return DriveSubsystem.getInstance().getDistance(target).in(Meters)
-        / getFlightTime(target, getInstance().getDesiredHoodAngle(target));
-  }
-
-  public double getVelocityY(Translation2d target) {
-    return getVelocityX(target) * Math.tan(getFlightTime(target, getDesiredHoodAngle(target)));
-  }
-
-  public double getVelocity(double x, double y) {
-    return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-  }
-
-  public AngularVelocity getFuelVelocity(double velocityX, double velocityY) {
-    return RotationsPerSecond.of(0);
-  }
-
   public boolean atGoodHoodAngle(Angle desiredHoodAngle) {
     return (Math.abs(desiredHoodAngle.in(Degrees))
             < Math.abs(
@@ -205,7 +212,9 @@ public class ShooterSubsystem extends StateMachine {
 
   public boolean atGoodShooterVelocity(Angle desiredHoodAngle) {
     return (Math.abs(
-                getInstance().getDesiredShooterVelocity(desiredHoodAngle).in(RotationsPerSecond))
+                getInstance()
+                    .getDesiredShooterVelocity(desiredHoodAngle, getInstance().getShootingTarget())
+                    .in(RotationsPerSecond))
             < Math.abs(
                 getInstance().m_flywheelLeaderMotor.getVelocity().getValueAsDouble()
                     * Constants.ShooterConstants.HOOD_THRESHOLD))
@@ -223,15 +232,11 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean atUnwindAngle() {
-    return getInstance().m_turretMotor.getPosition().getValue().in(Degrees)
-        >= Constants.ShooterConstants.TURRET_MAX_ANGLE.in(Degrees);
-  }
-
-  public double updateCurrentTurretPos() {
-    double lastTurretPosition = getInstance().m_currentTurretPosition;
-    getInstance().m_currentTurretPosition =
-        getInstance().m_turretMotor.getPosition().getValueAsDouble();
-    return getInstance().m_currentTurretPosition - lastTurretPosition;
+    double degreesTurretPos = getInstance().m_turretMotor.getPosition().getValue().in(Degrees);
+    return (degreesTurretPos * Constants.ShooterConstants.TURRET_THRESHOLD
+            >= Constants.ShooterConstants.TURRET_MAX_ANGLE.in(Degrees)
+        || degreesTurretPos * Constants.ShooterConstants.TURRET_THRESHOLD
+            <= Constants.ShooterConstants.TURRET_MINIMUM_ANGLE.in(Degrees));
   }
 
   public void setShooterVelocity(AngularVelocity shooterVelocity) {
@@ -253,7 +258,8 @@ public class ShooterSubsystem extends StateMachine {
   public void shoot(Translation2d target) {
     Angle desiredHoodAngle = getInstance().getDesiredHoodAngle(target);
     AngularVelocity desiredShooterVelocity =
-        getInstance().getDesiredShooterVelocity(desiredHoodAngle);
+        getInstance()
+            .getDesiredShooterVelocity(desiredHoodAngle, getInstance().getShootingTarget());
     Angle desiredTurretAngle = getInstance().getDesiredTurretAngle(target);
 
     getInstance().setShooterVelocity(desiredShooterVelocity);
@@ -261,7 +267,20 @@ public class ShooterSubsystem extends StateMachine {
     getInstance().setTurretAngle(desiredTurretAngle);
   }
 
-  public void unwindTurret() {}
+  public void unwindTurret() {
+    getInstance()
+        .m_turretMotor
+        .setControl(getInstance().m_positionRequest.withPosition(Degrees.of(0)));
+  }
+
+  public boolean finishedUnwind() {
+    if (getInstance().m_turretMotor.getPosition()
+        == Constants.ShooterConstants.TURRET_UNWIND_ANGLE) {
+      getInstance().m_isUnwinding = false;
+      return true;
+    }
+    return false;
+  }
 
   public Translation2d getShootingTarget() {
     Translation2d robotTranslation = DriveSubsystem.getInstance().getRobotPose().getTranslation();
@@ -376,15 +395,19 @@ public class ShooterSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
-    getInstance().updateCurrentTurretPos();
     Logger.recordOutput("ShooterSubsystem/State", getState().toString());
     Logger.recordOutput("ShooterSubsystem/HoodAngle", m_hoodMotor.getPosition().getValueAsDouble());
     Logger.recordOutput(
         "ShooterSubsystem/DesiredHoodAngle", getDesiredHoodAngle(getShootingTarget()));
     Logger.recordOutput(
         "ShooterSubsystem/DesiredShooterVelocity",
-        getDesiredShooterVelocity(getDesiredHoodAngle(getShootingTarget())));
+        getDesiredShooterVelocity(getDesiredHoodAngle(getShootingTarget()), getShootingTarget()));
     Logger.recordOutput(
         "ShooterSubsystem/DesiredTurretAngle", getDesiredTurretAngle(getShootingTarget()));
+    Logger.recordOutput("ShooterSubsystem/ShooterTarget", getShootingTarget());
+    Logger.recordOutput(
+        "ShooterSubsystem/ShooterVelocity", m_flywheelLeaderMotor.getVelocity().getValueAsDouble());
+    Logger.recordOutput(
+        "ShooterSubsystem/TurretAngle", m_turretMotor.getPosition().getValueAsDouble());
   }
 }
