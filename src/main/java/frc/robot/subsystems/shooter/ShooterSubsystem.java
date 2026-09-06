@@ -4,12 +4,21 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Rotations;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
@@ -32,9 +41,6 @@ public class ShooterSubsystem extends StateMachine {
     },
     ON {
       @Override
-      public void initialize() {}
-
-      @Override
       public void execute() {}
 
       @Override
@@ -49,6 +55,8 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFX m_shooterLeader;
   private TalonFX m_shooterFollower;
   private TalonFX m_hoodMotor;
+  private CANcoder m_encoderOne;
+  private CANcoder m_encoderTwo;
   private VelocityVoltage m_velocityVoltage;
   private PositionVoltage m_positionVoltage;
   private TalonFXConfiguration m_shooterConfig;
@@ -63,6 +71,8 @@ public class ShooterSubsystem extends StateMachine {
     m_shooterFollower = new TalonFX(Constants.ShooterConstants.SHOOTER_FOLLOWER_ID);
     m_hoodMotor = new TalonFX(Constants.ShooterConstants.HOOD_MOTOR_ID);
     m_turretMotor = new TalonFX(Constants.ShooterConstants.TURRET_MOTOR_ID);
+    m_encoderOne = new CANcoder(Constants.ShooterConstants.ENCODER_ONE_ID);
+    m_encoderOne = new CANcoder(Constants.ShooterConstants.ENCODER_TWO_ID);
     m_velocityVoltage = new VelocityVoltage(0);
     m_positionVoltage = new PositionVoltage(0);
     m_shooterFollower.setControl(
@@ -92,22 +102,90 @@ public class ShooterSubsystem extends StateMachine {
 
   private boolean inAZ() {
     if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
-      return DriveSubsystem.getPose().getX() < Constants.FieldConstants.NZ_BLUE_X;
+      return DriveSubsystem.getInstance().getPose().getX() < Constants.FieldConstants.NZ_BLUE_X;
     } else {
-      return DriveSubsystem.getPose().getX() > Constants.FieldConstants.NZ_RED_X;
+      return DriveSubsystem.getInstance().getPose().getX() > Constants.FieldConstants.NZ_RED_X;
     }
   }
 
+  private double getTurretPos(Translation2d target) {
+    Pose2d robotPose = DriveSubsystem.getInstance().getPose();
+    double xOffset = target.getX() - robotPose.getX();
+    double yOffset = target.getY() - robotPose.getY();
+    double angleToTarget = robotPose.getRotation().getRadians() - Math.atan2(xOffset, yOffset);
+    double turretDesired =
+        (m_turretMotor.getPosition().getValueAsDouble()
+                    / Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO)
+                * 2
+                * Math.PI
+            - angleToTarget;
+    return turretDesired;
+  }
+
+  // private double getHoodPos() {}
+
+  // private void setHoodPos(double desiredPos) {}
+
+  private void setTurretPos(double desiredPos) {
+    m_turretMotor.setControl(
+        m_positionVoltage.withPosition(
+            desiredPos * Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO));
+  }
+
   private boolean inNZ() {
-    return DriveSubsystem.getPose().getX() > Constants.FieldConstants.NZ_BLUE_X
-        && DriveSubsystem.getPose().getX() < Constants.FieldConstants.NZ_RED_X;
+    return DriveSubsystem.getInstance().getPose().getX() > Constants.FieldConstants.NZ_BLUE_X
+        && DriveSubsystem.getInstance().getPose().getX() < Constants.FieldConstants.NZ_RED_X;
+  }
+
+  private void setZero() {
+    StatusSignal<Angle> encoderOneSignal = m_encoderOne.getPosition();
+    StatusSignal<Angle> encoderTwoSignal = m_encoderTwo.getPosition();
+    BaseStatusSignal.refreshAll(encoderOneSignal, encoderTwoSignal);
+    BaseStatusSignal.waitForAll(0.1, encoderOneSignal, encoderTwoSignal);
+    double encoderOnePosition = encoderOneSignal.getValue().in(Rotations);
+    double encoderTwoPosition = encoderTwoSignal.getValue().in(Rotations);
+    double[] encoderOnePossible = new double[Constants.ShooterConstants.ENCODER_ONE_TEETH];
+    double[] encoderTwoPossible = new double[Constants.ShooterConstants.ENCODER_TWO_TEETH];
+
+    for (int i = 0; i < Constants.ShooterConstants.ENCODER_ONE_TEETH; i++) {
+      encoderOnePossible[i] =
+          (i + encoderOnePosition)
+              * ((double) Constants.ShooterConstants.ENCODER_ONE_TEETH
+                  / Constants.ShooterConstants.TURRET_GEAR_TEETH);
+    }
+    for (int i = 0; i < Constants.ShooterConstants.ENCODER_TWO_TEETH; i++) {
+      encoderTwoPossible[i] =
+          (i + encoderTwoPosition)
+              * ((double) Constants.ShooterConstants.ENCODER_TWO_TEETH
+                  / Constants.ShooterConstants.TURRET_GEAR_TEETH);
+    }
+
+    double matchingValue = 0;
+    outerLoop:
+    for (double eOnePossible : encoderOnePossible) {
+      for (double eTwoPossible : encoderTwoPossible) {
+        if (Math.abs(eTwoPossible - eOnePossible) < Constants.ShooterConstants.CRT_EPSILON) {
+          matchingValue = (eOnePossible + eTwoPossible) / 2;
+          break outerLoop;
+        }
+
+        if (eTwoPossible > eOnePossible) {
+          break;
+        }
+      }
+    }
+    m_turretMotor.setPosition(matchingValue);
   }
 
   @Override
   public void periodic() {
     Logger.recordOutput("ShooterSubsystem/InNZ", inNZ());
     Logger.recordOutput("ShooterSubsystem/InAZ", inAZ());
-
+    Logger.recordOutput(
+        "ShooterSubsystem/TurretPos",
+        new Pose2d(
+            DriveSubsystem.getInstance().getTranslation2d(),
+            new Rotation2d(getTurretPos(Constants.FieldConstants.BLUE_HUB_POS) / (2 * Math.PI))));
     // This method will be called once per scheduler run
   }
 }

@@ -74,6 +74,13 @@ public final class Constants {
     public static final int TURRET_MOTOR_ID = 53;
     public static final double HOOD_MIN_POS = 0;
     public static final double HOOD_MAX_POS = 0;
+    public static final int ENCODER_ONE_TEETH = 17;
+    public static final int ENCODER_TWO_TEETH = 18;
+    public static final int TURRET_GEAR_TEETH = 92;
+    public static final int MOTOR_TURRET_GEAR_RATIO = 46;
+    public static final int ENCODER_TWO_ID = 54;
+    public static final int ENCODER_ONE_ID = 55;
+    public static final double CRT_EPSILON = 0.01;
   }
 
   public static class FieldConstants {

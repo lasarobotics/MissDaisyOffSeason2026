@@ -9,6 +9,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -145,8 +146,12 @@ public class DriveSubsystem extends StateMachine {
     m_selectedState = state;
   }
 
-  public static Pose2d getPose() {
+  public Pose2d getPose() {
     return s_drivetrain.getState().Pose;
+  }
+
+  public Translation2d getTranslation2d() {
+    return s_drivetrain.getState().Pose.getTranslation();
   }
 
   @Override
