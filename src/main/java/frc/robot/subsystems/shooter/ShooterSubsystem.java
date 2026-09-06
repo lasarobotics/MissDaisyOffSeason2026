@@ -41,7 +41,11 @@ public class ShooterSubsystem extends StateMachine {
     },
     ON {
       @Override
-      public void execute() {}
+      public void execute() {
+        // if (getInstance().getTarget() != null) {
+        //   getInstance().setTurretPos(getInstance().getTurretPos(getInstance().getTarget())[0]);
+        // }
+      }
 
       @Override
       public SystemState nextState() {
@@ -63,6 +67,7 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFXConfiguration m_hoodConfig;
   private TalonFX m_turretMotor;
   private TalonFXConfiguration m_turretConfig;
+  private boolean m_blueAlliance;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
@@ -83,10 +88,15 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_turretConfig = new TalonFXConfiguration(); // TODO SET PID SV VALUES FOR ALL SUBSYSTEMS
     m_turretConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 23.0;
+    m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    m_turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -23.0;
+    m_turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     m_shooterLeader.getConfigurator().apply(m_shooterConfig);
     m_shooterFollower.getConfigurator().apply(m_shooterConfig);
     m_hoodMotor.getConfigurator().apply(m_hoodConfig);
     m_turretMotor.getConfigurator().apply(m_turretConfig);
+    updateTurretEncoder();
   }
 
   public static ShooterSubsystem getInstance() {
@@ -101,24 +111,53 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private boolean inAZ() {
-    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+    if (m_blueAlliance) {
       return DriveSubsystem.getInstance().getPose().getX() < Constants.FieldConstants.NZ_BLUE_X;
     } else {
       return DriveSubsystem.getInstance().getPose().getX() > Constants.FieldConstants.NZ_RED_X;
     }
   }
 
+  private Translation2d getTarget() {
+    if (m_blueAlliance) {
+      if (inAZ()) {
+        return Constants.FieldConstants.BLUE_HUB_POS;
+      } else if (inNZ()) {
+        if (DriveSubsystem.getInstance().getPose().getY() < Constants.FieldConstants.NZ_MID_LINE) {
+          return Constants.FieldConstants.BLUE_RIGHT_BUMP;
+        }
+        return Constants.FieldConstants.BLUE_LEFT_BUMP;
+      }
+    } else {
+      if (inAZ()) {
+        return Constants.FieldConstants.RED_HUB_POS;
+      } else if (inNZ()) {
+        if (DriveSubsystem.getInstance().getPose().getY() < Constants.FieldConstants.NZ_MID_LINE) {
+          return Constants.FieldConstants.RED_LEFT_BUMP;
+        }
+        return Constants.FieldConstants.RED_RIGHT_BUMP;
+      }
+    }
+    return null;
+  }
+
   private double getTurretPos(Translation2d target) {
     Pose2d robotPose = DriveSubsystem.getInstance().getPose();
+    if (target == null) {
+      return 0;
+    }
     double xOffset = target.getX() - robotPose.getX();
     double yOffset = target.getY() - robotPose.getY();
-    double angleToTarget = robotPose.getRotation().getRadians() - Math.atan2(xOffset, yOffset);
+    double angleToTarget = robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset);
     double turretDesired =
-        (m_turretMotor.getPosition().getValueAsDouble()
-                    / Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO)
-                * 2
-                * Math.PI
-            - angleToTarget;
+        -angleToTarget
+            - (m_turretMotor.getPosition().getValueAsDouble()
+                / Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO);
+    if (turretDesired < -Math.PI) {
+      turretDesired += 2 * Math.PI;
+    } else if (turretDesired > Math.PI) {
+      turretDesired -= 2 * Math.PI;
+    }
     return turretDesired;
   }
 
@@ -129,7 +168,7 @@ public class ShooterSubsystem extends StateMachine {
   private void setTurretPos(double desiredPos) {
     m_turretMotor.setControl(
         m_positionVoltage.withPosition(
-            desiredPos * Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO));
+            desiredPos / (2 * Math.PI) * Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO));
   }
 
   private boolean inNZ() {
@@ -137,7 +176,7 @@ public class ShooterSubsystem extends StateMachine {
         && DriveSubsystem.getInstance().getPose().getX() < Constants.FieldConstants.NZ_RED_X;
   }
 
-  private void setZero() {
+  private void updateTurretEncoder() {
     StatusSignal<Angle> encoderOneSignal = m_encoderOne.getPosition();
     StatusSignal<Angle> encoderTwoSignal = m_encoderTwo.getPosition();
     BaseStatusSignal.refreshAll(encoderOneSignal, encoderTwoSignal);
@@ -179,13 +218,15 @@ public class ShooterSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
+    m_blueAlliance = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
     Logger.recordOutput("ShooterSubsystem/InNZ", inNZ());
     Logger.recordOutput("ShooterSubsystem/InAZ", inAZ());
+    Logger.recordOutput("ShooterSubsystem/Target", getTarget());
     Logger.recordOutput(
         "ShooterSubsystem/TurretPos",
         new Pose2d(
             DriveSubsystem.getInstance().getTranslation2d(),
-            new Rotation2d(getTurretPos(Constants.FieldConstants.BLUE_HUB_POS) / (2 * Math.PI))));
-    // This method will be called once per scheduler run
+            new Rotation2d(getTurretPos(getTarget()))));
   }
+  // This method will be called once per scheduler run
 }

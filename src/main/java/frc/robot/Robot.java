@@ -28,7 +28,6 @@ public class Robot extends LoggedRobot {
 
   private final CommandXboxController m_driverController;
   private boolean m_activeToggle;
-  private boolean m_climbToggle;
   private boolean m_slowdownToggle;
 
   /**
@@ -50,7 +49,6 @@ public class Robot extends LoggedRobot {
     m_driverController
         .rightBumper()
         .onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
-    m_driverController.leftBumper().onTrue(Commands.runOnce(() -> m_climbToggle = !m_climbToggle));
     m_driverController.a().onTrue(Commands.runOnce(() -> m_slowdownToggle = !m_slowdownToggle));
     configureBindings();
   }

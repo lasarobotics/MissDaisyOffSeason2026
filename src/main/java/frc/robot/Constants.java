@@ -94,7 +94,8 @@ public final class Constants {
     public static final Translation2d RED_RIGHT_BUMP = new Translation2d(11.9, 6.03);
     public static final Translation2d RED_LEFT_TRENCH = new Translation2d(11.9, 1);
     public static final Translation2d RED_RIGHT_TRENCH = new Translation2d(11.9, 7);
-    public static final double NZ_RED_X = 12.549;
-    public static final double NZ_BLUE_X = 3.964;
+    public static final double NZ_RED_X = RED_HUB_POS.getX();
+    public static final double NZ_BLUE_X = BLUE_HUB_POS.getX();
+    public static final double NZ_MID_LINE = BLUE_HUB_POS.getY();
   }
 }

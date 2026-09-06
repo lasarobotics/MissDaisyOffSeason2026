@@ -63,18 +63,6 @@ public class DriveSubsystem extends StateMachine {
       public SystemState nextState() {
         return getInstance().m_selectedState;
       }
-    },
-    CLIMB_ALIGN {
-      @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
-
-      @Override
-      public SystemState nextState() {
-        return getInstance().m_selectedState;
-      }
     }
   }
 
