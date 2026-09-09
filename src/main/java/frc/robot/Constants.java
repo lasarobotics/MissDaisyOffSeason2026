@@ -86,6 +86,7 @@ public final class Constants {
     public static final double SHOOTER_OFFSET_X = 0;
     public static final double SHOOTER_OFFSET_Y = 0;
     public static final double HANG_TIME = 1.5;
+    public static final double MOTOR_HOOD_GEAR_RATIO = 0;
   }
 
   public static class FieldConstants {

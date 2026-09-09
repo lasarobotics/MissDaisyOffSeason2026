@@ -37,6 +37,8 @@ public class ShooterSubsystem extends StateMachine {
         //
         // getInstance().m_shooterLeader.setControl(getInstance().m_velocityVoltage.withVelocity(0));
         //   getInstance().m_hoodMotor.setControl(getInstance().m_positionVoltage.withPosition(0));
+        // getInstance.updateTurretEncoder();
+        // getInstance().m_turretMotor.setControl(getInstance().m_positionVoltage.withPosition(0))
       }
 
       @Override
@@ -189,13 +191,27 @@ public class ShooterSubsystem extends StateMachine {
     return 0;
   }
 
-  private void setHoodPos() {}
-
-  // private void getShooterSpeed(){}
-
-  // private void setShooterSpeed() {}
   // private void hoodMath(double distance){
+  // TODO
   // }
+
+  private void setHoodPos() {
+    m_hoodMotor.setControl(
+        m_positionVoltage.withPosition(
+            getHoodPos(getTarget())
+                / (2 * Math.PI)
+                * Constants.ShooterConstants.MOTOR_HOOD_GEAR_RATIO));
+  }
+
+  private double getShooterSpeed(Translation2d target) {
+    // TODO
+    return 0;
+  }
+
+  private void setShooterSpeed() {
+    m_shooterLeader.setControl(m_velocityVoltage.withVelocity(getShooterSpeed(getTarget())));
+  }
+
   private void updateTurretEncoder() {
     StatusSignal<Angle> encoderOneSignal = m_encoderOne.getPosition();
     StatusSignal<Angle> encoderTwoSignal = m_encoderTwo.getPosition();
