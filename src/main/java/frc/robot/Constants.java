@@ -94,6 +94,10 @@ public final class Constants {
   public static class ShooterConstants {
     public static final double MAX_FLIGHT_TIME = 3;
 
+    public static final int SPEED_BISECTION_STEPS = 24;
+
+    public static final double MAX_TURRET_ROTS = 23; // todo
+
     public static final int HOOD_CAN_ID = 52;
     public static final int FLYWHEEL_LEADER_CAN_ID = 50;
     public static final int FLYWHEEL_FOLLOWER_CAN_ID = 51;
@@ -108,7 +112,11 @@ public final class Constants {
     public static final Distance FLYWHEEL_SMALL_DIAMETER = Inches.of(2);
     public static final Distance FLYWHEEL_LARGE_DIAMETER = Inches.of(4);
 
-    public static final double BALL_METERS_PER_MOTOR_ROTATION = 0;
+    public static final LoggedNetworkNumber SLIP_FACTOR =
+        new LoggedNetworkNumber("/Tuning/slipFactor", 0.85);
+
+    public static final double BALL_METERS_PER_MOTOR_ROTATION =
+        Math.PI * 0.1016 / 1 * SLIP_FACTOR.getAsDouble();
 
     public static final double CRT_THRESHOLD = 0.01;
     public static final double TURRET_THRESHOLD = 1.01;
@@ -117,15 +125,15 @@ public final class Constants {
 
     public static final AngularVelocity FLYWHEEL_REST_SPEED = RotationsPerSecond.of(0);
 
-    public static final Angle HOOD_MAX_ANGLE = Degrees.of(0);
+    public static final Angle HOOD_MAX_ANGLE = Degrees.of(50);
     public static final Angle HOOD_MINIMUM_ANGLE = Degrees.of(0);
 
-    public static final Angle HOOD_ELEVATION_OFFSET = Degrees.of(0);
+    public static final Angle HOOD_ELEVATION_OFFSET = Degrees.of(15);
     public static final double HOOD_ELEVATION_SCALAR = 1.0;
 
-    public static final Angle TURRET_MAX_ANGLE = Degrees.of(0);
-    public static final Angle TURRET_MINIMUM_ANGLE = Degrees.of(0);
-    public static final Angle TURRET_UNWIND_ANGLE = Degrees.of(0);
+    public static final Angle TURRET_MAX_ANGLE = Degrees.of(180);
+    public static final Angle TURRET_MINIMUM_ANGLE = Degrees.of(-180);
+    public static final Angle TURRET_UNWIND_ANGLE = Degrees.of(180);
 
     public static final Distance SHOOTER_OFFSET_X = Meters.of(0);
     public static final Distance SHOOTER_OFFSET_Y = Meters.of(0);
@@ -137,7 +145,7 @@ public final class Constants {
 
     public static final AngularVelocity MIN_SHOOTER_VELOCITY = RotationsPerSecond.of(0);
 
-    public static final AngularVelocity MAX_SHOOTER_VELOCITY = RotationsPerSecond.of(100);
+    public static final AngularVelocity MAX_SHOOTER_VELOCITY = RotationsPerSecond.of(628);
 
     public static final AngularVelocity SHOOTER_VELOCITY_STEP = RotationsPerSecond.of(1);
 
@@ -204,15 +212,17 @@ public final class Constants {
     public static final Translation2d RED_HUB_COORDINATES = new Translation2d(11.925, 4.049);
     // Depot
     public static final Pose2d BLUE_DEPOT_CENTER =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(0.3, 5.95), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_DEPOT_CENTER =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(
+            new Translation2d(FIELD_X.in(Meters) - 0.3, FIELD_Y.in(Meters) - 5.95),
+            Rotation2d.fromDegrees(0));
 
     // Blue Tower
     public static final Pose2d BLUE_TOWER_LEFT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(1.108, 4.346), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TOWER_RIGHT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(1.108, 3.173), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TOWER_CLIMB_LEFT =
         new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TOWER_CLIMB_RIGHT =
@@ -220,9 +230,9 @@ public final class Constants {
 
     // Red Tower
     public static final Pose2d RED_TOWER_LEFT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TOWER_RIGHT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 1.108, 3.173), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TOWER_CLIMB_LEFT =
         new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TOWER_CLIMB_RIGHT =
@@ -230,47 +240,51 @@ public final class Constants {
 
     // Blue Trench
     public static final Pose2d BLUE_TRENCH_LEFT_RIGHT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(4.631, 6.851), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TRENCH_LEFT_LEFT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(4.631, 8), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TRENCH_RIGHT_RIGHT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(4.631, 0), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TRENCH_RIGHT_LEFT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(4.631, 1.225), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TRENCH_RIGHT_CENTER =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(4.631, 0.65), Rotation2d.fromDegrees(0));
     public static final Pose2d BLUE_TRENCH_LEFT_CENTER =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(4.631, 7.422), Rotation2d.fromDegrees(0));
 
     // Red Trench
     public static final Pose2d RED_TRENCH_LEFT_RIGHT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 4.631, 6.851), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TRENCH_LEFT_LEFT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 4.631, 8), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TRENCH_RIGHT_RIGHT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 4.631, 0), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TRENCH_RIGHT_LEFT =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 4.631, 1.225), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TRENCH_RIGHT_CENTER =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 4.631, 0.65), Rotation2d.fromDegrees(0));
     public static final Pose2d RED_TRENCH_LEFT_CENTER =
-        new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
+        new Pose2d(new Translation2d(FIELD_X.in(Meters) - 4.631, 7.422), Rotation2d.fromDegrees(0));
 
     // Passing Locations
-    public static final Translation2d BLUE_AZ_PASS_LEFT = new Translation2d(0, 0);
-    public static final Translation2d BLUE_AZ_PASS_RIGHT = new Translation2d(0, 0);
-    public static final Translation2d RED_AZ_PASS_LEFT = new Translation2d(0, 0);
-    public static final Translation2d RED_AZ_PASS_RIGHT = new Translation2d(0, 0);
-    public static final Translation2d BLUE_NZ_PASS_LEFT = new Translation2d(0, 0);
-    public static final Translation2d BLUE_NZ_PASS_RIGHT = new Translation2d(0, 0);
-    public static final Translation2d RED_NZ_PASS_LEFT = new Translation2d(0, 0);
-    public static final Translation2d RED_NZ_PASS_RIGHT = new Translation2d(0, 0);
+    public static final Translation2d BLUE_AZ_PASS_LEFT = new Translation2d(3.375, 7.184);
+    public static final Translation2d BLUE_AZ_PASS_RIGHT = new Translation2d(3.375, 0.865);
+    public static final Translation2d RED_AZ_PASS_LEFT =
+        new Translation2d(FIELD_X.in(Meters) - 3.375, 7.184);
+    public static final Translation2d RED_AZ_PASS_RIGHT =
+        new Translation2d(FIELD_X.in(Meters) - 3.375, 0.865);
+    public static final Translation2d BLUE_NZ_PASS_LEFT = new Translation2d(6.5, 7.3);
+    public static final Translation2d BLUE_NZ_PASS_RIGHT = new Translation2d(6.5, 0.7);
+    public static final Translation2d RED_NZ_PASS_LEFT =
+        new Translation2d(FIELD_X.in(Meters) - 6.5, 7.3);
+    public static final Translation2d RED_NZ_PASS_RIGHT =
+        new Translation2d(FIELD_X.in(Meters) - 6.5, 0.7);
 
     // meters
     public static final double HALF_FIELD_Y_POS = 4.022;
 
     // Thresholds
-    public static final double TRENCH_THRESHOLD = 0.1;
+    public static final double TRENCH_THRESHOLD = 0.5;
     public static final double TOWER_THRESHOLD = 0.1;
   }
 }

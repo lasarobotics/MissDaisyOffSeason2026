@@ -209,36 +209,28 @@ public class DriveSubsystem extends StateMachine {
 
   public boolean isUnderTrench() {
     Translation2d robotTranslation = getInstance().getRobotPose().getTranslation();
-    if ((HeadHoncho.getInstance()
+    if ((robotTranslation.getY() < Constants.FieldConstants.BLUE_TRENCH_RIGHT_LEFT.getX()
+            && (HeadHoncho.getInstance()
                     .numberWithinThreshold(
-                        Constants.FieldConstants.BLUE_TRENCH_LEFT_CENTER.getX(),
+                        Constants.FieldConstants.BLUE_TRENCH_RIGHT_CENTER.getX(),
                         robotTranslation.getX(),
                         Constants.FieldConstants.TRENCH_THRESHOLD)
                 || HeadHoncho.getInstance()
                     .numberWithinThreshold(
                         Constants.FieldConstants.RED_TRENCH_RIGHT_CENTER.getX(),
                         robotTranslation.getX(),
-                        Constants.FieldConstants.TRENCH_THRESHOLD))
+                        Constants.FieldConstants.TRENCH_THRESHOLD)))
+        || (robotTranslation.getY() > Constants.FieldConstants.BLUE_TRENCH_LEFT_RIGHT.getX()
             && (HeadHoncho.getInstance()
                     .numberWithinThreshold(
-                        Constants.FieldConstants.BLUE_TRENCH_LEFT_CENTER.getY(),
-                        robotTranslation.getY(),
-                        Constants.FieldConstants.TRENCH_THRESHOLD)
-                || HeadHoncho.getInstance()
-                    .numberWithinThreshold(
-                        Constants.FieldConstants.BLUE_TRENCH_RIGHT_CENTER.getY(),
-                        robotTranslation.getY(),
-                        Constants.FieldConstants.TRENCH_THRESHOLD)
-                || HeadHoncho.getInstance()
-                    .numberWithinThreshold(
-                        Constants.FieldConstants.RED_TRENCH_LEFT_LEFT.getX(),
+                        Constants.FieldConstants.BLUE_TRENCH_RIGHT_CENTER.getX(),
                         robotTranslation.getX(),
-                        Constants.FieldConstants.TRENCH_THRESHOLD))
-        || HeadHoncho.getInstance()
-            .numberWithinThreshold(
-                Constants.FieldConstants.RED_TRENCH_RIGHT_CENTER.getY(),
-                robotTranslation.getY(),
-                Constants.FieldConstants.TRENCH_THRESHOLD)) {
+                        Constants.FieldConstants.TRENCH_THRESHOLD)
+                || HeadHoncho.getInstance()
+                    .numberWithinThreshold(
+                        Constants.FieldConstants.RED_TRENCH_RIGHT_CENTER.getX(),
+                        robotTranslation.getX(),
+                        Constants.FieldConstants.TRENCH_THRESHOLD)))) {
       return true;
     }
 
@@ -250,14 +242,14 @@ public class DriveSubsystem extends StateMachine {
     if (isUnderTrench()
         || ((robotTranslation.getX() <= Constants.FieldConstants.BLUE_TOWER_LEFT.getX()
                 || robotTranslation.getX() >= Constants.FieldConstants.RED_TOWER_LEFT.getX())
-            && ((robotTranslation.getY() >= Constants.FieldConstants.RED_TOWER_LEFT.getY()
-                    && robotTranslation.getY() <= Constants.FieldConstants.RED_TOWER_RIGHT.getY())
-                || (robotTranslation.getY() >= Constants.FieldConstants.BLUE_TOWER_LEFT.getY()
+            && ((robotTranslation.getY() <= Constants.FieldConstants.RED_TOWER_LEFT.getY()
+                    && robotTranslation.getY() >= Constants.FieldConstants.RED_TOWER_RIGHT.getY())
+                || (robotTranslation.getY() <= Constants.FieldConstants.BLUE_TOWER_LEFT.getY()
                     && robotTranslation.getY()
-                        <= Constants.FieldConstants.BLUE_TOWER_RIGHT.getY())))) {
-      return true;
+                        >= Constants.FieldConstants.BLUE_TOWER_RIGHT.getY())))) {
+      return false;
     }
-    return false;
+    return true;
   }
 
   public void goTo(
