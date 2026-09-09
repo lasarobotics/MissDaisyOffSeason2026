@@ -39,6 +39,8 @@ public final class Constants {
     public static final int SHOOTER_SPEED_LEADER_MOTOR_ID = 16;
     public static final int SHOOTER_SPEED_FOLLOWER_MOTOR_ID = 17;
     public static final int HOOD_ANGLE_MOTOR_ID = 18;
+    public static final int ENCODER1 = 19;
+    public static final int ENCODER2 = 20;
   }
 
   public static class DriveConstants {
@@ -71,10 +73,24 @@ public final class Constants {
     public static final int SHOOTER_FEED_MOTOR_SPEED = 0;
   }
 
-  public static class ShooterConstants {}
+  public static class ShooterConstants {
+    public static final int GEAR1_TEETH = 17;
+    public static final int GEAR2_TEETH = 18;
+    public static final int TURRET_TEETH = 92;
+
+    public static final int ANGLE_LOWER_BOUND = -180;
+    public static final int ANGLE_HIGHER_BOUND = 360;
+
+    public static final double MOTOR_TURRET_GEAR_RATIO = -1;
+    public static final double MOTOR_HOOD_GEAR_RATIO = -1;
+  }
 
   public static class HubConstants {
     public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
     public static final Translation2d RED_HUB_POS = new Translation2d(11.9, 4.021);
+    public static final double BLUE_BUMP_XPOS = 0;
+    public static final double RED_BUMP_XPOS = 0;
+    public static final double LEFTY_POS = 0;
+    public static final double RIGHTY_POS = 0;
   }
 }

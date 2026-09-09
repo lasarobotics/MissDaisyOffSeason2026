@@ -58,7 +58,16 @@ public class SerializationSubsystem extends StateMachine {
       public void initialize() {}
 
       @Override
-      public void execute() {}
+      public void execute() {
+        getInstance()
+            .m_feedingRollerMotor
+            .setControl(
+                new VelocityVoltage(-Constants.SerializationConstants.FEEDING_ROLLER_MOTOR_SPEED));
+        getInstance()
+            .m_shooterFeedLeaderMotor
+            .setControl(
+                new VelocityVoltage(-Constants.SerializationConstants.SHOOTER_FEED_MOTOR_SPEED));
+      }
 
       @Override
       public SystemState nextState() {

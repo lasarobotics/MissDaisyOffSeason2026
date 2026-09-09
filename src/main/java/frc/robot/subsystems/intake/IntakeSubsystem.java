@@ -51,7 +51,11 @@ public class IntakeSubsystem extends StateMachine {
 
     Reverse {
       @Override
-      public void initialize() {}
+      public void initialize() {
+        getInstance()
+            .m_intakeRollerLeaderMotor
+            .setControl(new VelocityVoltage(-Constants.IntakeConstants.INTAKE_ROLLER_MOTOR_SPEED));
+      }
 
       @Override
       public void execute() {}
