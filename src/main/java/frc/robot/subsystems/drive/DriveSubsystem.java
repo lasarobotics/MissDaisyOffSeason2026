@@ -147,6 +147,11 @@ public class DriveSubsystem extends StateMachine {
     return s_drivetrain.getState().Pose;
   }
 
+  public boolean underTower() {
+    return (Constants.FieldConstants.BLUE_TOWER.contains(getTranslation2d())
+        || Constants.FieldConstants.RED_TOWER.contains(getTranslation2d()));
+  }
+
   public ChassisSpeeds getSpeeds() {
     return s_drivetrain.getState().Speeds;
   }

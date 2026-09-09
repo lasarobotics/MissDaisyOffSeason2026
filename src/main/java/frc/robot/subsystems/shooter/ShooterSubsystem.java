@@ -219,7 +219,7 @@ public class ShooterSubsystem extends StateMachine {
     m_shooterLeader.setControl(m_velocityVoltage.withVelocity(getShooterSpeed(getTarget())));
   }
 
-  private boolean robotCrossTrench() {
+  public boolean robotCrossTrench() {
     Translation2d a = DriveSubsystem.getInstance().getTranslation2d();
     Translation2d b = getFuturePose(Constants.ShooterConstants.HOOD_COLLISION_TIME);
     Translation2d c;
@@ -330,6 +330,11 @@ public class ShooterSubsystem extends StateMachine {
         new Pose2d(
             DriveSubsystem.getInstance().getTranslation2d(),
             new Rotation2d(getTurretPos(getTarget()))));
+    Logger.recordOutput(
+        "ShooterSubsystem/FuturePose",
+        new Pose2d(
+            getFuturePose(Constants.ShooterConstants.HOOD_COLLISION_TIME),
+            DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
   }
   // This method will be called once per scheduler run

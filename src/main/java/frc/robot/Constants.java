@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -90,7 +91,7 @@ public final class Constants {
     public static final double SHOOTER_OFFSET_Y = 0;
     public static final double HANG_TIME = 1.5;
     public static final double MOTOR_HOOD_GEAR_RATIO = 0;
-    public static final double HOOD_COLLISION_TIME = 0;
+    public static final double HOOD_COLLISION_TIME = 0.25;
   }
 
   public static class FieldConstants {
@@ -125,5 +126,13 @@ public final class Constants {
         new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters));
     public static final Translation2d BLUE_LEFT_TRENCH_P2 =
         new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters) - TRENCH_WIDTH);
+
+    // corner a and corner b of blue tower
+    public static final Rectangle2d BLUE_TOWER =
+        new Rectangle2d(new Translation2d(0, 3.173), new Translation2d(1.108, 4.346));
+    public static final Rectangle2d RED_TOWER =
+        new Rectangle2d(
+            new Translation2d(FIELD_X.in(Meters), 3.173),
+            new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
   }
 }

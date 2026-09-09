@@ -12,6 +12,8 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.Logger;
 
 public class SerializationSubsystem extends StateMachine {
@@ -35,19 +37,29 @@ public class SerializationSubsystem extends StateMachine {
     },
     ON {
       @Override
-      public void initialize() {
-        getInstance()
-            .m_serializationFeederLeader
-            .setControl(
-                getInstance()
-                    .m_velocityVoltage
-                    .withVelocity(Constants.SerializationConstants.SERIALIZATION_FEEDER_SPEED));
-        getInstance()
-            .m_serializationOmni
-            .setControl(
-                getInstance()
-                    .m_velocityVoltage
-                    .withVelocity(Constants.SerializationConstants.SERIALIZATION_OMNI_SPEED));
+      public void execute() {
+        if (ShooterSubsystem.getInstance().robotCrossTrench()
+            || DriveSubsystem.getInstance().underTower()) {
+          getInstance()
+              .m_serializationFeederLeader
+              .setControl(getInstance().m_velocityVoltage.withVelocity(0));
+          getInstance()
+              .m_serializationOmni
+              .setControl(getInstance().m_velocityVoltage.withVelocity(0));
+        } else {
+          getInstance()
+              .m_serializationFeederLeader
+              .setControl(
+                  getInstance()
+                      .m_velocityVoltage
+                      .withVelocity(Constants.SerializationConstants.SERIALIZATION_FEEDER_SPEED));
+          getInstance()
+              .m_serializationOmni
+              .setControl(
+                  getInstance()
+                      .m_velocityVoltage
+                      .withVelocity(Constants.SerializationConstants.SERIALIZATION_OMNI_SPEED));
+        }
       }
 
       @Override
@@ -124,10 +136,11 @@ public class SerializationSubsystem extends StateMachine {
     // Logger.recordOutput(getName() + "/currentState", getState().toString());
     // Logger.recordOutput(getName() + "/selectedState", m_selectedState);
     Logger.recordOutput(
-        getName() + "/serializationFeederSpeed",
+        getName() + "SerializationSubsystem/FeederSpeed",
         m_serializationFeederLeader.getVelocity().getValueAsDouble());
     Logger.recordOutput(
-        getName() + "/serializationOmniSpeed",
+        getName() + "Serialization/OmniSpeed",
         m_serializationOmni.getVelocity().getValueAsDouble());
+    Logger.recordOutput("Serialization/UnderTower", DriveSubsystem.getInstance().underTower());
   }
 }
