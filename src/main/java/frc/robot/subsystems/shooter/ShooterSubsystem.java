@@ -136,7 +136,8 @@ public class ShooterSubsystem extends StateMachine {
       if (inAZ()) {
         return Constants.FieldConstants.BLUE_HUB_POS;
       } else if (inNZ()) {
-        if (DriveSubsystem.getInstance().getPose().getY() < Constants.FieldConstants.NZ_MID_LINE) {
+        if (DriveSubsystem.getInstance().getPose().getY()
+            < Constants.FieldConstants.NZ_MID_LINE_Y) {
           return Constants.FieldConstants.BLUE_RIGHT_BUMP;
         }
         return Constants.FieldConstants.BLUE_LEFT_BUMP;
@@ -145,7 +146,8 @@ public class ShooterSubsystem extends StateMachine {
       if (inAZ()) {
         return Constants.FieldConstants.RED_HUB_POS;
       } else if (inNZ()) {
-        if (DriveSubsystem.getInstance().getPose().getY() < Constants.FieldConstants.NZ_MID_LINE) {
+        if (DriveSubsystem.getInstance().getPose().getY()
+            < Constants.FieldConstants.NZ_MID_LINE_Y) {
           return Constants.FieldConstants.RED_LEFT_BUMP;
         }
         return Constants.FieldConstants.RED_RIGHT_BUMP;
@@ -156,7 +158,9 @@ public class ShooterSubsystem extends StateMachine {
 
   private double getTurretPos(Translation2d target) {
     Pose2d robotPose =
-        new Pose2d(getFuturePose(), DriveSubsystem.getInstance().getPose().getRotation());
+        new Pose2d(
+            getFuturePose(Constants.ShooterConstants.HANG_TIME),
+            DriveSubsystem.getInstance().getPose().getRotation());
     if (target == null) {
       return 0;
     }
@@ -184,7 +188,10 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private double getHoodPos(Translation2d target) {
-    Translation2d robotPose = getFuturePose();
+    if (robotCrossTrench()) {
+      return 0;
+    }
+    Translation2d robotPose = getFuturePose(Constants.ShooterConstants.HANG_TIME);
     Translation2d targetDiff = target.minus(robotPose);
     double distance = targetDiff.getNorm();
     // return hoodMath(distance);
@@ -210,6 +217,43 @@ public class ShooterSubsystem extends StateMachine {
 
   private void setShooterSpeed() {
     m_shooterLeader.setControl(m_velocityVoltage.withVelocity(getShooterSpeed(getTarget())));
+  }
+
+  private boolean robotCrossTrench() {
+    Translation2d a = DriveSubsystem.getInstance().getTranslation2d();
+    Translation2d b = getFuturePose(Constants.ShooterConstants.HOOD_COLLISION_TIME);
+    Translation2d c;
+    Translation2d d;
+    if (b.getX() > Constants.FieldConstants.NZ_MID_LINE_X) {
+      if (b.getY() > Constants.FieldConstants.NZ_MID_LINE_Y) {
+        c = Constants.FieldConstants.RED_LEFT_TRENCH_P1;
+        d = Constants.FieldConstants.RED_LEFT_TRENCH_P2;
+      } else {
+        c = Constants.FieldConstants.RED_RIGHT_TRENCH_P1;
+        d = Constants.FieldConstants.RED_RIGHT_TRENCH_P2;
+      }
+    } else {
+      if (b.getY() > Constants.FieldConstants.NZ_MID_LINE_Y) {
+        c = Constants.FieldConstants.BLUE_LEFT_TRENCH_P1;
+        d = Constants.FieldConstants.BLUE_LEFT_TRENCH_P2;
+      } else {
+        c = Constants.FieldConstants.BLUE_RIGHT_TRENCH_P1;
+        d = Constants.FieldConstants.BLUE_RIGHT_TRENCH_P2;
+      }
+    }
+    double orient1 = crossProductOrient(a, b, c);
+    double orient2 = crossProductOrient(a, b, d);
+    double orient3 = crossProductOrient(c, d, a);
+    double orient4 = crossProductOrient(c, d, b);
+    boolean underTrench =
+        ((orient1 > 0 && orient2 < 0) || (orient1 < 0 && orient2 > 0))
+            && ((orient3 > 0 && orient4 < 0) || (orient3 < 0 && orient4 > 0));
+    return underTrench;
+  }
+
+  private double crossProductOrient(Translation2d a, Translation2d b, Translation2d c) {
+    return (b.getX() - a.getX()) * (c.getY() - a.getY())
+        - (b.getY() - a.getY()) * (c.getX() - a.getX());
   }
 
   private void updateTurretEncoder() {
@@ -257,7 +301,7 @@ public class ShooterSubsystem extends StateMachine {
         / Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO;
   }
 
-  private Translation2d getFuturePose() {
+  private Translation2d getFuturePose(double time) {
     Pose2d currentPose = DriveSubsystem.getInstance().getPose();
     Translation2d futurePos =
         currentPose
@@ -271,7 +315,7 @@ public class ShooterSubsystem extends StateMachine {
                 new Translation2d(
                         DriveSubsystem.getInstance().getSpeeds().vxMetersPerSecond,
                         DriveSubsystem.getInstance().getSpeeds().vyMetersPerSecond)
-                    .times(Constants.ShooterConstants.HANG_TIME));
+                    .times(time));
     return futurePos;
   }
 
@@ -286,6 +330,7 @@ public class ShooterSubsystem extends StateMachine {
         new Pose2d(
             DriveSubsystem.getInstance().getTranslation2d(),
             new Rotation2d(getTurretPos(getTarget()))));
+    Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
   }
   // This method will be called once per scheduler run
 }

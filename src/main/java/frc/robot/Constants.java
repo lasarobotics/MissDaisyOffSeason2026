@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -12,6 +14,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.generated.TunerConstants;
@@ -87,21 +90,40 @@ public final class Constants {
     public static final double SHOOTER_OFFSET_Y = 0;
     public static final double HANG_TIME = 1.5;
     public static final double MOTOR_HOOD_GEAR_RATIO = 0;
+    public static final double HOOD_COLLISION_TIME = 0;
   }
 
   public static class FieldConstants {
-    public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
-    public static final Translation2d RED_HUB_POS = new Translation2d(11.9, 4.021);
-    public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(4.61, 6.03);
-    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(4.61, 1);
-    public static final Translation2d BLUE_LEFT_TRENCH = new Translation2d(4.61, 7);
-    public static final Translation2d BLUE_RIGHT_TRENCH = new Translation2d(4.61, 2.01);
-    public static final Translation2d RED_LEFT_BUMP = new Translation2d(11.9, 2.01);
-    public static final Translation2d RED_RIGHT_BUMP = new Translation2d(11.9, 6.03);
-    public static final Translation2d RED_LEFT_TRENCH = new Translation2d(11.9, 1);
-    public static final Translation2d RED_RIGHT_TRENCH = new Translation2d(11.9, 7);
+    public static final Distance FIELD_X = Inches.of(650.12);
+    public static final Distance FIELD_Y = Inches.of(316.64);
+    public static final double NZ_MID_LINE_X = FIELD_X.in(Meters) / 2;
+    public static final double NZ_MID_LINE_Y = FIELD_Y.in(Meters) / 2;
+
+    public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, NZ_MID_LINE_Y);
+    public static final Translation2d RED_HUB_POS = new Translation2d(11.9, NZ_MID_LINE_Y);
+    public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 6.03);
+    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 1);
+    public static final Translation2d RED_LEFT_BUMP = new Translation2d(RED_HUB_POS.getX(), 2.01);
+    public static final Translation2d RED_RIGHT_BUMP = new Translation2d(RED_HUB_POS.getX(), 6.03);
+
     public static final double NZ_RED_X = RED_HUB_POS.getX();
     public static final double NZ_BLUE_X = BLUE_HUB_POS.getX();
-    public static final double NZ_MID_LINE = BLUE_HUB_POS.getY();
+    public static final double TRENCH_WIDTH = Inches.of(50.34).in(Meters);
+    public static final Translation2d RED_LEFT_TRENCH_P1 =
+        new Translation2d(RED_HUB_POS.getX(), FIELD_Y.in(Meters));
+    public static final Translation2d RED_LEFT_TRENCH_P2 =
+        new Translation2d(RED_HUB_POS.getX(), FIELD_Y.in(Meters) - TRENCH_WIDTH);
+    public static final Translation2d RED_RIGHT_TRENCH_P1 =
+        new Translation2d(RED_HUB_POS.getX(), 0);
+    public static final Translation2d RED_RIGHT_TRENCH_P2 =
+        new Translation2d(RED_HUB_POS.getX(), TRENCH_WIDTH);
+    public static final Translation2d BLUE_RIGHT_TRENCH_P1 =
+        new Translation2d(BLUE_HUB_POS.getX(), 0);
+    public static final Translation2d BLUE_RIGHT_TRENCH_P2 =
+        new Translation2d(BLUE_HUB_POS.getX(), TRENCH_WIDTH);
+    public static final Translation2d BLUE_LEFT_TRENCH_P1 =
+        new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters));
+    public static final Translation2d BLUE_LEFT_TRENCH_P2 =
+        new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters) - TRENCH_WIDTH);
   }
 }

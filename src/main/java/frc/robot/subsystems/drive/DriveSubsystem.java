@@ -83,6 +83,7 @@ public class DriveSubsystem extends StateMachine {
   private static SwerveRequest.FieldCentric s_drive;
   private BooleanSupplier m_slowdownRequest;
   private double m_currentSpeedScalar;
+  private Translation2d m_limeEstimate;
 
   // private PIDController m_rotationPIDController;
 
@@ -154,6 +155,10 @@ public class DriveSubsystem extends StateMachine {
     return s_drivetrain.getState().Pose.getTranslation();
   }
 
+  public Translation2d getLimelightTranslation2d() {
+    return m_limeEstimate;
+  }
+
   private LimelightHelpers.PoseEstimate getFilteredPoseEstimate() {
     LimelightHelpers.PoseEstimate pose_estimate =
         LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
@@ -219,6 +224,7 @@ public class DriveSubsystem extends StateMachine {
     if (limelightEstimate != null && limelightEstimate.tagCount > 0) {
 
       // since the limelight is on the turret, we have to translate and rotate the pose
+      m_limeEstimate = limelightEstimate.pose.toPose2d().getTranslation();
       Translation2d turretOffset =
           new Translation2d(
               Constants.ShooterConstants.SHOOTER_OFFSET_X,
