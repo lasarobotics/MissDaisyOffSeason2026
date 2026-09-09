@@ -42,6 +42,8 @@ public final class Constants {
     public static final double TURN_P = 0;
     public static final double TURN_I = 0;
     public static final double TURN_D = 0;
+    public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
+    public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
   }
 
   public static class IntakeConstants {
@@ -81,6 +83,9 @@ public final class Constants {
     public static final int ENCODER_TWO_ID = 54;
     public static final int ENCODER_ONE_ID = 55;
     public static final double CRT_EPSILON = 0.01;
+    public static final double SHOOTER_OFFSET_X = 0;
+    public static final double SHOOTER_OFFSET_Y = 0;
+    public static final double HANG_TIME = 1.5;
   }
 
   public static class FieldConstants {

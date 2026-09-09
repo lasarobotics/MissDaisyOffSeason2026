@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
@@ -87,6 +88,7 @@ public class IntakeSubsystem extends StateMachine {
     m_velocityVoltage = new VelocityVoltage(0);
     m_rollerConfig = new TalonFXConfiguration();
     m_slapdownConfig = new TalonFXConfiguration();
+    m_slapdownConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     m_rollerConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_slapdownConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_intakeRollerLeader.getConfigurator().apply(m_rollerConfig); // TODO add individual configs
