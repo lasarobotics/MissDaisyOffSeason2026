@@ -148,8 +148,8 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public boolean underTower() {
-    return (Constants.FieldConstants.BLUE_TOWER.contains(getTranslation2d())
-        || Constants.FieldConstants.RED_TOWER.contains(getTranslation2d()));
+    return (Constants.FieldConstants.BLUE_TOWER.contains(getLimelightTranslation2d())
+        || Constants.FieldConstants.RED_TOWER.contains(getLimelightTranslation2d()));
   }
 
   public ChassisSpeeds getSpeeds() {
