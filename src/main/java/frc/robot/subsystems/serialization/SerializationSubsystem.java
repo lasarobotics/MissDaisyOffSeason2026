@@ -85,10 +85,22 @@ public class SerializationSubsystem extends StateMachine {
 
     TalonFXConfiguration omniConfig = new TalonFXConfiguration();
     omniConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    omniConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    omniConfig.CurrentLimits.StatorCurrentLimit = 120;
+    omniConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    omniConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    omniConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_omniMotor.getConfigurator().apply(omniConfig);
 
     TalonFXConfiguration mecanumConfig = new TalonFXConfiguration();
     mecanumConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    mecanumConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    mecanumConfig.CurrentLimits.StatorCurrentLimit = 120;
+    mecanumConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    mecanumConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    mecanumConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_mecanumMotorLeader.getConfigurator().apply(mecanumConfig);
     m_mecanumMotorFollower.getConfigurator().apply(mecanumConfig);
 

@@ -92,6 +92,7 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
+    public static final double MAX_FLIGHT_TIME = 3;
 
     public static final int HOOD_CAN_ID = 52;
     public static final int FLYWHEEL_LEADER_CAN_ID = 50;
@@ -104,8 +105,10 @@ public final class Constants {
     public static final int ENCODER_TEETH_TWO = 18;
     public static final int TURRET_GEAR_TEETH = 92;
 
-    public static final int FLYWHEEL_SMALL_DIAMETER = 2;
-    public static final int FLYWHEEL_LARGE_DIAMETER = 4;
+    public static final Distance FLYWHEEL_SMALL_DIAMETER = Inches.of(2);
+    public static final Distance FLYWHEEL_LARGE_DIAMETER = Inches.of(4);
+
+    public static final double BALL_METERS_PER_MOTOR_ROTATION = 0;
 
     public static final double CRT_THRESHOLD = 0.01;
     public static final double TURRET_THRESHOLD = 1.01;
@@ -117,6 +120,9 @@ public final class Constants {
     public static final Angle HOOD_MAX_ANGLE = Degrees.of(0);
     public static final Angle HOOD_MINIMUM_ANGLE = Degrees.of(0);
 
+    public static final Angle HOOD_ELEVATION_OFFSET = Degrees.of(0);
+    public static final double HOOD_ELEVATION_SCALAR = 1.0;
+
     public static final Angle TURRET_MAX_ANGLE = Degrees.of(0);
     public static final Angle TURRET_MINIMUM_ANGLE = Degrees.of(0);
     public static final Angle TURRET_UNWIND_ANGLE = Degrees.of(0);
@@ -124,6 +130,16 @@ public final class Constants {
     public static final Distance SHOOTER_OFFSET_X = Meters.of(0);
     public static final Distance SHOOTER_OFFSET_Y = Meters.of(0);
     public static final Distance SHOOTER_OFFSET_Z = Meters.of(0);
+
+    public static final Angle HOOD_ANGLE_STEP = Degrees.of(1);
+
+    public static final Angle TURRET_ANGLE_STEP = Degrees.of(1);
+
+    public static final AngularVelocity MIN_SHOOTER_VELOCITY = RotationsPerSecond.of(0);
+
+    public static final AngularVelocity MAX_SHOOTER_VELOCITY = RotationsPerSecond.of(100);
+
+    public static final AngularVelocity SHOOTER_VELOCITY_STEP = RotationsPerSecond.of(1);
 
     public static final Distance SHOOTER_CENTER_OFFSET =
         Meters.of(
@@ -153,8 +169,20 @@ public final class Constants {
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
     // TODO for comp
     // = new LoggedNetworkNumber("Tuning/maxBallYPos", 2.7);
+
     public static final double HUB_Y_POS = 1.83;
     public static final double GRAVITY_VALUE = 9.80665;
+    public static final double AIR_DENSITY = 1.225;
+    public static final double DRAG_COEFFICIENT = 0.47;
+    public static final double GAME_PIECE_MASS = 0.215; // kg
+    public static final double GAME_PIECE_RADIUS = 0.075; // m
+    public static final double TIME_STEP = 0.005;
+    public static final double FLYWHEEL_EFFICIENCY = 1.0;
+    public static final double CROSS_SECTIONAL_AREA = Math.PI * Math.pow(GAME_PIECE_RADIUS, 2);
+    public static final double DRAG_CONSTANT =
+        (AIR_DENSITY * DRAG_COEFFICIENT * CROSS_SECTIONAL_AREA) / (2.0 * GAME_PIECE_MASS);
+    public static final Distance HUB_WIDTH = Meters.of(1.0668); // m
+
     public static final DoubleSupplier HUB_HANG_TIME =
         () ->
             (Math.sqrt(

@@ -93,10 +93,22 @@ public class IntakeSubsystem extends StateMachine {
 
     TalonFXConfiguration armConfig = new TalonFXConfiguration();
     armConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    armConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    armConfig.CurrentLimits.StatorCurrentLimit = 120;
+    armConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    armConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_armMotor.getConfigurator().apply(armConfig);
 
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
     intakeConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    intakeConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    intakeConfig.CurrentLimits.StatorCurrentLimit = 120;
+    intakeConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    intakeConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    intakeConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_intakeMotorLeader.getConfigurator().apply(intakeConfig);
     m_intakeMotorFollower.getConfigurator().apply(intakeConfig);
     m_intakeMotorFollower.setControl(

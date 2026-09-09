@@ -163,8 +163,20 @@ public class DriveSubsystem extends StateMachine {
 
   public Translation2d getShooterTranslation() {
     Pose2d robotPose = getRobotPose();
-    double shooterX = robotPose.getX() - Constants.ShooterConstants.SHOOTER_OFFSET_X.in(Meters);
-    double shooterY = robotPose.getY() - Constants.ShooterConstants.SHOOTER_OFFSET_Y.in(Meters);
+    Rotation2d robotHeading = robotPose.getRotation();
+
+    double shooterX =
+        robotPose.getX()
+            + Constants.ShooterConstants.SHOOTER_OFFSET_X.in(Meters)
+                * Math.cos(robotHeading.getRadians())
+            - Constants.ShooterConstants.SHOOTER_OFFSET_Y.in(Meters)
+                * Math.sin(robotHeading.getRadians());
+    double shooterY =
+        robotPose.getY()
+            + Constants.ShooterConstants.SHOOTER_OFFSET_X.in(Meters)
+                * Math.sin(robotHeading.getRadians())
+            + Constants.ShooterConstants.SHOOTER_OFFSET_Y.in(Meters)
+                * Math.cos(robotHeading.getRadians());
     return new Translation2d(shooterX, shooterY);
   }
 
@@ -178,7 +190,7 @@ public class DriveSubsystem extends StateMachine {
     }
 
     return Meters.of(
-        Math.sqrt(Math.pow(translationDiff.getX(), 2)) + Math.pow(translationDiff.getY(), 2));
+        Math.sqrt(Math.pow(translationDiff.getX(), 2) + Math.pow(translationDiff.getY(), 2)));
   }
 
   public Distance getDistance(Translation2d target) {
@@ -188,6 +200,11 @@ public class DriveSubsystem extends StateMachine {
             Math.pow(robotTranslation.getMeasureX().minus(target.getMeasureX()).in(Meters), 2)
                 + Math.pow(
                     robotTranslation.getMeasureY().minus(target.getMeasureY()).in(Meters), 2)));
+  }
+
+  public double getHubZOffset() {
+    return Constants.FieldConstants.HUB_Y_POS
+        - Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters);
   }
 
   public boolean isUnderTrench() {

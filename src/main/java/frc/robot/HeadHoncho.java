@@ -138,6 +138,34 @@ public class HeadHoncho extends StateMachine {
     s_intakeSubsystem = IntakeSubsystem.getInstance();
     s_serializationSubsystem = SerializationSubsystem.getInstance();
     s_shooterSubsystem = ShooterSubsystem.getInstance();
+
+    // Log all field values for verification
+    Logger.recordOutput(
+        "Field/BLUE_HUB_COORDINATES", Constants.FieldConstants.BLUE_HUB_COORDINATES);
+    Logger.recordOutput("Field/RED_HUB_COORDINATES", Constants.FieldConstants.RED_HUB_COORDINATES);
+    Logger.recordOutput("Field/BLUE_DEPOT_CENTER", Constants.FieldConstants.BLUE_DEPOT_CENTER);
+    Logger.recordOutput("Field/RED_DEPOT_CENTER", Constants.FieldConstants.RED_DEPOT_CENTER);
+    Logger.recordOutput("Field/BLUE_TOWER_LEFT", Constants.FieldConstants.BLUE_TOWER_LEFT);
+    Logger.recordOutput("Field/BLUE_TOWER_RIGHT", Constants.FieldConstants.BLUE_TOWER_RIGHT);
+    Logger.recordOutput(
+        "Field/BLUE_TOWER_CLIMB_LEFT", Constants.FieldConstants.BLUE_TOWER_CLIMB_LEFT);
+    Logger.recordOutput(
+        "Field/BLUE_TOWER_CLIMB_RIGHT", Constants.FieldConstants.BLUE_TOWER_CLIMB_RIGHT);
+    Logger.recordOutput("Field/RED_TOWER_LEFT", Constants.FieldConstants.RED_TOWER_LEFT);
+    Logger.recordOutput("Field/RED_TOWER_RIGHT", Constants.FieldConstants.RED_TOWER_RIGHT);
+    Logger.recordOutput(
+        "Field/RED_TOWER_CLIMB_LEFT", Constants.FieldConstants.RED_TOWER_CLIMB_LEFT);
+    Logger.recordOutput(
+        "Field/RED_TOWER_CLIMB_RIGHT", Constants.FieldConstants.RED_TOWER_CLIMB_RIGHT);
+    Logger.recordOutput("Field/BLUE_AZ_PASS_LEFT", Constants.FieldConstants.BLUE_AZ_PASS_LEFT);
+    Logger.recordOutput("Field/BLUE_AZ_PASS_RIGHT", Constants.FieldConstants.BLUE_AZ_PASS_RIGHT);
+    Logger.recordOutput("Field/RED_AZ_PASS_LEFT", Constants.FieldConstants.RED_AZ_PASS_LEFT);
+    Logger.recordOutput("Field/RED_AZ_PASS_RIGHT", Constants.FieldConstants.RED_AZ_PASS_RIGHT);
+    Logger.recordOutput("Field/BLUE_NZ_PASS_LEFT", Constants.FieldConstants.BLUE_NZ_PASS_LEFT);
+    Logger.recordOutput("Field/BLUE_NZ_PASS_RIGHT", Constants.FieldConstants.BLUE_NZ_PASS_RIGHT);
+    Logger.recordOutput("Field/RED_NZ_PASS_LEFT", Constants.FieldConstants.RED_NZ_PASS_LEFT);
+    Logger.recordOutput("Field/RED_NZ_PASS_RIGHT", Constants.FieldConstants.RED_NZ_PASS_RIGHT);
+    Logger.recordOutput("Field/HALF_FIELD_Y_POS", Constants.FieldConstants.HALF_FIELD_Y_POS);
   }
 
   public static HeadHoncho getInstance() {
@@ -173,10 +201,7 @@ public class HeadHoncho extends StateMachine {
   }
 
   public boolean numberWithinThreshold(double target, double value, double threshold) {
-    if (value - threshold > target || value - threshold < target) {
-      return false;
-    }
-    return true;
+    return (Math.abs(value - target) <= threshold);
   }
 
   public void restRobot() {
@@ -213,33 +238,5 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("HeadHoncho/State", getState().toString());
     Logger.recordOutput("HeadHoncho/IsActive", wantToActive());
     Logger.recordOutput("HeadHoncho/IsReverse", wantToReverse());
-
-    // Log all field values for verification
-    Logger.recordOutput(
-        "Field/BLUE_HUB_COORDINATES", Constants.FieldConstants.BLUE_HUB_COORDINATES);
-    Logger.recordOutput("Field/RED_HUB_COORDINATES", Constants.FieldConstants.RED_HUB_COORDINATES);
-    Logger.recordOutput("Field/BLUE_DEPOT_CENTER", Constants.FieldConstants.BLUE_DEPOT_CENTER);
-    Logger.recordOutput("Field/RED_DEPOT_CENTER", Constants.FieldConstants.RED_DEPOT_CENTER);
-    Logger.recordOutput("Field/BLUE_TOWER_LEFT", Constants.FieldConstants.BLUE_TOWER_LEFT);
-    Logger.recordOutput("Field/BLUE_TOWER_RIGHT", Constants.FieldConstants.BLUE_TOWER_RIGHT);
-    Logger.recordOutput(
-        "Field/BLUE_TOWER_CLIMB_LEFT", Constants.FieldConstants.BLUE_TOWER_CLIMB_LEFT);
-    Logger.recordOutput(
-        "Field/BLUE_TOWER_CLIMB_RIGHT", Constants.FieldConstants.BLUE_TOWER_CLIMB_RIGHT);
-    Logger.recordOutput("Field/RED_TOWER_LEFT", Constants.FieldConstants.RED_TOWER_LEFT);
-    Logger.recordOutput("Field/RED_TOWER_RIGHT", Constants.FieldConstants.RED_TOWER_RIGHT);
-    Logger.recordOutput(
-        "Field/RED_TOWER_CLIMB_LEFT", Constants.FieldConstants.RED_TOWER_CLIMB_LEFT);
-    Logger.recordOutput(
-        "Field/RED_TOWER_CLIMB_RIGHT", Constants.FieldConstants.RED_TOWER_CLIMB_RIGHT);
-    Logger.recordOutput("Field/BLUE_AZ_PASS_LEFT", Constants.FieldConstants.BLUE_AZ_PASS_LEFT);
-    Logger.recordOutput("Field/BLUE_AZ_PASS_RIGHT", Constants.FieldConstants.BLUE_AZ_PASS_RIGHT);
-    Logger.recordOutput("Field/RED_AZ_PASS_LEFT", Constants.FieldConstants.RED_AZ_PASS_LEFT);
-    Logger.recordOutput("Field/RED_AZ_PASS_RIGHT", Constants.FieldConstants.RED_AZ_PASS_RIGHT);
-    Logger.recordOutput("Field/BLUE_NZ_PASS_LEFT", Constants.FieldConstants.BLUE_NZ_PASS_LEFT);
-    Logger.recordOutput("Field/BLUE_NZ_PASS_RIGHT", Constants.FieldConstants.BLUE_NZ_PASS_RIGHT);
-    Logger.recordOutput("Field/RED_NZ_PASS_LEFT", Constants.FieldConstants.RED_NZ_PASS_LEFT);
-    Logger.recordOutput("Field/RED_NZ_PASS_RIGHT", Constants.FieldConstants.RED_NZ_PASS_RIGHT);
-    Logger.recordOutput("Field/HALF_FIELD_Y_POS", Constants.FieldConstants.HALF_FIELD_Y_POS);
   }
 }

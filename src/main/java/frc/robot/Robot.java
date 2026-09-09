@@ -36,6 +36,10 @@ public class Robot extends LoggedRobot {
   public Robot() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+    Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+    Logger.addDataReceiver(new NT4Publisher());
+    Logger.start();
+
     DriveSubsystem.getInstance();
     IntakeSubsystem.getInstance();
     SerializationSubsystem.getInstance();
@@ -43,9 +47,6 @@ public class Robot extends LoggedRobot {
     m_activeAll = true;
     configureBindings();
 
-    Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
-    Logger.addDataReceiver(new NT4Publisher());
-    Logger.start();
     // Toggle full robot active
     m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
   }

@@ -6,6 +6,10 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -17,12 +21,13 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
@@ -38,10 +43,8 @@ public class ShooterSubsystem extends StateMachine {
     REST {
       @Override
       public void execute() {
-        getInstance()
-            .setTurretAngle(getInstance().getDesiredTurretAngle(getInstance().getShootingTarget()));
-        getInstance()
-            .setHoodAngle(getInstance().getDesiredHoodAngle(getInstance().getShootingTarget()));
+        getInstance().setTurretAngle(getInstance().shot.turretAngle);
+        getInstance().setHoodAngle(getInstance().shot.hoodAngle());
         getInstance().setShooterVelocity(Constants.ShooterConstants.FLYWHEEL_REST_SPEED);
       }
 
@@ -69,7 +72,8 @@ public class ShooterSubsystem extends StateMachine {
           } else {
             getInstance().m_isUnwinding = false;
             HeadHoncho.getInstance().driveUnwindEnded();
-            getInstance().shoot(getInstance().getShootingTarget());
+
+            getInstance().shoot(getInstance().target, getInstance().hub);
           }
         } else {
           getInstance().unwindTurret();
@@ -102,6 +106,10 @@ public class ShooterSubsystem extends StateMachine {
 
   private PositionVoltage m_positionRequest;
 
+  private Translation2d target;
+  private boolean hub;
+  private ShotSolution shot;
+
   public ShooterSubsystem() {
     super(ShooterStates.REST);
 
@@ -124,6 +132,12 @@ public class ShooterSubsystem extends StateMachine {
 
     TalonFXConfiguration flywheelConfig = new TalonFXConfiguration();
     flywheelConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    flywheelConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    flywheelConfig.CurrentLimits.StatorCurrentLimit = 120;
+    flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    flywheelConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    flywheelConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_flywheelLeaderMotor.getConfigurator().apply(flywheelConfig);
     m_flywheelFollowerMotor.getConfigurator().apply(flywheelConfig);
 
@@ -132,62 +146,301 @@ public class ShooterSubsystem extends StateMachine {
 
     TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
     hoodConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    hoodConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 120;
+    hoodConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    hoodConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    hoodConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_hoodMotor.getConfigurator().apply(hoodConfig);
 
     TalonFXConfiguration turretConfig = new TalonFXConfiguration();
     turretConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    turretConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    turretConfig.CurrentLimits.StatorCurrentLimit = 120;
+    turretConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    turretConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    turretConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
     m_turretMotor.getConfigurator().apply(turretConfig);
 
     new Thread(() -> updateTurretPosition()).start();
   }
 
-  public AngularVelocity getDesiredShooterVelocity(Angle hoodAngle, Translation2d target) {
-    Distance D = DriveSubsystem.getInstance().getDistance(target);
-    Distance dh =
-        Meters.of(
-            Constants.FieldConstants.HUB_Y_POS
-                - Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters));
-    double v =
-        Math.sqrt(
-            (Constants.FieldConstants.GRAVITY_VALUE * Math.pow(D.in(Meters), 2))
-                / ((2 * Math.pow(Math.pow(hoodAngle.in(Degrees), 2), 2))
-                    * (D.in(Meters) * Math.tan(hoodAngle.in(Degrees)) - dh.in(Meters))));
-    return RotationsPerSecond.of(
-        v
-            / (Math.PI
-                * ((Constants.ShooterConstants.FLYWHEEL_SMALL_DIAMETER
-                        + Constants.ShooterConstants.FLYWHEEL_LARGE_DIAMETER)
-                    / 2)));
+  public record ShotSolution(Angle turretAngle, Angle hoodAngle, AngularVelocity shooterVelocity) {}
+
+  public LinearVelocity getTurretVelocityX() {
+    ChassisSpeeds speeds = DriveSubsystem.getSpeeds();
+
+    double robotHeading = DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
+
+    Translation2d turretPos =
+        new Translation2d(
+            Constants.ShooterConstants.SHOOTER_OFFSET_X.in(Meters),
+            Constants.ShooterConstants.SHOOTER_OFFSET_Y.in(Meters));
+
+    double turretVelocityRobotX =
+        speeds.vxMetersPerSecond - speeds.omegaRadiansPerSecond * turretPos.getY();
+
+    double turretVelocityRobotY =
+        speeds.vyMetersPerSecond + speeds.omegaRadiansPerSecond * turretPos.getX();
+
+    return MetersPerSecond.of(
+        turretVelocityRobotX * Math.cos(robotHeading)
+            - turretVelocityRobotY * Math.sin(robotHeading));
   }
 
-  public Angle getDesiredHoodAngle(Translation2d target) {
-    if (DriveSubsystem.getInstance().isUnderTrench()) {
-      return Degrees.of(Constants.ShooterConstants.HOOD_MINIMUM_ANGLE.in(Degrees));
+  public LinearVelocity getTurretVelocityY() {
+    ChassisSpeeds speeds = DriveSubsystem.getSpeeds();
+
+    double robotHeading = DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
+
+    Translation2d turretPos =
+        new Translation2d(
+            Constants.ShooterConstants.SHOOTER_OFFSET_X.in(Meters),
+            Constants.ShooterConstants.SHOOTER_OFFSET_Y.in(Meters));
+
+    double turretVelocityRobotX =
+        speeds.vxMetersPerSecond - speeds.omegaRadiansPerSecond * turretPos.getY();
+
+    double turretVelocityRobotY =
+        speeds.vyMetersPerSecond + speeds.omegaRadiansPerSecond * turretPos.getX();
+
+    return MetersPerSecond.of(
+        turretVelocityRobotX * Math.sin(robotHeading)
+            + turretVelocityRobotY * Math.cos(robotHeading));
+  }
+
+  public static Angle hoodToElevation(Angle hoodAngle) {
+    return Constants.ShooterConstants.HOOD_ELEVATION_OFFSET.plus(
+        hoodAngle.times(Constants.ShooterConstants.HOOD_ELEVATION_SCALAR));
+  }
+
+  public LinearVelocity getFuelVelocityX(
+      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
+
+    double speed = getFuelVelocity(launchSpeed).in(MetersPerSecond);
+
+    double fieldTurretAngle =
+        turretAngle.in(Radians)
+            + DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
+
+    return MetersPerSecond.of(
+        speed * Math.cos(hoodToElevation(hoodAngle).in(Radians)) * Math.cos(fieldTurretAngle));
+  }
+
+  public LinearVelocity getFuelVelocityY(
+      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
+
+    double speed = getFuelVelocity(launchSpeed).in(MetersPerSecond);
+
+    double fieldTurretAngle =
+        turretAngle.in(Radians)
+            + DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
+
+    return MetersPerSecond.of(
+        speed * Math.cos(hoodToElevation(hoodAngle).in(Radians)) * Math.sin(fieldTurretAngle));
+  }
+
+  public LinearVelocity getFuelVelocityZ(
+      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
+
+    double speed = getFuelVelocity(launchSpeed).in(MetersPerSecond);
+
+    return MetersPerSecond.of(speed * Math.sin(hoodToElevation(hoodAngle).in(Radians)));
+  }
+
+  public LinearVelocity getFullVelocityX(
+      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
+    return MetersPerSecond.of(
+        getFuelVelocityX(hoodAngle, turretAngle, launchSpeed).in(MetersPerSecond)
+            + getTurretVelocityX().in(MetersPerSecond));
+  }
+
+  public LinearVelocity getFullVelocityY(
+      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
+    return MetersPerSecond.of(
+        getFuelVelocityY(hoodAngle, turretAngle, launchSpeed).in(MetersPerSecond)
+            + getTurretVelocityY().in(MetersPerSecond));
+  }
+
+  public LinearVelocity getFullVelocityZ(
+      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
+    return MetersPerSecond.of(
+        getFuelVelocityZ(hoodAngle, turretAngle, launchSpeed).in(MetersPerSecond));
+  }
+
+  public Translation2d getShooterFieldPosition() {
+    Translation2d robotPosition = DriveSubsystem.getInstance().getRobotPose().getTranslation();
+
+    Translation2d shooterOffset =
+        new Translation2d(
+            Constants.ShooterConstants.SHOOTER_OFFSET_X.in(Meters),
+            Constants.ShooterConstants.SHOOTER_OFFSET_Y.in(Meters));
+
+    double robotHeading = DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
+
+    double shooterX =
+        shooterOffset.getX() * Math.cos(robotHeading)
+            - shooterOffset.getY() * Math.sin(robotHeading);
+
+    double shooterY =
+        shooterOffset.getX() * Math.sin(robotHeading)
+            + shooterOffset.getY() * Math.cos(robotHeading);
+
+    return new Translation2d(robotPosition.getX() + shooterX, robotPosition.getY() + shooterY);
+  }
+
+  public boolean flightNumericalSolver(
+      Angle hoodAngle,
+      Angle turretAngle,
+      AngularVelocity launchSpeed,
+      Translation2d target,
+      boolean isHub) {
+    LinearVelocity fullXVelocity = getFullVelocityX(hoodAngle, turretAngle, launchSpeed);
+    LinearVelocity fullYVelocity = getFullVelocityY(hoodAngle, turretAngle, launchSpeed);
+    LinearVelocity fullZVelocity = getFullVelocityZ(hoodAngle, turretAngle, launchSpeed);
+
+    Translation2d shooterPosition = getShooterFieldPosition();
+
+    Distance fuelXPos = Meters.of(shooterPosition.getX());
+    Distance fuelYPos = Meters.of(shooterPosition.getY());
+    Distance fuelZPos = Constants.ShooterConstants.SHOOTER_OFFSET_Z;
+
+    double flightTime = 0;
+
+    while (flightTime < Constants.ShooterConstants.MAX_FLIGHT_TIME) {
+      LinearVelocity fuelSpeed =
+          MetersPerSecond.of(
+              Math.sqrt(
+                  Math.pow(fullXVelocity.in(MetersPerSecond), 2)
+                      + Math.pow(fullYVelocity.in(MetersPerSecond), 2)
+                      + Math.pow(fullZVelocity.in(MetersPerSecond), 2)));
+
+      LinearAcceleration accelerationX =
+          MetersPerSecondPerSecond.of(
+              -Constants.FieldConstants.DRAG_CONSTANT
+                  * fuelSpeed.in(MetersPerSecond)
+                  * fullXVelocity.in(MetersPerSecond));
+
+      LinearAcceleration accelerationY =
+          MetersPerSecondPerSecond.of(
+              -Constants.FieldConstants.DRAG_CONSTANT
+                  * fuelSpeed.in(MetersPerSecond)
+                  * fullYVelocity.in(MetersPerSecond));
+
+      LinearAcceleration accelerationZ =
+          MetersPerSecondPerSecond.of(
+              -Constants.FieldConstants.GRAVITY_VALUE
+                  - Constants.FieldConstants.DRAG_CONSTANT
+                      * fuelSpeed.in(MetersPerSecond)
+                      * fullZVelocity.in(MetersPerSecond));
+
+      fullXVelocity =
+          MetersPerSecond.of(
+              fullXVelocity.in(MetersPerSecond)
+                  + accelerationX.in(MetersPerSecondPerSecond)
+                      * Constants.FieldConstants.TIME_STEP);
+      fullYVelocity =
+          MetersPerSecond.of(
+              fullYVelocity.in(MetersPerSecond)
+                  + accelerationY.in(MetersPerSecondPerSecond)
+                      * Constants.FieldConstants.TIME_STEP);
+      fullZVelocity =
+          MetersPerSecond.of(
+              fullZVelocity.in(MetersPerSecond)
+                  + accelerationZ.in(MetersPerSecondPerSecond)
+                      * Constants.FieldConstants.TIME_STEP);
+
+      fuelXPos =
+          Meters.of(
+              fuelXPos.in(Meters)
+                  + fullXVelocity.in(MetersPerSecond) * Constants.FieldConstants.TIME_STEP);
+
+      fuelYPos =
+          Meters.of(
+              fuelYPos.in(Meters)
+                  + fullYVelocity.in(MetersPerSecond) * Constants.FieldConstants.TIME_STEP);
+
+      fuelZPos =
+          Meters.of(
+              fuelZPos.in(Meters)
+                  + fullZVelocity.in(MetersPerSecond) * Constants.FieldConstants.TIME_STEP);
+
+      flightTime += Constants.FieldConstants.TIME_STEP;
+
+      if (fuelZPos.in(Meters) > Constants.FieldConstants.MAX_BALL_Y_POS.getAsDouble()) {
+        return false;
+      }
+
+      if (fuelZPos.in(Meters) < Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters) - .01
+          && isHub) {
+        return false;
+      }
+
+      Distance height = (isHub) ? Meters.of(Constants.FieldConstants.HUB_Y_POS) : Meters.of(0);
+
+      Distance distanceToTarget =
+          Meters.of(
+              Math.sqrt(
+                  Math.pow((target.getX() - fuelXPos.in(Meters)), 2)
+                      + Math.pow((target.getY() - fuelYPos.in(Meters)), 2)
+                      + Math.pow((height.in(Meters) - fuelZPos.in(Meters)), 2)));
+
+      if (distanceToTarget.in(Meters) <= Constants.FieldConstants.HUB_WIDTH.in(Meters) / 2.0
+          && fullZVelocity.in(MetersPerSecond) < 0) {
+        return true;
+      }
     }
-    Distance D = DriveSubsystem.getInstance().getDistance(target);
-    Distance dh =
-        Meters.of(
-            Constants.FieldConstants.HUB_Y_POS
-                - Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters));
-    return Degrees.of(
-        MathUtil.clamp(
-            Degrees.of(
-                    Math.atan(
-                        (dh.in(Meters)
-                                + Math.sqrt(Math.pow(D.in(Meters), 2) + Math.pow(dh.in(Meters), 2)))
-                            / D.in(Meters)))
-                .in(Degrees),
-            Constants.ShooterConstants.HOOD_MINIMUM_ANGLE.in(Degrees),
-            Constants.ShooterConstants.HOOD_MAX_ANGLE.in(Degrees)));
+    return false;
   }
 
-  public Angle getDesiredTurretAngle(Translation2d target) {
-    Pose2d robotPose = DriveSubsystem.getInstance().getRobotPose();
-    Translation2d robotTranslation = robotPose.getTranslation();
-    Distance distanceToTarget = DriveSubsystem.getInstance().getDistance(target);
-    double robotRotationDiff =
-        Math.acos((target.getX() - robotTranslation.getX() / distanceToTarget.in(Meters)));
-    return Degrees.of(robotRotationDiff);
+  public ShotSolution findOptimalSolution(Translation2d target, boolean isHub) {
+    ShotSolution bestShot = null;
+
+    if (DriveSubsystem.getInstance().isUnderTrench()) {
+      return new ShotSolution(
+          Constants.ShooterConstants.TURRET_MINIMUM_ANGLE,
+          Constants.ShooterConstants.HOOD_MINIMUM_ANGLE,
+          Constants.ShooterConstants.MIN_SHOOTER_VELOCITY);
+    }
+
+    for (Angle hoodAngle = Constants.ShooterConstants.HOOD_MINIMUM_ANGLE;
+        hoodAngle.in(Degrees) <= Constants.ShooterConstants.HOOD_MAX_ANGLE.in(Degrees);
+        hoodAngle = hoodAngle.plus(Constants.ShooterConstants.HOOD_ANGLE_STEP)) {
+
+      for (Angle turretAngle = Constants.ShooterConstants.TURRET_MINIMUM_ANGLE;
+          turretAngle.in(Degrees) <= Constants.ShooterConstants.TURRET_MAX_ANGLE.in(Degrees);
+          turretAngle = turretAngle.plus(Constants.ShooterConstants.TURRET_ANGLE_STEP)) {
+
+        for (AngularVelocity shooterVelocity = Constants.ShooterConstants.MIN_SHOOTER_VELOCITY;
+            shooterVelocity.in(RadiansPerSecond)
+                <= Constants.ShooterConstants.MAX_SHOOTER_VELOCITY.in(RadiansPerSecond);
+            shooterVelocity =
+                shooterVelocity.plus(Constants.ShooterConstants.SHOOTER_VELOCITY_STEP)) {
+
+          if (!flightNumericalSolver(hoodAngle, turretAngle, shooterVelocity, target, isHub)) {
+            continue;
+          }
+
+          if (bestShot == null
+              || shooterVelocity.in(RadiansPerSecond)
+                  < bestShot.shooterVelocity().in(RadiansPerSecond)) {
+
+            bestShot = new ShotSolution(turretAngle, hoodAngle, shooterVelocity);
+          }
+        }
+      }
+    }
+
+    return bestShot;
+  }
+
+  public LinearVelocity getFuelVelocity(AngularVelocity shooterVelocity) {
+
+    return MetersPerSecond.of(
+        shooterVelocity.in(RotationsPerSecond)
+            * Constants.ShooterConstants.BALL_METERS_PER_MOTOR_ROTATION);
   }
 
   public double getFlightTime(Translation2d target, Angle desiredHoodAngle) {
@@ -210,11 +463,8 @@ public class ShooterSubsystem extends StateMachine {
         : false;
   }
 
-  public boolean atGoodShooterVelocity(Angle desiredHoodAngle) {
-    return (Math.abs(
-                getInstance()
-                    .getDesiredShooterVelocity(desiredHoodAngle, getInstance().getShootingTarget())
-                    .in(RotationsPerSecond))
+  public boolean atGoodShooterVelocity(AngularVelocity velocity) {
+    return (Math.abs(velocity.in(RotationsPerSecond))
             < Math.abs(
                 getInstance().m_flywheelLeaderMotor.getVelocity().getValueAsDouble()
                     * Constants.ShooterConstants.HOOD_THRESHOLD))
@@ -255,16 +505,10 @@ public class ShooterSubsystem extends StateMachine {
         .setControl(getInstance().m_positionRequest.withPosition(turretAngle));
   }
 
-  public void shoot(Translation2d target) {
-    Angle desiredHoodAngle = getInstance().getDesiredHoodAngle(target);
-    AngularVelocity desiredShooterVelocity =
-        getInstance()
-            .getDesiredShooterVelocity(desiredHoodAngle, getInstance().getShootingTarget());
-    Angle desiredTurretAngle = getInstance().getDesiredTurretAngle(target);
-
-    getInstance().setShooterVelocity(desiredShooterVelocity);
-    getInstance().setHoodAngle(desiredHoodAngle);
-    getInstance().setTurretAngle(desiredTurretAngle);
+  public void shoot(Translation2d target, boolean isHub) {
+    setTurretAngle(getInstance().shot.turretAngle());
+    setHoodAngle(getInstance().shot.hoodAngle());
+    setShooterVelocity(getInstance().shot.shooterVelocity());
   }
 
   public void unwindTurret() {
@@ -274,12 +518,11 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean finishedUnwind() {
-    if (getInstance().m_turretMotor.getPosition()
-        == Constants.ShooterConstants.TURRET_UNWIND_ANGLE) {
-      getInstance().m_isUnwinding = false;
-      return true;
-    }
-    return false;
+    double current = getInstance().m_turretMotor.getPosition().getValue().in(Degrees);
+
+    double target = Constants.ShooterConstants.TURRET_UNWIND_ANGLE.in(Degrees);
+
+    return Math.abs(current - target) <= 2;
   }
 
   public Translation2d getShootingTarget() {
@@ -343,11 +586,10 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean isShooterReady() {
-    return (getInstance().atGoodHoodAngle(getInstance().getDesiredHoodAngle(getShootingTarget()))
-        && getInstance()
-            .atGoodShooterVelocity(getInstance().getDesiredHoodAngle(getShootingTarget()))
+    return (getInstance().atGoodHoodAngle(getInstance().shot.hoodAngle())
+        && getInstance().atGoodShooterVelocity(getInstance().shot.shooterVelocity())
         && DriveSubsystem.getInstance().atGoodShootingPosition()
-        && getInstance().atGoodTurretAngle(getInstance().getDesiredHoodAngle(getShootingTarget())));
+        && getInstance().atGoodTurretAngle(getInstance().shot.turretAngle()));
   }
 
   public void updateTurretPosition() {
@@ -395,15 +637,18 @@ public class ShooterSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
+    target = getInstance().getShootingTarget();
+    hub =
+        (target == Constants.FieldConstants.BLUE_HUB_COORDINATES
+                || target == Constants.FieldConstants.RED_HUB_COORDINATES)
+            ? true
+            : false;
+    shot = findOptimalSolution(target, hub);
     Logger.recordOutput("ShooterSubsystem/State", getState().toString());
     Logger.recordOutput("ShooterSubsystem/HoodAngle", m_hoodMotor.getPosition().getValueAsDouble());
-    Logger.recordOutput(
-        "ShooterSubsystem/DesiredHoodAngle", getDesiredHoodAngle(getShootingTarget()));
-    Logger.recordOutput(
-        "ShooterSubsystem/DesiredShooterVelocity",
-        getDesiredShooterVelocity(getDesiredHoodAngle(getShootingTarget()), getShootingTarget()));
-    Logger.recordOutput(
-        "ShooterSubsystem/DesiredTurretAngle", getDesiredTurretAngle(getShootingTarget()));
+    Logger.recordOutput("ShooterSubsystem/DesiredHoodAngle", shot.hoodAngle());
+    Logger.recordOutput("ShooterSubsystem/DesiredShooterVelocity", shot.shooterVelocity());
+    Logger.recordOutput("ShooterSubsystem/DesiredTurretAngle", shot.turretAngle());
     Logger.recordOutput("ShooterSubsystem/ShooterTarget", getShootingTarget());
     Logger.recordOutput(
         "ShooterSubsystem/ShooterVelocity", m_flywheelLeaderMotor.getVelocity().getValueAsDouble());
