@@ -204,7 +204,7 @@ public class ShooterSubsystem extends StateMachine {
     if (robotCrossTrench()) {
       return 0;
     }
-    double hoodAngle = Math.atan2(y_vel, x_vel);
+    double hoodAngle = (Math.PI / 2) - Math.atan2(y_vel, x_vel);
     return hoodAngle;
   }
 
