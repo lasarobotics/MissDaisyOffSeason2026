@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -92,6 +93,10 @@ public final class Constants {
     public static final double HANG_TIME = 1.5;
     public static final double MOTOR_HOOD_GEAR_RATIO = 0;
     public static final double HOOD_COLLISION_TIME = 0.25;
+    public static final double HUB_HEIGHT = 1.83;
+    public static final LoggedNetworkNumber MAX_BALL_Y_POS =
+        new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
+    public static final double MOTOR_SHOOTER_GEAR_RATIO = 1;
   }
 
   public static class FieldConstants {
@@ -134,5 +139,6 @@ public final class Constants {
         new Rectangle2d(
             new Translation2d(FIELD_X.in(Meters), 3.173),
             new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
+    public static final double GRAVITY_VALUE = 9.81;
   }
 }

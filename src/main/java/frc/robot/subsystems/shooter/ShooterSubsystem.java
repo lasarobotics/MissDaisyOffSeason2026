@@ -49,9 +49,23 @@ public class ShooterSubsystem extends StateMachine {
     ON {
       @Override
       public void execute() {
+        Translation2d robotPose = getInstance().getFuturePose(Constants.ShooterConstants.HANG_TIME);
+        Translation2d targetDiff = getInstance().getTarget().minus(robotPose);
+        double distance = targetDiff.getNorm();
+        double x_vel =
+            getVelocityXStationary(
+                distance,
+                Constants.ShooterConstants.HUB_HEIGHT,
+                Constants.ShooterConstants.MAX_BALL_Y_POS.getAsDouble());
+        double y_vel =
+            getVelocityYStationary(Constants.ShooterConstants.MAX_BALL_Y_POS.getAsDouble());
+        Logger.recordOutput(
+            "ShooterSubsystem/HoodAngle", getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI));
+        Logger.recordOutput(
+            "ShooterSubsystem/HoodSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
         // getInstance().setTurretPos();
-        // getInstance().setHoodPos();
-        // getInstance().setShooterSpeed();
+        // getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
+        // getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
       }
 
       @Override
@@ -135,7 +149,7 @@ public class ShooterSubsystem extends StateMachine {
     if (m_blueAlliance) {
       if (inAZ()) {
         return Constants.FieldConstants.BLUE_HUB_POS;
-      } else if (inNZ()) {
+      } else {
         if (DriveSubsystem.getInstance().getPose().getY()
             < Constants.FieldConstants.NZ_MID_LINE_Y) {
           return Constants.FieldConstants.BLUE_RIGHT_BUMP;
@@ -145,7 +159,7 @@ public class ShooterSubsystem extends StateMachine {
     } else {
       if (inAZ()) {
         return Constants.FieldConstants.RED_HUB_POS;
-      } else if (inNZ()) {
+      } else {
         if (DriveSubsystem.getInstance().getPose().getY()
             < Constants.FieldConstants.NZ_MID_LINE_Y) {
           return Constants.FieldConstants.RED_LEFT_BUMP;
@@ -153,7 +167,6 @@ public class ShooterSubsystem extends StateMachine {
         return Constants.FieldConstants.RED_RIGHT_BUMP;
       }
     }
-    return null;
   }
 
   private double getTurretPos(Translation2d target) {
@@ -187,36 +200,48 @@ public class ShooterSubsystem extends StateMachine {
                 * Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO));
   }
 
-  private double getHoodPos(Translation2d target) {
+  private double getHoodPos(double x_vel, double y_vel) {
     if (robotCrossTrench()) {
       return 0;
     }
-    Translation2d robotPose = getFuturePose(Constants.ShooterConstants.HANG_TIME);
-    Translation2d targetDiff = target.minus(robotPose);
-    double distance = targetDiff.getNorm();
-    // return hoodMath(distance);
-    return 0;
+    double hoodAngle = Math.atan2(y_vel, x_vel);
+    return hoodAngle;
   }
 
-  // private void hoodMath(double distance){
-  // TODO
-  // }
-
-  private void setHoodPos() {
+  private void setHoodPos(double hoodPos) {
     m_hoodMotor.setControl(
         m_positionVoltage.withPosition(
-            getHoodPos(getTarget())
-                / (2 * Math.PI)
-                * Constants.ShooterConstants.MOTOR_HOOD_GEAR_RATIO));
+            hoodPos / (2 * Math.PI) * Constants.ShooterConstants.MOTOR_HOOD_GEAR_RATIO));
   }
 
-  private double getShooterSpeed(Translation2d target) {
-    // TODO
-    return 0;
+  private double getShooterSpeed(double x_vel, double y_vel) {
+    double shootSpeed = Math.hypot(x_vel, y_vel);
+    double desiredRPS = (shootSpeed * 4 / 3) / (4 * Math.PI);
+    double finalRPS = desiredRPS * Constants.ShooterConstants.MOTOR_SHOOTER_GEAR_RATIO;
+    return finalRPS;
   }
 
-  private void setShooterSpeed() {
-    m_shooterLeader.setControl(m_velocityVoltage.withVelocity(getShooterSpeed(getTarget())));
+  private void setShooterSpeed(double speed) {
+    m_shooterLeader.setControl(m_velocityVoltage.withVelocity(speed));
+  }
+
+  private static double getVelocityXStationary(
+      double distance, double targetHeight, double maxBallYPos) {
+    double y_max = maxBallYPos;
+    double y_end = targetHeight;
+    double g = Constants.FieldConstants.GRAVITY_VALUE;
+
+    double x_vel =
+        distance * (Math.sqrt(g)) / (Math.sqrt(2 * y_max) + Math.sqrt(2 * (y_max - y_end)));
+    return x_vel;
+  }
+
+  private static double getVelocityYStationary(double maxBallYPos) {
+    double y_max = maxBallYPos;
+    double g = Constants.FieldConstants.GRAVITY_VALUE;
+
+    double y_vel = Math.sqrt(y_max * 2 * g);
+    return y_vel;
   }
 
   public boolean robotCrossTrench() {
@@ -308,11 +333,6 @@ public class ShooterSubsystem extends StateMachine {
             .getTranslation()
             .plus(
                 new Translation2d(
-                        Constants.ShooterConstants.SHOOTER_OFFSET_X,
-                        Constants.ShooterConstants.SHOOTER_OFFSET_Y)
-                    .rotateBy(currentPose.getRotation()))
-            .plus(
-                new Translation2d(
                         DriveSubsystem.getInstance().getSpeeds().vxMetersPerSecond,
                         DriveSubsystem.getInstance().getSpeeds().vyMetersPerSecond)
                     .times(time));
@@ -337,5 +357,4 @@ public class ShooterSubsystem extends StateMachine {
             DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
   }
-  // This method will be called once per scheduler run
 }

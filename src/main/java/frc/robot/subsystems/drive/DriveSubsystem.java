@@ -148,12 +148,16 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public boolean underTower() {
-    return (Constants.FieldConstants.BLUE_TOWER.contains(getLimelightTranslation2d())
-        || Constants.FieldConstants.RED_TOWER.contains(getLimelightTranslation2d()));
+    return (Constants.FieldConstants.BLUE_TOWER.contains(getTranslation2d())
+        || Constants.FieldConstants.RED_TOWER.contains(getTranslation2d()));
   }
 
   public ChassisSpeeds getSpeeds() {
-    return s_drivetrain.getState().Speeds;
+    return s_drivetrain
+        .getState()
+        .Speeds
+        .fromRobotRelativeSpeeds(
+            s_drivetrain.getState().Speeds, s_drivetrain.getState().Pose.getRotation());
   }
 
   public Translation2d getTranslation2d() {
