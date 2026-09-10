@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -60,7 +62,8 @@ public class ShooterSubsystem extends StateMachine {
         double y_vel =
             getVelocityYStationary(Constants.ShooterConstants.MAX_BALL_Y_POS.getAsDouble());
         Logger.recordOutput(
-            "ShooterSubsystem/HoodAngle", getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI));
+            "ShooterSubsystem/HoodAngle",
+            getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);
         Logger.recordOutput(
             "ShooterSubsystem/HoodSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
         // getInstance().setTurretPos();
@@ -108,6 +111,12 @@ public class ShooterSubsystem extends StateMachine {
     m_shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     m_hoodConfig = new TalonFXConfiguration();
     m_hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.ShooterConstants.MOTOR_HOOD_GEAR_RATIO
+            * Constants.ShooterConstants.HOOD_MAX_ANGLE;
+    m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+    m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     m_turretConfig = new TalonFXConfiguration(); // TODO SET PID SV VALUES FOR ALL SUBSYSTEMS
     m_turretConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 23.0;
@@ -216,7 +225,7 @@ public class ShooterSubsystem extends StateMachine {
 
   private double getShooterSpeed(double x_vel, double y_vel) {
     double shootSpeed = Math.hypot(x_vel, y_vel);
-    double desiredRPS = (shootSpeed * 4 / 3) / (4 * Math.PI);
+    double desiredRPS = (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI);
     double finalRPS = desiredRPS * Constants.ShooterConstants.MOTOR_SHOOTER_GEAR_RATIO;
     return finalRPS;
   }

@@ -79,8 +79,6 @@ public final class Constants {
     public static final int SHOOTER_FOLLOWER_ID = 51;
     public static final int HOOD_MOTOR_ID = 52;
     public static final int TURRET_MOTOR_ID = 53;
-    public static final double HOOD_MIN_POS = 0;
-    public static final double HOOD_MAX_POS = 0;
     public static final int ENCODER_ONE_TEETH = 17;
     public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
@@ -91,12 +89,16 @@ public final class Constants {
     public static final double SHOOTER_OFFSET_X = 0;
     public static final double SHOOTER_OFFSET_Y = 0;
     public static final double HANG_TIME = 1.5;
-    public static final double MOTOR_HOOD_GEAR_RATIO = 0;
+    public static final double MOTOR_HOOD_GEAR_RATIO =
+        (44 / 11)
+            * (32 / 18)
+            * (175 / 10); // Spins per motor to get 1 "rotation" of the rack if it were a circle
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final double HUB_HEIGHT = 1.83;
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
     public static final double MOTOR_SHOOTER_GEAR_RATIO = 1;
+    public static final double HOOD_MAX_ANGLE = 19 / 175; // rotations
   }
 
   public static class FieldConstants {
