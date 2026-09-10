@@ -18,8 +18,10 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -214,6 +216,8 @@ public class ShooterSubsystem extends StateMachine {
       return 0;
     }
     double hoodAngle = (Math.PI / 2) - Math.atan2(y_vel, x_vel);
+    hoodAngle =
+        MathUtil.clamp(hoodAngle, 0, Constants.ShooterConstants.HOOD_MAX_ANGLE * 2 * Math.PI);
     return hoodAngle;
   }
 
@@ -275,19 +279,80 @@ public class ShooterSubsystem extends StateMachine {
         d = Constants.FieldConstants.BLUE_RIGHT_TRENCH_P2;
       }
     }
-    double orient1 = crossProductOrient(a, b, c);
-    double orient2 = crossProductOrient(a, b, d);
-    double orient3 = crossProductOrient(c, d, a);
-    double orient4 = crossProductOrient(c, d, b);
+    Translation2d toEdgeOfRobot = new Translation2d(Constants.DriveConstants.CENTER_TO_EDGE, 0);
     boolean underTrench =
-        ((orient1 > 0 && orient2 < 0) || (orient1 < 0 && orient2 > 0))
-            && ((orient3 > 0 && orient4 < 0) || (orient3 < 0 && orient4 > 0));
+        (segmentsIntersect(a, b, c, d)
+            || segmentsIntersect(a.minus(toEdgeOfRobot), a.plus(toEdgeOfRobot), c, d));
     return underTrench;
   }
 
   private double crossProductOrient(Translation2d a, Translation2d b, Translation2d c) {
     return (b.getX() - a.getX()) * (c.getY() - a.getY())
         - (b.getY() - a.getY()) * (c.getX() - a.getX());
+  }
+
+  public boolean canSeeTarget() {
+    Translation2d a =
+        DriveSubsystem.getInstance()
+            .getPose()
+            .transformBy(
+                new Transform2d(
+                    Constants.ShooterConstants.SHOOTER_OFFSET_X,
+                    Constants.ShooterConstants.SHOOTER_OFFSET_Y,
+                    new Rotation2d(0)))
+            .getTranslation();
+    Translation2d b = getTarget();
+    Translation2d blueBottomRight =
+        new Translation2d(
+            Constants.FieldConstants.BLUE_HUB_POS.getX() - Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.BLUE_HUB_POS.getY() - Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d blueBottomLeft =
+        new Translation2d(
+            Constants.FieldConstants.BLUE_HUB_POS.getX() - Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.BLUE_HUB_POS.getY() + Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d blueTopRight =
+        new Translation2d(
+            Constants.FieldConstants.BLUE_HUB_POS.getX() + Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.BLUE_HUB_POS.getY() - Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d blueTopLeft =
+        new Translation2d(
+            Constants.FieldConstants.BLUE_HUB_POS.getX() + Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.BLUE_HUB_POS.getY() + Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d redBottomRight =
+        new Translation2d(
+            Constants.FieldConstants.RED_HUB_POS.getX() - Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.RED_HUB_POS.getY() - Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d redBottomLeft =
+        new Translation2d(
+            Constants.FieldConstants.RED_HUB_POS.getX() - Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.RED_HUB_POS.getY() + Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d redTopRight =
+        new Translation2d(
+            Constants.FieldConstants.RED_HUB_POS.getX() - Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.RED_HUB_POS.getY() + Constants.FieldConstants.HUB_WIDTH / 2);
+    Translation2d redTopLeft =
+        new Translation2d(
+            Constants.FieldConstants.RED_HUB_POS.getX() + Constants.FieldConstants.HUB_WIDTH / 2,
+            Constants.FieldConstants.RED_HUB_POS.getY() + Constants.FieldConstants.HUB_WIDTH / 2);
+    if (segmentsIntersect(a, b, blueBottomLeft, blueBottomRight)) return false;
+    if (segmentsIntersect(a, b, blueTopLeft, blueTopRight)) return false;
+    if (segmentsIntersect(a, b, blueBottomRight, blueTopRight)) return false;
+    if (segmentsIntersect(a, b, blueBottomLeft, blueTopLeft)) return false;
+    if (segmentsIntersect(a, b, redBottomLeft, redBottomRight)) return false;
+    if (segmentsIntersect(a, b, redTopLeft, redTopRight)) return false;
+    if (segmentsIntersect(a, b, redBottomRight, redTopRight)) return false;
+    if (segmentsIntersect(a, b, redBottomLeft, redTopLeft)) return false;
+    return true;
+  }
+
+  private boolean segmentsIntersect(
+      Translation2d a, Translation2d b, Translation2d c, Translation2d d) {
+    double orient1 = crossProductOrient(a, b, c);
+    double orient2 = crossProductOrient(a, b, d);
+    double orient3 = crossProductOrient(c, d, a);
+    double orient4 = crossProductOrient(c, d, b);
+    return ((orient1 > 0 && orient2 < 0) || (orient1 < 0 && orient2 > 0))
+        && ((orient3 > 0 && orient4 < 0) || (orient3 < 0 && orient4 > 0));
   }
 
   private void updateTurretEncoder() {

@@ -49,6 +49,7 @@ public final class Constants {
     public static final double TURN_D = 0;
     public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
     public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
+    public static final double CENTER_TO_EDGE = Inches.of(13.25).in(Meters);
   }
 
   public static class IntakeConstants {
@@ -86,19 +87,19 @@ public final class Constants {
     public static final int ENCODER_TWO_ID = 54;
     public static final int ENCODER_ONE_ID = 55;
     public static final double CRT_EPSILON = 0.01;
-    public static final double SHOOTER_OFFSET_X = 0;
-    public static final double SHOOTER_OFFSET_Y = 0;
+    public static final double SHOOTER_OFFSET_X = Inches.of(-4).in(Meters);
+    public static final double SHOOTER_OFFSET_Y = Inches.of(-3).in(Meters);
     public static final double HANG_TIME = 1.5;
     public static final double MOTOR_HOOD_GEAR_RATIO =
-        (44 / 11)
-            * (32 / 18)
-            * (175 / 10); // Spins per motor to get 1 "rotation" of the rack if it were a circle
+        (44.0 / 11.0)
+            * (32.0 / 18.0)
+            * (175.0 / 10.0); // Spins per motor to get 1 "rotation" of the rack if it were a circle
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final double HUB_HEIGHT = 1.83;
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
     public static final double MOTOR_SHOOTER_GEAR_RATIO = 1;
-    public static final double HOOD_MAX_ANGLE = 19 / 175; // rotations
+    public static final double HOOD_MAX_ANGLE = (19.0 / 175.0); // rotations
   }
 
   public static class FieldConstants {
@@ -106,9 +107,13 @@ public final class Constants {
     public static final Distance FIELD_Y = Inches.of(316.64);
     public static final double NZ_MID_LINE_X = FIELD_X.in(Meters) / 2;
     public static final double NZ_MID_LINE_Y = FIELD_Y.in(Meters) / 2;
+    public static final double HUB_WIDTH = Inches.of(47).in(Meters);
+    public static final double AZ_DEPTH = Inches.of(158.6).in(Meters);
 
-    public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, NZ_MID_LINE_Y);
-    public static final Translation2d RED_HUB_POS = new Translation2d(11.9, NZ_MID_LINE_Y);
+    public static final Translation2d BLUE_HUB_POS =
+        new Translation2d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y);
+    public static final Translation2d RED_HUB_POS =
+        new Translation2d(FIELD_X.in(Meters) - AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y);
     public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 6.03);
     public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 1);
     public static final Translation2d RED_LEFT_BUMP = new Translation2d(RED_HUB_POS.getX(), 2.01);

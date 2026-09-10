@@ -39,7 +39,8 @@ public class SerializationSubsystem extends StateMachine {
       @Override
       public void execute() {
         if (ShooterSubsystem.getInstance().robotCrossTrench()
-            || DriveSubsystem.getInstance().underTower()) {
+            || DriveSubsystem.getInstance().underTower()
+            || !ShooterSubsystem.getInstance().canSeeTarget()) {
           getInstance()
               .m_serializationFeederLeader
               .setControl(getInstance().m_velocityVoltage.withVelocity(0));
@@ -139,8 +140,11 @@ public class SerializationSubsystem extends StateMachine {
         getName() + "SerializationSubsystem/FeederSpeed",
         m_serializationFeederLeader.getVelocity().getValueAsDouble());
     Logger.recordOutput(
-        getName() + "Serialization/OmniSpeed",
+        getName() + "SerializationSubsystem/OmniSpeed",
         m_serializationOmni.getVelocity().getValueAsDouble());
-    Logger.recordOutput("Serialization/UnderTower", DriveSubsystem.getInstance().underTower());
+    Logger.recordOutput(
+        "SerializationSubsystem/UnderTower", DriveSubsystem.getInstance().underTower());
+    Logger.recordOutput(
+        "SerializationSubsystem/CanSeeTarget", ShooterSubsystem.getInstance().canSeeTarget());
   }
 }
