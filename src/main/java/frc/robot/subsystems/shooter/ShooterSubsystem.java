@@ -279,6 +279,10 @@ public class ShooterSubsystem extends StateMachine {
         d = Constants.FieldConstants.BLUE_RIGHT_TRENCH_P2;
       }
     }
+    /*Basically, form a line segment the length of the robot, and see if it intersects the trench
+     * as well as checking current vs future pose to see if
+     * robot will cross trench in forseeable future(HOOD_COLLISION_TIME secondsto be precise)
+     */
     Translation2d toEdgeOfRobot = new Translation2d(Constants.DriveConstants.CENTER_TO_EDGE, 0);
     boolean underTrench =
         (segmentsIntersect(a, b, c, d)
@@ -291,6 +295,7 @@ public class ShooterSubsystem extends StateMachine {
         - (b.getY() - a.getY()) * (c.getX() - a.getX());
   }
 
+  /*Check all line segments of the 2 hubs and see if it intersects the robot and target line segment */
   public boolean canSeeTarget() {
     Translation2d a =
         DriveSubsystem.getInstance()
@@ -345,6 +350,11 @@ public class ShooterSubsystem extends StateMachine {
     return true;
   }
 
+  /*
+  Check if two line segments intersect ---
+  Used for checking if either hub is between robot and target(Check all 4 line segment sides of the hub)
+  And for checking if robot is under the trench
+  */
   private boolean segmentsIntersect(
       Translation2d a, Translation2d b, Translation2d c, Translation2d d) {
     double orient1 = crossProductOrient(a, b, c);

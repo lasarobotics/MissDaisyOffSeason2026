@@ -120,6 +120,5 @@ public class IntakeSubsystem extends StateMachine {
         getName() + "/slapdownPos", m_intakeSlapdown.getPosition().getValueAsDouble());
     Logger.recordOutput(
         getName() + "/rollerSpeed", m_intakeRollerLeader.getVelocity().getValueAsDouble());
-    // This method will be called once per scheduler run
   }
 }
