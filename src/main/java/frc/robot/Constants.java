@@ -103,6 +103,9 @@ public final class Constants {
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
     public static final double MOTOR_SHOOTER_GEAR_RATIO = 1;
     public static final double HOOD_MAX_ANGLE = (19.0 / 175.0); // rotations
+    public static final double TURRET_DEADBAND =
+        0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
+               // meters away
   }
 
   public static class FieldConstants {

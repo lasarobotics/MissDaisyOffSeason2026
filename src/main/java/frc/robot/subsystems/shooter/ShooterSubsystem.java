@@ -39,6 +39,7 @@ public class ShooterSubsystem extends StateMachine {
     OFF {
       @Override
       public void initialize() {
+        getInstance().m_readytoShoot = false;
         //
         // getInstance().m_shooterLeader.setControl(getInstance().m_velocityVoltage.withVelocity(0));
         //   getInstance().m_hoodMotor.setControl(getInstance().m_positionVoltage.withPosition(0));
@@ -67,6 +68,18 @@ public class ShooterSubsystem extends StateMachine {
                 Constants.ShooterConstants.MAX_BALL_Y_POS.getAsDouble());
         double y_vel =
             getVelocityYStationary(Constants.ShooterConstants.MAX_BALL_Y_POS.getAsDouble());
+
+        getInstance().m_readytoShoot =
+            Math.abs(
+                    getInstance().getTurretRotation()
+                        - getInstance()
+                            .getTurretPos(
+                                getInstance().getTarget(),
+                                new Pose2d(
+                                    robotPose,
+                                    DriveSubsystem.getInstance().getPose().getRotation())))
+                < Constants.ShooterConstants.TURRET_DEADBAND;
+
         Logger.recordOutput(
             "ShooterSubsystem/HoodAngle",
             getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);
@@ -126,6 +139,7 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFX m_turretMotor;
   private TalonFXConfiguration m_turretConfig;
   private boolean m_blueAlliance;
+  private boolean m_readytoShoot;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
@@ -466,6 +480,10 @@ public class ShooterSubsystem extends StateMachine {
                 .getRotation()
                 .minus(new Rotation2d(Radians.of(-Math.PI / 2))));
     return currentPos.plus(transformationVector);
+  }
+
+  public boolean isReadyToShoot() {
+    return m_readytoShoot;
   }
 
   @Override

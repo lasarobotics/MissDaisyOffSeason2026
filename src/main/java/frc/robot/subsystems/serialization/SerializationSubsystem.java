@@ -40,7 +40,8 @@ public class SerializationSubsystem extends StateMachine {
       public void execute() {
         if (ShooterSubsystem.getInstance().robotCrossTrench()
             || DriveSubsystem.getInstance().underTower()
-            || !ShooterSubsystem.getInstance().canSeeTarget()) {
+            || !ShooterSubsystem.getInstance().canSeeTarget()
+            || !ShooterSubsystem.getInstance().isReadyToShoot()) {
           getInstance()
               .m_serializationFeederLeader
               .setControl(getInstance().m_velocityVoltage.withVelocity(0));
