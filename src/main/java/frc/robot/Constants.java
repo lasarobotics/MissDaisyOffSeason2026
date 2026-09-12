@@ -49,7 +49,6 @@ public final class Constants {
     public static final double TURN_D = 0;
     public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
     public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
-    public static final double CENTER_TO_EDGE = Inches.of(13.25).in(Meters);
   }
 
   public static class IntakeConstants {
@@ -89,6 +88,9 @@ public final class Constants {
     public static final double CRT_EPSILON = 0.01;
     public static final double SHOOTER_OFFSET_X = Inches.of(-4).in(Meters);
     public static final double SHOOTER_OFFSET_Y = Inches.of(-3).in(Meters);
+    public static final double SHOOTER_OFFSET_RADIUS =
+        Math.hypot(SHOOTER_OFFSET_X, SHOOTER_OFFSET_Y);
+    public static final double CENTER_TO_EDGE = Inches.of(13.25).in(Meters);
     public static final double HANG_TIME = 1.5;
     public static final double MOTOR_HOOD_GEAR_RATIO =
         (44.0 / 11.0)

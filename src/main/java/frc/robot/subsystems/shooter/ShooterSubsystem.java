@@ -6,6 +6,7 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -53,7 +54,10 @@ public class ShooterSubsystem extends StateMachine {
     ON {
       @Override
       public void execute() {
-        Translation2d robotPose = getInstance().getFuturePose(Constants.ShooterConstants.HANG_TIME);
+        Translation2d robotPose =
+            getInstance()
+                .transformByTangentialRotationSpeed(
+                    getInstance().getFuturePose(Constants.ShooterConstants.HANG_TIME));
         Translation2d targetDiff = getInstance().getTarget().minus(robotPose);
         double distance = targetDiff.getNorm();
         double x_vel =
@@ -68,6 +72,7 @@ public class ShooterSubsystem extends StateMachine {
             getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);
         Logger.recordOutput(
             "ShooterSubsystem/HoodSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
+        Logger.recordOutput("ShooterSubsystem/FuturePoseWRotation", robotPose);
         // getInstance().setTurretPos();
         // getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
         // getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
@@ -283,7 +288,7 @@ public class ShooterSubsystem extends StateMachine {
      * as well as checking current vs future pose to see if
      * robot will cross trench in forseeable future(HOOD_COLLISION_TIME secondsto be precise)
      */
-    Translation2d toEdgeOfRobot = new Translation2d(Constants.DriveConstants.CENTER_TO_EDGE, 0);
+    Translation2d toEdgeOfRobot = new Translation2d(Constants.ShooterConstants.CENTER_TO_EDGE, 0);
     boolean underTrench =
         (segmentsIntersect(a, b, c, d)
             || segmentsIntersect(a.minus(toEdgeOfRobot), a.plus(toEdgeOfRobot), c, d));
@@ -421,6 +426,23 @@ public class ShooterSubsystem extends StateMachine {
                         DriveSubsystem.getInstance().getSpeeds().vyMetersPerSecond)
                     .times(time));
     return futurePos;
+  }
+
+  /*The turret could be rotating with the robot,
+  as such we want to transform out future pose
+  by the tangential velocity and direction in order to have accurate SOTM */
+  private Translation2d transformByTangentialRotationSpeed(Translation2d currentPos) {
+    double linearTangentSpeed =
+        DriveSubsystem.getInstance().getSpeeds().omegaRadiansPerSecond
+            * Constants.ShooterConstants.SHOOTER_OFFSET_RADIUS;
+    Translation2d transformationVector =
+        new Translation2d(
+            linearTangentSpeed * Constants.ShooterConstants.HANG_TIME,
+            DriveSubsystem.getInstance()
+                .getPose()
+                .getRotation()
+                .minus(new Rotation2d(Radians.of(-Math.PI / 2))));
+    return currentPos.plus(transformationVector);
   }
 
   @Override
