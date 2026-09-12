@@ -498,5 +498,6 @@ public class ShooterSubsystem extends StateMachine {
             getFuturePose(Constants.ShooterConstants.HOOD_COLLISION_TIME),
             DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
+    Logger.recordOutput("ShooterSubsystem/isReadyToShoot", isReadyToShoot());
   }
 }
