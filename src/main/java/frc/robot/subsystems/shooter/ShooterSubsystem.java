@@ -72,7 +72,8 @@ public class ShooterSubsystem extends StateMachine {
             getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);
         Logger.recordOutput(
             "ShooterSubsystem/HoodSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
-        Logger.recordOutput("ShooterSubsystem/FuturePoseWRotation", robotPose);
+        Logger.recordOutput(
+            "ShooterSubsystem/FuturePoseHangTime", new Pose2d(robotPose, new Rotation2d(0)));
         // getInstance().setTurretPos();
         // getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
         // getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
@@ -433,7 +434,9 @@ public class ShooterSubsystem extends StateMachine {
   by the tangential velocity and direction in order to have accurate SOTM */
   private Translation2d transformByTangentialRotationSpeed(Translation2d currentPos) {
     double linearTangentSpeed =
-        DriveSubsystem.getInstance().getSpeeds().omegaRadiansPerSecond
+        MathUtil.applyDeadband(
+                DriveSubsystem.getInstance().getSpeeds().omegaRadiansPerSecond,
+                Constants.DriveConstants.ROTATION_DEADBAND)
             * Constants.ShooterConstants.SHOOTER_OFFSET_RADIUS;
     Translation2d transformationVector =
         new Translation2d(
@@ -457,7 +460,7 @@ public class ShooterSubsystem extends StateMachine {
             DriveSubsystem.getInstance().getTranslation2d(),
             new Rotation2d(getTurretPos(getTarget()))));
     Logger.recordOutput(
-        "ShooterSubsystem/FuturePose",
+        "ShooterSubsystem/FuturePoseHoodCollisionTime",
         new Pose2d(
             getFuturePose(Constants.ShooterConstants.HOOD_COLLISION_TIME),
             DriveSubsystem.getInstance().getPose().getRotation()));
