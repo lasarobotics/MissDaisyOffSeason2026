@@ -88,7 +88,7 @@ public class ShooterSubsystem extends StateMachine {
         Logger.recordOutput(
             "ShooterSubsystem/AggregateAimPoint",
             new Pose2d(
-                robotPose,
+                DriveSubsystem.getInstance().getTranslation2d(),
                 new Rotation2d(
                     (getInstance()
                             .getTurretPos(
@@ -460,7 +460,7 @@ public class ShooterSubsystem extends StateMachine {
             * Constants.ShooterConstants.SHOOTER_OFFSET_RADIUS;
     Translation2d transformationVector =
         new Translation2d(
-            linearTangentSpeed * Constants.ShooterConstants.HANG_TIME,
+            linearTangentSpeed * Constants.ShooterConstants.HANG_TIME * 10,
             DriveSubsystem.getInstance()
                 .getPose()
                 .getRotation()
