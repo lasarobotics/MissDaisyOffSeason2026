@@ -71,12 +71,38 @@ public class ShooterSubsystem extends StateMachine {
             "ShooterSubsystem/HoodAngle",
             getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);
         Logger.recordOutput(
-            "ShooterSubsystem/HoodSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
+            "ShooterSubsystem/FlywheelSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
         Logger.recordOutput(
             "ShooterSubsystem/FuturePoseHangTime", new Pose2d(robotPose, new Rotation2d(0)));
-        // getInstance().setTurretPos();
-        // getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
-        // getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
+        Logger.recordOutput(
+            "ShooterSubsystem/TurretPos",
+            new Pose2d(
+                robotPose,
+                new Rotation2d(
+                    getInstance()
+                        .getTurretPos(
+                            getInstance().getTarget(),
+                            new Pose2d(
+                                robotPose,
+                                DriveSubsystem.getInstance().getPose().getRotation())))));
+        Logger.recordOutput(
+            "ShooterSubsystem/AggregateAimPoint",
+            new Pose2d(
+                robotPose,
+                new Rotation2d(
+                    (getInstance()
+                            .getTurretPos(
+                                getInstance().getTarget(),
+                                new Pose2d(
+                                    robotPose,
+                                    DriveSubsystem.getInstance().getPose().getRotation()))
+                        - (getInstance().m_turretMotor.getPosition().getValueAsDouble()
+                            / Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO)))));
+
+        /*  getInstance().setTurretPos(getInstance().getTurretPos(getInstance().getTarget(),new Pose2d(robotPose,DriveSubsystem.getInstance().getPose().getRotation()))))););
+            getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
+            getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
+        */
       }
 
       @Override
@@ -186,11 +212,7 @@ public class ShooterSubsystem extends StateMachine {
     }
   }
 
-  private double getTurretPos(Translation2d target) {
-    Pose2d robotPose =
-        new Pose2d(
-            getFuturePose(Constants.ShooterConstants.HANG_TIME),
-            DriveSubsystem.getInstance().getPose().getRotation());
+  private double getTurretPos(Translation2d target, Pose2d robotPose) {
     if (target == null) {
       return 0;
     }
@@ -209,12 +231,10 @@ public class ShooterSubsystem extends StateMachine {
     return turretDesired;
   }
 
-  private void setTurretPos() {
+  private void setTurretPos(double desiredPos) {
     m_turretMotor.setControl(
         m_positionVoltage.withPosition(
-            getTurretPos(getTarget())
-                / (2 * Math.PI)
-                * Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO));
+            desiredPos / (2 * Math.PI) * Constants.ShooterConstants.MOTOR_TURRET_GEAR_RATIO));
   }
 
   private double getHoodPos(double x_vel, double y_vel) {
@@ -454,11 +474,6 @@ public class ShooterSubsystem extends StateMachine {
     Logger.recordOutput("ShooterSubsystem/InNZ", inNZ());
     Logger.recordOutput("ShooterSubsystem/InAZ", inAZ());
     Logger.recordOutput("ShooterSubsystem/Target", getTarget());
-    Logger.recordOutput(
-        "ShooterSubsystem/TurretPos",
-        new Pose2d(
-            DriveSubsystem.getInstance().getTranslation2d(),
-            new Rotation2d(getTurretPos(getTarget()))));
     Logger.recordOutput(
         "ShooterSubsystem/FuturePoseHoodCollisionTime",
         new Pose2d(
