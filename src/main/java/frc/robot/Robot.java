@@ -7,7 +7,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -17,6 +16,8 @@ import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.serialization.SerializationSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import java.io.IOException;
+import java.util.List;
+import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -28,12 +29,10 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends LoggedRobot {
-  private Command m_autonomousCommand;
-
   private final CommandXboxController m_driverController;
   private boolean m_activeToggle;
   private boolean m_slowdownToggle;
-  SendableChooser<Command> autoChooser;
+  SendableChooser<String> autoChooser;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -52,14 +51,19 @@ public class Robot extends LoggedRobot {
     ShooterSubsystem.getInstance();
     SerializationSubsystem.getInstance();
     HeadHoncho.getInstance();
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     m_driverController
         .rightBumper()
         .onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
     m_driverController.a().onTrue(Commands.runOnce(() -> m_slowdownToggle = !m_slowdownToggle));
     configureBindings();
+    autoChooser = new SendableChooser<>();
+    autoChooser.setDefaultOption("None", null);
+    List<String> allAutos = AutoBuilder.getAllAutoNames();
+    for (String autoName : allAutos) {
+      autoChooser.addOption(autoName, autoName);
+    }
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   @Override
@@ -103,9 +107,16 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     DriveSubsystem.getInstance().setPerspective();
-    m_autonomousCommand = getAutonomousCommand();
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+    if (autoChooser.getSelected() != null) {
+      try {
+        AutoFollower.getInstance(autoChooser.getSelected());
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (ParseException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
   }
 
@@ -119,9 +130,6 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
     DriveSubsystem.getInstance().setPerspective();
   }
 
@@ -143,10 +151,4 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
-
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-
-    return autoChooser.getSelected();
-  }
 }
