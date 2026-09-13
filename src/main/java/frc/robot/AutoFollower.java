@@ -13,9 +13,18 @@ import org.littletonrobotics.junction.Logger;
 
 public class AutoFollower {
   private static AutoFollower s_autoFollower;
-  private List<Pose2d> waypoints = new ArrayList<>();
+  private static List<Pose2d> waypoints = new ArrayList<>();
 
-  public AutoFollower(String auto) throws IOException, ParseException {
+  public AutoFollower() {}
+
+  public static AutoFollower getInstance() {
+    if (s_autoFollower == null) {
+      s_autoFollower = new AutoFollower();
+    }
+    return s_autoFollower;
+  }
+
+  public static void setAuto(String auto) throws IOException, ParseException {
     waypoints = new ArrayList<>();
     List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(auto);
 
@@ -25,12 +34,5 @@ public class AutoFollower {
       }
     }
     Logger.recordOutput("AutoFollower/Waypoints", waypoints.toArray(new Pose2d[0]));
-  }
-
-  public static AutoFollower getInstance(String auto) throws IOException, ParseException {
-    if (s_autoFollower == null) {
-      s_autoFollower = new AutoFollower(auto);
-    }
-    return s_autoFollower;
   }
 }

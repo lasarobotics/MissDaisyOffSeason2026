@@ -51,6 +51,7 @@ public class Robot extends LoggedRobot {
     ShooterSubsystem.getInstance();
     SerializationSubsystem.getInstance();
     HeadHoncho.getInstance();
+    AutoFollower.getInstance();
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     m_driverController
         .rightBumper()
@@ -109,7 +110,7 @@ public class Robot extends LoggedRobot {
     DriveSubsystem.getInstance().setPerspective();
     if (autoChooser.getSelected() != null) {
       try {
-        AutoFollower.getInstance(autoChooser.getSelected());
+        AutoFollower.setAuto(autoChooser.getSelected());
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
