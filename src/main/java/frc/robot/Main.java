@@ -5,6 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import java.io.IOException;
+import org.json.simple.parser.ParseException;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
@@ -20,6 +22,18 @@ public final class Main {
    * <p>If you change your main robot class, change the parameter type.
    */
   public static void main(String... args) {
-    RobotBase.startRobot(Robot::new);
+    RobotBase.startRobot(
+        () -> {
+          try {
+            return new Robot();
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          return null;
+        });
   }
 }

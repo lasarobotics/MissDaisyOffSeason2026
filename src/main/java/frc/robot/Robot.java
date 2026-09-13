@@ -13,6 +13,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.serialization.SerializationSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
+import java.io.IOException;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -33,8 +34,10 @@ public class Robot extends LoggedRobot {
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
+   *
+   * @throws org.json.simple.parser.ParseException
    */
-  public Robot() {
+  public Robot() throws IOException, org.json.simple.parser.ParseException {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
@@ -45,6 +48,7 @@ public class Robot extends LoggedRobot {
     ShooterSubsystem.getInstance();
     SerializationSubsystem.getInstance();
     HeadHoncho.getInstance();
+    AutoFollower.getInstance("Auto");
     m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
     m_driverController
         .rightBumper()
