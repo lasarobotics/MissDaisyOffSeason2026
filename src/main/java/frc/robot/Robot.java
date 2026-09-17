@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.RotationTarget;
 import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,6 +24,7 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import org.json.simple.parser.ParseException;
@@ -75,13 +77,22 @@ public class Robot extends LoggedRobot {
       allAutos = new HashMap<>();
       for (String auto : AutoBuilder.getAllAutoNames()) {
         List<Pose2d> waypointsPerAuto = new ArrayList<>();
+        List<Pose2d> waypointsPerAutoUnique = new ArrayList<>();
         List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(auto);
         for (PathPlannerPath path : paths) {
           List<Pose2d> waypointsPerPath = new ArrayList<>();
           for (Waypoint waypoint : path.getWaypoints()) {
             waypointsPerPath.add(new Pose2d(waypoint.anchor(), new Rotation2d(0)));
           }
-
+          for (RotationTarget rotTarget : path.getRotationTargets()) {
+            if (rotTarget.position() % 1 == 0) {
+              waypointsPerPath.set(
+                  (int) rotTarget.position(),
+                  new Pose2d(
+                      waypointsPerPath.get((int) rotTarget.position()).getTranslation(),
+                      rotTarget.rotation()));
+            }
+          }
           waypointsPerPath.set(
               0,
               new Pose2d(
@@ -93,9 +104,12 @@ public class Robot extends LoggedRobot {
                   waypointsPerPath.get(waypointsPerPath.size() - 1).getTranslation(),
                   path.getGoalEndState().rotation()));
           waypointsPerAuto.addAll(waypointsPerPath);
+          LinkedHashSet<Pose2d> set = new LinkedHashSet<>(waypointsPerAuto);
+          waypointsPerAutoUnique = new ArrayList<>(set);
         }
-        allAutos.put(auto, waypointsPerAuto);
+        allAutos.put(auto, waypointsPerAutoUnique);
       }
+
       autoChooser = new SendableChooser<>();
       autoChooser.setDefaultOption("None", null);
       List<String> autoNames = AutoBuilder.getAllAutoNames();
