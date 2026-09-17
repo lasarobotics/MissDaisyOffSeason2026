@@ -4,6 +4,7 @@ import com.pathplanner.lib.commands.*;
 import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 public class AutoFollower {
   private static AutoFollower s_autoFollower;
@@ -18,5 +19,8 @@ public class AutoFollower {
     return s_autoFollower;
   }
 
-  public static void setAuto(List<Pose2d> auto) {}
+  public static void setAuto(List<Pose2d> auto) {
+    selectedAuto = auto;
+    Logger.recordOutput("Auto", selectedAuto.toArray(new Pose2d[0]));
+  }
 }

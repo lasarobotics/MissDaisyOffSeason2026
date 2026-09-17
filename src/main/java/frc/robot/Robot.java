@@ -81,15 +81,21 @@ public class Robot extends LoggedRobot {
           for (Waypoint waypoint : path.getWaypoints()) {
             waypointsPerPath.add(new Pose2d(waypoint.anchor(), new Rotation2d(0)));
           }
-          waypointsPerPath.get(0).rotateBy(path.getIdealStartingState().rotation());
-          waypointsPerPath
-              .get(waypointsPerPath.size() - 1)
-              .rotateBy(path.getGoalEndState().rotation());
+
+          waypointsPerPath.set(
+              0,
+              new Pose2d(
+                  waypointsPerPath.get(0).getTranslation(),
+                  path.getIdealStartingState().rotation()));
+          waypointsPerPath.set(
+              waypointsPerPath.size() - 1,
+              new Pose2d(
+                  waypointsPerPath.get(waypointsPerPath.size() - 1).getTranslation(),
+                  path.getGoalEndState().rotation()));
           waypointsPerAuto.addAll(waypointsPerPath);
         }
         allAutos.put(auto, waypointsPerAuto);
       }
-      Logger.recordOutput("AllAutos", allAutos.values().toArray(new Pose2d[0]));
       autoChooser = new SendableChooser<>();
       autoChooser.setDefaultOption("None", null);
       List<String> autoNames = AutoBuilder.getAllAutoNames();
