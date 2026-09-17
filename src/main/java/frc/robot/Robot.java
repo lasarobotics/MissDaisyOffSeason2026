@@ -5,6 +5,11 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -16,7 +21,10 @@ import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.serialization.SerializationSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -33,6 +41,7 @@ public class Robot extends LoggedRobot {
   private boolean m_activeToggle;
   private boolean m_slowdownToggle;
   SendableChooser<String> autoChooser;
+  Map<String, List<Pose2d>> allAutos = new HashMap<>();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -58,17 +67,53 @@ public class Robot extends LoggedRobot {
         .onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
     m_driverController.a().onTrue(Commands.runOnce(() -> m_slowdownToggle = !m_slowdownToggle));
     configureBindings();
-    autoChooser = new SendableChooser<>();
-    autoChooser.setDefaultOption("None", null);
-    List<String> allAutos = AutoBuilder.getAllAutoNames();
-    for (String autoName : allAutos) {
-      autoChooser.addOption(autoName, autoName);
-    }
-    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    try {
+      allAutos = new HashMap<>();
+      for (String auto : AutoBuilder.getAllAutoNames()) {
+        List<Pose2d> waypointsPerAuto = new ArrayList<>();
+        List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(auto);
+        for (PathPlannerPath path : paths) {
+          List<Pose2d> waypointsPerPath = new ArrayList<>();
+          for (Waypoint waypoint : path.getWaypoints()) {
+            waypointsPerPath.add(new Pose2d(waypoint.anchor(), new Rotation2d(0)));
+          }
+          waypointsPerPath.get(0).rotateBy(path.getIdealStartingState().rotation());
+          waypointsPerPath
+              .get(waypointsPerPath.size() - 1)
+              .rotateBy(path.getGoalEndState().rotation());
+          waypointsPerAuto.addAll(waypointsPerPath);
+        }
+        allAutos.put(auto, waypointsPerAuto);
+      }
+      Logger.recordOutput("AllAutos", allAutos.values().toArray(new Pose2d[0]));
+      autoChooser = new SendableChooser<>();
+      autoChooser.setDefaultOption("None", null);
+      List<String> autoNames = AutoBuilder.getAllAutoNames();
+      for (String autoName : autoNames) {
+        autoChooser.addOption(autoName, autoName);
+      }
+      SmartDashboard.putData("Auto Chooser", autoChooser);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  /*for (PathPlannerPath path : paths) {
+  ArrayList<Pose2d> waypointsPerPath = new ArrayList<>();
+  for (Waypoint waypoint : path.getWaypoints()) {
+    waypointsPerPath.add(new Pose2d(waypoint.anchor(), new Rotation2d(0)));
+  }
+  waypointsPerPath.get(0).rotateBy(path.getIdealStartingState().rotation());
+  waypointsPerPath.get(waypointsPerPath.size() - 1).rotateBy(path.getGoalEndState().rotation());
+  waypoints.addAll(waypointsPerPath); */
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -108,17 +153,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     DriveSubsystem.getInstance().setPerspective();
-    if (autoChooser.getSelected() != null) {
-      try {
-        AutoFollower.setAuto(autoChooser.getSelected());
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ParseException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
+    AutoFollower.setAuto(allAutos.get(autoChooser.getSelected()));
   }
 
   /** This function is called periodically during autonomous. */
