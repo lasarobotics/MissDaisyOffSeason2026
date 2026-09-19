@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.AutoFollower;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawFiducial;
@@ -228,7 +229,7 @@ public class DriveSubsystem extends StateMachine {
     m_currentSpeedScalar =
         m_slowdownRequest.getAsBoolean() ? Constants.DriveConstants.SLOWDOWN_SPEED : 1;
     Logger.recordOutput("DriveSubsystem/Pose", s_drivetrain.getState().Pose);
-
+    Logger.recordOutput("DriveSubsystem/checkCollision", AutoFollower.checkCollision());
     LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
     if (limelightEstimate != null && limelightEstimate.tagCount > 0) {
 
