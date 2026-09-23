@@ -22,7 +22,9 @@ public class HeadHoncho extends StateMachine {
   public enum HeadHonchoStates implements SystemState {
     AUTO {
       @Override
-      public void initialize() {}
+      public void initialize() {
+        getInstance().autoRobot();
+      }
 
       @Override
       public void execute() {}
@@ -202,6 +204,13 @@ public class HeadHoncho extends StateMachine {
 
   public boolean numberWithinThreshold(double target, double value, double threshold) {
     return (Math.abs(value - target) <= threshold);
+  }
+
+  public void autoRobot() {
+    s_driveSubsystem.setState(DriveStates.AUTO);
+    s_intakeSubsystem.setState(IntakeStates.INTAKE);
+    s_serializationSubsystem.setState(SerializationStates.ACTIVE);
+    s_shooterSubsystem.setState(ShooterStates.SHOOT);
   }
 
   public void restRobot() {

@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,6 +33,8 @@ public class Robot extends LoggedRobot {
 
   private boolean m_activeAll;
 
+  SendableChooser autoChooser;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -44,11 +50,28 @@ public class Robot extends LoggedRobot {
     IntakeSubsystem.getInstance();
     SerializationSubsystem.getInstance();
     ShooterSubsystem.getInstance();
+    Autos.getInstance();
     m_activeAll = true;
     configureBindings();
 
     // Toggle full robot active
     m_driverController.rightBumper().onTrue(Commands.runOnce(() -> m_activeAll = !m_activeAll));
+
+    autoChooser = new SendableChooser<>();
+
+    autoChooser.setDefaultOption("None", null);
+
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+      for (String auto : Autos.getInstance().getBlueAutos()) {
+        autoChooser.addOption(auto, auto);
+      }
+    } else {
+      for (String auto : Autos.getInstance().getRedAutos()) {
+        autoChooser.addOption(auto, auto);
+      }
+    }
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   private void configureBindings() {
@@ -98,6 +121,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     DriveSubsystem.getInstance().setPerspective();
+    Autos.getInstance().setAuto((String) autoChooser.getSelected());
   }
 
   /** This function is called periodically during autonomous. */

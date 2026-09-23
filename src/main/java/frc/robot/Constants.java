@@ -287,4 +287,108 @@ public final class Constants {
     public static final double TRENCH_THRESHOLD = 0.5;
     public static final double TOWER_THRESHOLD = 0.1;
   }
+
+  public static class AutoConstants {
+    public static final Pose2d BLUE_LEFT_TRENCH_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_BUMP_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_BUMP_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_TRENCH_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_TRENCH_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_BUMP_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_BUMP_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_TRENCH_AZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_TRENCH_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_BUMP_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_BUMP_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_TRENCH_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_TRENCH_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_BUMP_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_BUMP_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_TRENCH_NZ =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_DEPOT =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_DEPOT =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_LEFT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_LEFT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_RIGHT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_RIGHT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_RIGHT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_RIGHT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_LEFT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_LEFT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_LEFT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_LEFT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_RIGHT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_RIGHT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_RIGHT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_RIGHT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_LEFT_BOTTOM =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_LEFT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+  }
 }
