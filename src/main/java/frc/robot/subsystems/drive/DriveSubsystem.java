@@ -36,6 +36,16 @@ public class DriveSubsystem extends StateMachine {
   public enum DriveStates implements SystemState {
     AUTO {
       @Override
+      public void execute() {
+        ChassisSpeeds desired = AutoFollower.getDesiredSpeeds();
+        s_drivetrain.setControl(
+            s_drive
+                .withVelocityX(desired.vxMetersPerSecond)
+                .withVelocityY(desired.vyMetersPerSecond));
+        Logger.recordOutput("Auto/desiredSpeedX", desired.vxMetersPerSecond);
+        Logger.recordOutput("Auto/desiredSpeedY", desired.vyMetersPerSecond);
+      }
+
       public SystemState nextState() {
         if (!DriverStation.isAutonomous()) {
           return DRIVER_CONTROL;
@@ -89,8 +99,8 @@ public class DriveSubsystem extends StateMachine {
   // private PIDController m_rotationPIDController;
 
   public DriveSubsystem() {
-    super(DriveStates.DRIVER_CONTROL);
-    setState(DriveStates.DRIVER_CONTROL);
+    super(DriveStates.AUTO);
+    setState(DriveStates.AUTO);
     s_drivetrain = TunerConstants.createDrivetrain();
     s_drive =
         new SwerveRequest.FieldCentric()
@@ -229,7 +239,6 @@ public class DriveSubsystem extends StateMachine {
     m_currentSpeedScalar =
         m_slowdownRequest.getAsBoolean() ? Constants.DriveConstants.SLOWDOWN_SPEED : 1;
     Logger.recordOutput("DriveSubsystem/Pose", s_drivetrain.getState().Pose);
-    Logger.recordOutput("DriveSubsystem/checkCollision", AutoFollower.checkCollision());
     LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
     if (limelightEstimate != null && limelightEstimate.tagCount > 0) {
 
