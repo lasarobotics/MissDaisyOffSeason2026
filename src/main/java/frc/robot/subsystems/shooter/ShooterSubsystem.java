@@ -80,6 +80,7 @@ public class ShooterSubsystem extends StateMachine {
                                     DriveSubsystem.getInstance().getPose().getRotation())))
                 < Constants.ShooterConstants.TURRET_DEADBAND;
 
+        Logger.recordOutput("ShooterSubsystem/State", getInstance().getState().toString());
         Logger.recordOutput(
             "ShooterSubsystem/HoodAngle",
             getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);

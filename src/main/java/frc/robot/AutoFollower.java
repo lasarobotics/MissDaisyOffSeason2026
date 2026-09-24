@@ -43,8 +43,9 @@ public class AutoFollower {
       double endY = currentEndPoint.getY();
       double robotX = DriveSubsystem.getInstance().getTranslation2d().getX();
       double robotY = DriveSubsystem.getInstance().getTranslation2d().getY();
-      double radius = Inches.of(5).in(Meters);
+      double radius = Inches.of(20).in(Meters);
       Translation2d target;
+      double desiredAngle;
       /*
        * We are essentially parameterizing x and y as functions of t, where 0 <= t <= 1
        * and the plugging x(t) and y(t) into the circle equation, and then simplifying,
@@ -81,29 +82,35 @@ public class AutoFollower {
         t = Math.max(t1, t2);
       }
       if (t > 1) {
+        desiredAngle = DriveSubsystem.getInstance().getPose().getRotation().getRadians();
         if (currentEndPointIndex < selectedAuto.size() - 1) {
           currentStartPointIndex = currentEndPointIndex;
           currentEndPointIndex += 1;
           target = selectedAuto.get(currentStartPointIndex).getTranslation();
         } else {
-          target = currentEndPoint.getTranslation();
+          return new double[] {0, 0, desiredAngle};
         }
       } else if (t < 0) {
         target = currentStartPoint.getTranslation();
+        desiredAngle = DriveSubsystem.getInstance().getPose().getRotation().getRadians();
       } else {
         double xOfT = startX + t * (endX - startX);
         double yOfT = startY + t * (endY - startY);
         target = new Translation2d(xOfT, yOfT);
+        desiredAngle = currentStartPoint.getRotation().getRadians();
       }
       Translation2d delta = target.minus(new Translation2d(robotX, robotY));
       double deltaNorm = delta.getNorm();
       double xDesiredSpeed =
-          TunerConstants.kSpeedAt12Volts.magnitude() * 0.1 * (delta.getX() / deltaNorm);
+          TunerConstants.kSpeedAt12Volts.magnitude() * 1 * (delta.getX() / deltaNorm);
       double YDesiredSpeed =
-          TunerConstants.kSpeedAt12Volts.magnitude() * 0.1 * (delta.getY() / deltaNorm);
+          TunerConstants.kSpeedAt12Volts.magnitude() * 1 * (delta.getY() / deltaNorm);
       Logger.recordOutput("Auto/delta", delta);
       Logger.recordOutput("Auto/target", new Pose2d(target, new Rotation2d(0)));
-      return new double[] {-xDesiredSpeed, -YDesiredSpeed, 0};
+      /*
+       * idk why it has to be -speed, some calculations must have been wrong
+       */
+      return new double[] {-xDesiredSpeed, -YDesiredSpeed, desiredAngle};
     }
     return new double[] {0, 0, 0};
   }

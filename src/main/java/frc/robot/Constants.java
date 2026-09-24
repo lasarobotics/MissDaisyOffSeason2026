@@ -47,6 +47,9 @@ public final class Constants {
     public static final double TURN_P = 0;
     public static final double TURN_I = 0;
     public static final double TURN_D = 0;
+    public static final double AUTOAIMTURN_P = 1.5;
+    public static final double AUTOAIMTURN_I = 0;
+    public static final double AUTOAIMTURN_D = 0;
     public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
     public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
     public static final double ROTATION_DEADBAND = 0.002 * Math.PI * 2;
@@ -105,7 +108,7 @@ public final class Constants {
     public static final double HOOD_MAX_ANGLE = (19.0 / 175.0); // rotations
     public static final double TURRET_DEADBAND =
         0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
-               // meters away
+    // meters away
   }
 
   public static class FieldConstants {

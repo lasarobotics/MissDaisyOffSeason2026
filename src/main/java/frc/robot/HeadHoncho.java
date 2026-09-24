@@ -21,29 +21,36 @@ import org.littletonrobotics.junction.Logger;
 public class HeadHoncho extends StateMachine {
 
   public enum HeadHonchoStates implements SystemState {
+    AUTO {
+      @Override
+      public void initialize() {
+        DriveSubsystem.getInstance().setState(DriveStates.AUTO);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+        IntakeSubsystem.getInstance().setState(IntakeStates.ON);
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
+        return REST;
+      }
+    },
     REST {
       @Override
       public void initialize() {
-        if (DriverStation.isAutonomous()) {
-          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
-        } else {
-          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
-        }
+
+        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
         IntakeSubsystem.getInstance().setState(IntakeStates.OFF);
       }
 
       @Override
-      public void execute() {
-        if (DriverStation.isAutonomous()) {
-          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
-        } else {
-          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
-        }
-      }
-
-      @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
@@ -53,26 +60,16 @@ public class HeadHoncho extends StateMachine {
     TOGGLE_ON {
       @Override
       public void initialize() {
-        if (DriverStation.isAutonomous()) {
-          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
-        } else {
-          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
-        }
+        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
         IntakeSubsystem.getInstance().setState(IntakeStates.ON);
       }
 
       @Override
-      public void execute() {
-        if (DriverStation.isAutonomous()) {
-          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
-        } else {
-          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
-        }
-      }
-
-      @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (!getInstance().m_activeToggle.getAsBoolean()) {
           return REST;
         }
@@ -89,10 +86,10 @@ public class HeadHoncho extends StateMachine {
       }
 
       @Override
-      public void execute() {}
-
-      @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }

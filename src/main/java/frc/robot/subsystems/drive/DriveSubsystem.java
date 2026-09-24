@@ -4,12 +4,15 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -38,7 +41,22 @@ public class DriveSubsystem extends StateMachine {
       @Override
       public void execute() {
         double[] desired = AutoFollower.getDesiredSpeeds();
-        s_drivetrain.setControl(s_drive.withVelocityX(desired[0]).withVelocityY(desired[1]));
+        double currentRotation = s_drivetrain.getState().Pose.getRotation().getRadians();
+        double desiredRotation = desired[2];
+        double pidOutputAngle =
+            getInstance()
+                .m_auto_aimrotationPIDController
+                .calculate(s_drivetrain.getState().Pose.getRotation().getRadians(), desired[2]);
+
+        double pidInput =
+            Constants.DriveConstants.MAX_ANGULAR_RATE.times(pidOutputAngle).in(RadiansPerSecond);
+        pidInput = pidInput > 0 ? Math.min(pidInput, 8.0) : Math.max(pidInput, -8.0);
+        pidInput = Math.abs(currentRotation - desiredRotation) < Math.PI / 180 ? 0 : pidInput;
+        s_drivetrain.setControl(
+            s_drive
+                .withVelocityX(desired[0])
+                .withVelocityY(desired[1])
+                .withRotationalRate(pidInput));
         Logger.recordOutput("Auto/desiredSpeedX", desired[0]);
         Logger.recordOutput("Auto/desiredSpeedY", desired[1]);
       }
@@ -89,6 +107,7 @@ public class DriveSubsystem extends StateMachine {
   private BooleanSupplier m_slowdownRequest;
   private double m_currentSpeedScalar;
   private Translation2d m_limeEstimate;
+  private PIDController m_auto_aimrotationPIDController;
 
   // private PIDController m_rotationPIDController;
 
@@ -104,12 +123,12 @@ public class DriveSubsystem extends StateMachine {
             .withDriveRequestType(DriveRequestType.Velocity)
             .withSteerRequestType(SteerRequestType.MotionMagicExpo)
             .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
-    // m_rotationPIDController =
-    //     new PIDController(
-    //         Constants.DriveConstants.TURN_P,
-    //         Constants.DriveConstants.TURN_I,
-    //         Constants.DriveConstants.TURN_D);
-    // m_rotationPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_auto_aimrotationPIDController =
+        new PIDController(
+            Constants.DriveConstants.AUTOAIMTURN_P,
+            Constants.DriveConstants.AUTOAIMTURN_I,
+            Constants.DriveConstants.AUTOAIMTURN_D);
+    m_auto_aimrotationPIDController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
   public void setPerspective() {
