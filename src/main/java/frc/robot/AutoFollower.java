@@ -4,8 +4,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import java.util.List;
@@ -33,7 +33,7 @@ public class AutoFollower {
     }
   }
 
-  public static ChassisSpeeds getDesiredSpeeds() {
+  public static double[] getDesiredSpeeds() {
     if (selectedAuto != null) {
       Pose2d currentStartPoint = selectedAuto.get(currentStartPointIndex);
       Pose2d currentEndPoint = selectedAuto.get(currentEndPointIndex);
@@ -68,9 +68,10 @@ public class AutoFollower {
         /*
          * find scalar projection of robot vector onto line vector, normalize, and thats our "t"
          */
-        t =
-            ((robotX * endX) + (robotY * endY))
-                / (Math.hypot(robotX, robotY) * Math.hypot(endX, endY));
+        double dx = endX - startX;
+        double dy = endY - startY;
+
+        t = ((robotX - startX) * dx + (robotY - startY) * dy) / (dx * dx + dy * dy);
       } else if (discriminant == 0) {
         t = -b / (2 * a);
       } else {
@@ -83,23 +84,27 @@ public class AutoFollower {
         if (currentEndPointIndex < selectedAuto.size() - 1) {
           currentStartPointIndex = currentEndPointIndex;
           currentEndPointIndex += 1;
+          target = selectedAuto.get(currentStartPointIndex).getTranslation();
+        } else {
+          target = currentEndPoint.getTranslation();
         }
-        target = selectedAuto.get(currentStartPointIndex).getTranslation();
       } else if (t < 0) {
         target = currentStartPoint.getTranslation();
       } else {
         double xOfT = startX + t * (endX - startX);
-        double yOfT = startX + t * (endX - startX);
+        double yOfT = startY + t * (endY - startY);
         target = new Translation2d(xOfT, yOfT);
       }
       Translation2d delta = target.minus(new Translation2d(robotX, robotY));
       double deltaNorm = delta.getNorm();
       double xDesiredSpeed =
-          TunerConstants.kSpeedAt12Volts.magnitude() * (delta.getX() / deltaNorm);
+          TunerConstants.kSpeedAt12Volts.magnitude() * 0.1 * (delta.getX() / deltaNorm);
       double YDesiredSpeed =
-          TunerConstants.kSpeedAt12Volts.magnitude() * (delta.getY() / deltaNorm);
-      return new ChassisSpeeds(xDesiredSpeed, YDesiredSpeed, 0);
+          TunerConstants.kSpeedAt12Volts.magnitude() * 0.1 * (delta.getY() / deltaNorm);
+      Logger.recordOutput("Auto/delta", delta);
+      Logger.recordOutput("Auto/target", new Pose2d(target, new Rotation2d(0)));
+      return new double[] {-xDesiredSpeed, -YDesiredSpeed, 0};
     }
-    return new ChassisSpeeds(0, 0, 0);
+    return new double[] {0, 0, 0};
   }
 }

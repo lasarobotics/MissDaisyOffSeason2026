@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -23,9 +24,22 @@ public class HeadHoncho extends StateMachine {
     REST {
       @Override
       public void initialize() {
-        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        if (DriverStation.isAutonomous()) {
+          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
+        } else {
+          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        }
         ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
         IntakeSubsystem.getInstance().setState(IntakeStates.OFF);
+      }
+
+      @Override
+      public void execute() {
+        if (DriverStation.isAutonomous()) {
+          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
+        } else {
+          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        }
       }
 
       @Override
@@ -39,9 +53,22 @@ public class HeadHoncho extends StateMachine {
     TOGGLE_ON {
       @Override
       public void initialize() {
-        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        if (DriverStation.isAutonomous()) {
+          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
+        } else {
+          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        }
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
         IntakeSubsystem.getInstance().setState(IntakeStates.ON);
+      }
+
+      @Override
+      public void execute() {
+        if (DriverStation.isAutonomous()) {
+          DriveSubsystem.getInstance().setState(DriveStates.AUTO);
+        } else {
+          DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        }
       }
 
       @Override
@@ -79,7 +106,7 @@ public class HeadHoncho extends StateMachine {
   private BooleanSupplier m_reverseButton;
 
   public HeadHoncho() {
-    super(HeadHonchoStates.REST);
+    super(HeadHonchoStates.REST); // TODO switch to auto
   }
 
   public void configureBindings(BooleanSupplier activeToggle, BooleanSupplier reverse) {

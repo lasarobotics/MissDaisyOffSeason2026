@@ -37,20 +37,14 @@ public class DriveSubsystem extends StateMachine {
     AUTO {
       @Override
       public void execute() {
-        ChassisSpeeds desired = AutoFollower.getDesiredSpeeds();
-        s_drivetrain.setControl(
-            s_drive
-                .withVelocityX(desired.vxMetersPerSecond)
-                .withVelocityY(desired.vyMetersPerSecond));
-        Logger.recordOutput("Auto/desiredSpeedX", desired.vxMetersPerSecond);
-        Logger.recordOutput("Auto/desiredSpeedY", desired.vyMetersPerSecond);
+        double[] desired = AutoFollower.getDesiredSpeeds();
+        s_drivetrain.setControl(s_drive.withVelocityX(desired[0]).withVelocityY(desired[1]));
+        Logger.recordOutput("Auto/desiredSpeedX", desired[0]);
+        Logger.recordOutput("Auto/desiredSpeedY", desired[1]);
       }
 
       public SystemState nextState() {
-        if (!DriverStation.isAutonomous()) {
-          return DRIVER_CONTROL;
-        }
-        return AUTO;
+        return getInstance().m_selectedState;
       }
     },
     DRIVER_CONTROL {
@@ -239,6 +233,7 @@ public class DriveSubsystem extends StateMachine {
     m_currentSpeedScalar =
         m_slowdownRequest.getAsBoolean() ? Constants.DriveConstants.SLOWDOWN_SPEED : 1;
     Logger.recordOutput("DriveSubsystem/Pose", s_drivetrain.getState().Pose);
+    Logger.recordOutput("DriveSubsystem/State", getInstance().m_selectedState);
     LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
     if (limelightEstimate != null && limelightEstimate.tagCount > 0) {
 
