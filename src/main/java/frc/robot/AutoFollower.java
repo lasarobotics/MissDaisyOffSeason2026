@@ -8,12 +8,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoFollower {
   private static AutoFollower s_autoFollower;
-  private static List<Pose2d> selectedAuto;
+  private static List<Robot.WaypointWithSpeed> selectedAuto;
   private static int currentStartPointIndex;
   private static int currentEndPointIndex;
 
@@ -24,19 +25,30 @@ public class AutoFollower {
     return s_autoFollower;
   }
 
-  public static void setAuto(List<Pose2d> auto) {
+  public static void setAuto(List<Robot.WaypointWithSpeed> auto) {
     selectedAuto = auto;
     currentStartPointIndex = 0;
     currentEndPointIndex = 1;
     if (selectedAuto != null) {
-      Logger.recordOutput("Auto", selectedAuto.toArray(new Pose2d[0]));
+      List<Pose2d> waypoints = new ArrayList<>();
+      for (Robot.WaypointWithSpeed waypointWithSpeed : selectedAuto) {
+        waypoints.add(waypointWithSpeed.waypoint());
+      }
+      Logger.recordOutput("Auto", waypoints.toArray(new Pose2d[0]));
     }
   }
 
   public static double[] getDesiredSpeeds() {
+    /*
+     * speedFlipper must be -1 if on red alliance
+     */
+    double speedFlipper = 1;
+    if (!DriveSubsystem.getInstance().isBlueAlliance()) {
+      speedFlipper = -1;
+    }
     if (selectedAuto != null) {
-      Pose2d currentStartPoint = selectedAuto.get(currentStartPointIndex);
-      Pose2d currentEndPoint = selectedAuto.get(currentEndPointIndex);
+      Pose2d currentStartPoint = selectedAuto.get(currentStartPointIndex).waypoint();
+      Pose2d currentEndPoint = selectedAuto.get(currentEndPointIndex).waypoint();
       double startX = currentStartPoint.getX();
       double startY = currentStartPoint.getY();
       double endX = currentEndPoint.getX();
@@ -46,6 +58,7 @@ public class AutoFollower {
       double radius = Inches.of(20).in(Meters);
       Translation2d target;
       double desiredAngle;
+      double desiredSpeed;
       /*
        * We are essentially parameterizing x and y as functions of t, where 0 <= t <= 1
        * and the plugging x(t) and y(t) into the circle equation, and then simplifying,
@@ -86,31 +99,34 @@ public class AutoFollower {
         if (currentEndPointIndex < selectedAuto.size() - 1) {
           currentStartPointIndex = currentEndPointIndex;
           currentEndPointIndex += 1;
-          target = selectedAuto.get(currentStartPointIndex).getTranslation();
+          target = selectedAuto.get(currentStartPointIndex).waypoint().getTranslation();
         } else {
           return new double[] {0, 0, desiredAngle};
         }
+        desiredSpeed = TunerConstants.kSpeedAt12Volts.magnitude();
       } else if (t < 0) {
         target = currentStartPoint.getTranslation();
         desiredAngle = DriveSubsystem.getInstance().getPose().getRotation().getRadians();
+        desiredSpeed = TunerConstants.kSpeedAt12Volts.magnitude();
       } else {
         double xOfT = startX + t * (endX - startX);
         double yOfT = startY + t * (endY - startY);
         target = new Translation2d(xOfT, yOfT);
-        desiredAngle = currentStartPoint.getRotation().getRadians();
+        desiredAngle = currentEndPoint.getRotation().getRadians();
+        desiredSpeed =
+            Math.min(
+                selectedAuto.get(currentStartPointIndex).velocity(),
+                TunerConstants.kSpeedAt12Volts.magnitude());
       }
       Translation2d delta = target.minus(new Translation2d(robotX, robotY));
       double deltaNorm = delta.getNorm();
-      double xDesiredSpeed =
-          TunerConstants.kSpeedAt12Volts.magnitude() * 1 * (delta.getX() / deltaNorm);
-      double YDesiredSpeed =
-          TunerConstants.kSpeedAt12Volts.magnitude() * 1 * (delta.getY() / deltaNorm);
+      double xDesiredSpeed = desiredSpeed * (delta.getX() / deltaNorm);
+      double YDesiredSpeed = desiredSpeed * (delta.getY() / deltaNorm);
       Logger.recordOutput("Auto/delta", delta);
       Logger.recordOutput("Auto/target", new Pose2d(target, new Rotation2d(0)));
-      /*
-       * idk why it has to be -speed, some calculations must have been wrong
-       */
-      return new double[] {-xDesiredSpeed, -YDesiredSpeed, desiredAngle};
+      return new double[] {
+        speedFlipper * xDesiredSpeed, speedFlipper * YDesiredSpeed, desiredAngle
+      };
     }
     return new double[] {0, 0, 0};
   }

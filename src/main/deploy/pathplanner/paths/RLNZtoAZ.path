@@ -3,37 +3,46 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.959495225694445,
-        "y": 1.6470390625000007
+        "x": 10.623646629050928,
+        "y": 0.6476594328703709
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.079151142663744,
-        "y": 2.3047899597258974
+        "x": 11.623646629050928,
+        "y": 0.6476594328703706
       },
       "isLocked": false,
-      "linkedName": "test2"
+      "linkedName": "RLNZ1"
     },
     {
       "anchor": {
-        "x": 8.405354528356481,
-        "y": 5.44739793113426
+        "x": 12.111234230324074,
+        "y": 0.6476594328703709
       },
       "prevControl": {
-        "x": 8.238018101120696,
-        "y": 5.261660158670059
+        "x": 11.111234230324074,
+        "y": 0.6476594328703706
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RLT1"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 2.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -48,7 +57,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 117.3548320318817
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }

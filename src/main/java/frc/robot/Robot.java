@@ -24,7 +24,6 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import org.json.simple.parser.ParseException;
@@ -43,7 +42,10 @@ public class Robot extends LoggedRobot {
   private boolean m_activeToggle;
   private boolean m_slowdownToggle;
   SendableChooser<String> autoChooser;
-  Map<String, List<Pose2d>> allAutos = new HashMap<>();
+  Map<String, List<WaypointWithSpeed>> allAutos = new HashMap<>();
+
+  public record WaypointWithSpeed(Pose2d waypoint, double velocity) {}
+  ;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -76,10 +78,18 @@ public class Robot extends LoggedRobot {
     try {
       allAutos = new HashMap<>();
       for (String auto : AutoBuilder.getAllAutoNames()) {
+        List<Double> maxVelocitiesPerAuto = new ArrayList<>();
         List<Pose2d> waypointsPerAuto = new ArrayList<>();
         List<Pose2d> waypointsPerAutoUnique = new ArrayList<>();
         List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(auto);
-        for (PathPlannerPath path : paths) {
+        for (int i = 0; i < paths.size(); i++) {
+          PathPlannerPath path = paths.get(i);
+          for (int j = 0; j < path.getWaypoints().size() - 1; j++) {
+            maxVelocitiesPerAuto.add(path.getGlobalConstraints().maxVelocityMPS());
+          }
+          if (i == paths.size() - 1) {
+            maxVelocitiesPerAuto.add(path.getGlobalConstraints().maxVelocityMPS());
+          }
           List<Pose2d> waypointsPerPath = new ArrayList<>();
           for (Waypoint waypoint : path.getWaypoints()) {
             waypointsPerPath.add(new Pose2d(waypoint.anchor(), new Rotation2d(0)));
@@ -103,13 +113,27 @@ public class Robot extends LoggedRobot {
               new Pose2d(
                   waypointsPerPath.get(waypointsPerPath.size() - 1).getTranslation(),
                   path.getGoalEndState().rotation()));
-          waypointsPerAuto.addAll(waypointsPerPath);
-          LinkedHashSet<Pose2d> set = new LinkedHashSet<>(waypointsPerAuto);
-          waypointsPerAutoUnique = new ArrayList<>(set);
-        }
-        allAutos.put(auto, waypointsPerAutoUnique);
-      }
 
+          waypointsPerAuto.addAll(waypointsPerPath);
+        }
+        Pose2d prev = waypointsPerAuto.get(0);
+        waypointsPerAutoUnique.add(prev);
+        for (int j = 1; j < waypointsPerAuto.size(); j++) {
+          Pose2d current = waypointsPerAuto.get(j);
+          if (!current.getTranslation().equals(prev.getTranslation())) {
+            waypointsPerAutoUnique.add(current);
+            prev = current;
+          }
+        }
+        List<WaypointWithSpeed> waypointsAndSpeeds = new ArrayList<>();
+        int index = 0;
+        for (double vel : maxVelocitiesPerAuto) {
+          waypointsAndSpeeds.add(new WaypointWithSpeed(waypointsPerAutoUnique.get(index), vel));
+          index++;
+        }
+        allAutos.put(auto, waypointsAndSpeeds);
+      }
+      System.out.println(allAutos);
       autoChooser = new SendableChooser<>();
       autoChooser.setDefaultOption("None", null);
       List<String> autoNames = AutoBuilder.getAllAutoNames();
@@ -125,15 +149,6 @@ public class Robot extends LoggedRobot {
       e.printStackTrace();
     }
   }
-
-  /*for (PathPlannerPath path : paths) {
-  ArrayList<Pose2d> waypointsPerPath = new ArrayList<>();
-  for (Waypoint waypoint : path.getWaypoints()) {
-    waypointsPerPath.add(new Pose2d(waypoint.anchor(), new Rotation2d(0)));
-  }
-  waypointsPerPath.get(0).rotateBy(path.getIdealStartingState().rotation());
-  waypointsPerPath.get(waypointsPerPath.size() - 1).rotateBy(path.getGoalEndState().rotation());
-  waypoints.addAll(waypointsPerPath); */
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics

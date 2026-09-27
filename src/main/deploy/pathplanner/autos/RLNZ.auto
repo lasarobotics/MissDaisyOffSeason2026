@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLTtoNZ"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLNZinter"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLNZrouteForward"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLNZrouteBackward"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NZtoRLT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLAZroute1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLAZroute2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RLAZroute3"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

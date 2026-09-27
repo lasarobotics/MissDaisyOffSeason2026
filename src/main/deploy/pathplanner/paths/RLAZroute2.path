@@ -1,0 +1,134 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 14.880064308449075,
+        "y": 0.6476594328703709
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 15.880064308449075,
+        "y": 0.6476594328703706
+      },
+      "isLocked": false,
+      "linkedName": "RLAZ2"
+    },
+    {
+      "anchor": {
+        "x": 15.996689959490741,
+        "y": 0.6476594328703709
+      },
+      "prevControl": {
+        "x": 16.24668995949074,
+        "y": 0.6476594328703708
+      },
+      "nextControl": {
+        "x": 15.746689959490741,
+        "y": 0.647659432870371
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 14.880064308449075,
+        "y": 1.3105882523148147
+      },
+      "prevControl": {
+        "x": 14.822250959044844,
+        "y": 1.0673648639849413
+      },
+      "nextControl": {
+        "x": 14.937877657853306,
+        "y": 1.553811640644688
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 15.47534432212027,
+        "y": 1.435569278827891
+      },
+      "prevControl": {
+        "x": 15.206610989986789,
+        "y": 1.4946904597362896
+      },
+      "nextControl": {
+        "x": 15.74407765425375,
+        "y": 1.3764480979194926
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 15.996689959490741,
+        "y": 1.435569278827891
+      },
+      "prevControl": {
+        "x": 16.037455778487473,
+        "y": 1.1889153755514061
+      },
+      "nextControl": {
+        "x": 15.955924140494009,
+        "y": 1.682223182104376
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 14.880064308449075,
+        "y": 2.077509765625
+      },
+      "prevControl": {
+        "x": 15.019997413917826,
+        "y": 1.5333688151041667
+      },
+      "nextControl": {
+        "x": 14.740131202980324,
+        "y": 2.621650716145833
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 16.118003833912038,
+        "y": 2.607511646412037
+      },
+      "prevControl": {
+        "x": 15.118003833912038,
+        "y": 2.607511646412037
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "RLAZ3"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 1.25,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": false
+}

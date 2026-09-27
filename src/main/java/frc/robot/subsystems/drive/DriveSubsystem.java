@@ -108,6 +108,7 @@ public class DriveSubsystem extends StateMachine {
   private double m_currentSpeedScalar;
   private Translation2d m_limeEstimate;
   private PIDController m_auto_aimrotationPIDController;
+  private boolean s_blueAlliance;
 
   // private PIDController m_rotationPIDController;
 
@@ -137,10 +138,12 @@ public class DriveSubsystem extends StateMachine {
       if (ally.get() == Alliance.Red) {
         s_drivetrain.setOperatorPerspectiveForward(
             CommandSwerveDrivetrain.kRedAlliancePerspectiveRotation);
+        s_blueAlliance = false;
       }
       if (ally.get() == Alliance.Blue) {
         s_drivetrain.setOperatorPerspectiveForward(
             CommandSwerveDrivetrain.kBlueAlliancePerspectiveRotation);
+        s_blueAlliance = true;
       }
     }
   }
@@ -169,6 +172,10 @@ public class DriveSubsystem extends StateMachine {
 
   public Pose2d getPose() {
     return s_drivetrain.getState().Pose;
+  }
+
+  public boolean isBlueAlliance() {
+    return s_blueAlliance;
   }
 
   public boolean underTower() {
@@ -248,7 +255,7 @@ public class DriveSubsystem extends StateMachine {
 
   @Override
   public void periodic() {
-
+    setPerspective();
     m_currentSpeedScalar =
         m_slowdownRequest.getAsBoolean() ? Constants.DriveConstants.SLOWDOWN_SPEED : 1;
     Logger.recordOutput("DriveSubsystem/Pose", s_drivetrain.getState().Pose);
