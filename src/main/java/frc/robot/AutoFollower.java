@@ -25,6 +25,20 @@ public class AutoFollower {
     return s_autoFollower;
   }
 
+  private static double getDesiredLookaheadDist() {
+    double scalar =
+        Math.hypot(
+                DriveSubsystem.getInstance().getSpeeds().vxMetersPerSecond,
+                DriveSubsystem.getInstance().getSpeeds().vyMetersPerSecond)
+            / TunerConstants.kSpeedAt12Volts.magnitude();
+    scalar =
+        scalar
+                * Constants.AutoConstants.LOOKAHEAD_SCALAR
+                * Constants.AutoConstants.LOOKAHEAD_DIST_MAX
+            + (1 - Constants.AutoConstants.LOOKAHEAD_SCALAR);
+    return scalar;
+  }
+
   public static void setAuto(List<Robot.WaypointWithSpeed> auto) {
     selectedAuto = auto;
     currentStartPointIndex = 0;
@@ -55,7 +69,7 @@ public class AutoFollower {
       double endY = currentEndPoint.getY();
       double robotX = DriveSubsystem.getInstance().getTranslation2d().getX();
       double robotY = DriveSubsystem.getInstance().getTranslation2d().getY();
-      double radius = Inches.of(20).in(Meters);
+      double radius = Inches.of(getDesiredLookaheadDist()).in(Meters);
       Translation2d target;
       double desiredAngle;
       double desiredSpeed;
@@ -122,10 +136,35 @@ public class AutoFollower {
       double deltaNorm = delta.getNorm();
       double xDesiredSpeed = desiredSpeed * (delta.getX() / deltaNorm);
       double YDesiredSpeed = desiredSpeed * (delta.getY() / deltaNorm);
+      double turnSpeedScale = 1;
+      double curvatureAngle;
+      if (0 <= t && t <= 1) {
+        if (currentEndPointIndex == selectedAuto.size() - 1) {
+          curvatureAngle = Math.PI;
+        } else {
+          Translation2d pathVector1 = currentStartPoint.minus(currentEndPoint).getTranslation();
+          Translation2d pathVector2 =
+              selectedAuto
+                  .get(currentEndPointIndex + 1)
+                  .waypoint()
+                  .minus(currentEndPoint)
+                  .getTranslation();
+          curvatureAngle =
+              Math.acos(
+                  pathVector1.dot(pathVector2) / (pathVector1.getNorm() * pathVector2.getNorm()));
+        }
+        double minScale = 0.25;
+        curvatureAngle = Math.abs(curvatureAngle) / Math.PI;
+        curvatureAngle = Math.min(curvatureAngle, 1.0);
+        double targetScale = 1.0 - (1.0 - minScale) * curvatureAngle;
+        turnSpeedScale = 1.0 - (1.0 - targetScale) * t * Constants.AutoConstants.TURN_AGGRESION;
+        turnSpeedScale = Math.max(minScale, turnSpeedScale);
+      }
+
       Logger.recordOutput("Auto/delta", delta);
       Logger.recordOutput("Auto/target", new Pose2d(target, new Rotation2d(0)));
       return new double[] {
-        speedFlipper * xDesiredSpeed, speedFlipper * YDesiredSpeed, desiredAngle
+        speedFlipper * turnSpeedScale * xDesiredSpeed, speedFlipper * YDesiredSpeed, desiredAngle
       };
     }
     return new double[] {0, 0, 0};

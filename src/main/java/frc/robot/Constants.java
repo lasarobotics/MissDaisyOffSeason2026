@@ -157,4 +157,10 @@ public final class Constants {
             new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
     public static final double GRAVITY_VALUE = 9.81;
   }
+
+  public static class AutoConstants {
+    public static final double TURN_AGGRESION = 0.5; // 0 -> no slowdown 1.5 -> more slowdown
+    public static final double LOOKAHEAD_DIST_MAX = 30; // Inches
+    public static final double LOOKAHEAD_SCALAR = 0.6;
+  }
 }
