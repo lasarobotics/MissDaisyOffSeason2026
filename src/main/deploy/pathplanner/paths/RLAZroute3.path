@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 12.602233579282409,
-        "y": 0.6493653067129626
+        "y": 0.6493653067129627
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RLNZ",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
