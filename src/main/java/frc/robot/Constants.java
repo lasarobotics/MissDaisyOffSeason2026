@@ -60,6 +60,9 @@ public final class Constants {
     public static final double SLOW_SPEED_SCALAR = 0.1;
     public static final double MID_SPEED_SCALAR = 0.5;
     public static final double FAST_SPEED_SCALAR = 0.75;
+
+    public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
+    public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
   }
 
   public static class IntakeConstants {
@@ -83,6 +86,7 @@ public final class Constants {
 
     public static final double MOTOR_TURRET_GEAR_RATIO = -1;
     public static final double MOTOR_HOOD_GEAR_RATIO = -1;
+    public static final double HANG_TIME = 2;
   }
 
   public static class HubConstants {
@@ -93,4 +97,52 @@ public final class Constants {
     public static final double LEFTY_POS = 0;
     public static final double RIGHTY_POS = 0;
   }
+
+  public static final class BLineConstants {
+    public static final double MAX_VELOCITY_MPS = 4.0;
+    public static final double MAX_ACCELERATION_MPS2 = 3.0;
+    public static final double MAX_ANGULAR_VELOCITY_DEG_PER_SEC = 360.0;
+    public static final double MAX_ANGULAR_ACCELERATION_DEG_PER_SEC2 = 720.0;
+    public static final double END_TRANSLATION_TOLERANCE_METERS = 0.05;
+    public static final double END_ROTATION_TOLERANCE_DEG = 2.0;
+    public static final double INTERMEDIATE_HANDOFF_RADIUS_METERS = 0.30;
+
+    public static final double TRANSLATION_KP = 5.0;
+    public static final double TRANSLATION_KI = 0.0;
+    public static final double TRANSLATION_KD = 0.0;
+
+    public static final double ROTATION_KP = 3.0;
+    public static final double ROTATION_KI = 0.0;
+    public static final double ROTATION_KD = 0.0;
+
+    public static final double CROSS_TRACK_KP = 2.0;
+    public static final double CROSS_TRACK_KI = 0.0;
+    public static final double CROSS_TRACK_KD = 0.0;
+  }
+
+public static final class LimelightConstants {
+
+  public static final String LIMELIGHT_NAME = "limelight";
+
+  public static final double TURRET_PIVOT_FORWARD_METERS = 0.0;
+  public static final double TURRET_PIVOT_LEFT_METERS = 0.0;
+  public static final double TURRET_PIVOT_HEIGHT_METERS = 0.0;
+
+  public static final double CAMERA_FORWARD_METERS = 0.0;
+  public static final double CAMERA_LEFT_METERS = 0.0;
+  public static final double CAMERA_HEIGHT_METERS = 0.0;
+
+  public static final double CAMERA_YAW_AT_ZERO_DEG = 0.0;
+  public static final double CAMERA_PITCH_DEG = 0.0;
+  public static final double CAMERA_ROLL_DEG = 0.0;
+
+  public static final double MAX_TAG_AMBIGUITY = 1.0;
+  public static final double MAX_VISION_ANGULAR_VELOCITY_DEG_PER_SEC = 720.0;
+  public static final double MAX_SINGLE_TAG_DISTANCE_METERS = 0.0;
+
+  public static final double VISION_STD_DEV_X = 0.7;
+  public static final double VISION_STD_DEV_Y = 0.7;
+
+  public static final double VISION_STD_DEV_THETA = 9999999.0;
+}
 }

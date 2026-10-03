@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -11,48 +7,62 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+
 import frc.robot.Constants;
-import frc.robot.Constants.MotorIdentification;
+import frc.robot.Constants.HubConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.MotorIdentification;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class ShooterSubsystem extends StateMachine {
-
   public enum ShooterStates implements SystemState {
+
     CycleOff {
       @Override
       public void initialize() {}
 
       @Override
-      public void execute() {}
+      public void execute() {
+        ShooterSubsystem shooter = getInstance();
+
+        shooter.m_shooterSpeedLeader.setControl(
+            shooter.m_shooterVelocityRequest.withVelocity(0));
+      }
 
       @Override
-      public SystemState nextState() {
+      public ShooterStates nextState() {
         return getInstance().m_shooterState;
       }
     },
+
     CycleOn {
       @Override
       public void initialize() {}
 
       @Override
       public void execute() {
-        getInstance().updateShootingTarget();
-        getInstance().setTurretPosition();
-        getInstance().setHoodAngle();
-        getInstance()
-            .m_shooterSpeedLeaderMotor
-            .setControl(new VelocityVoltage(getInstance().m_rollerSpeeds));
+        ShooterSubsystem shooter = getInstance();
+
+        shooter.updateShootingTarget();
+        shooter.updateShooterValues();
+
+        shooter.setTurretPosition();
+        shooter.setHoodAngle();
+
+        shooter.m_shooterSpeedLeader.setControl(
+            shooter.m_shooterVelocityRequest
+                .withVelocity(shooter.m_rollerSpeeds));
       }
 
       @Override
-      public SystemState nextState() {
+      public ShooterStates nextState() {
         return getInstance().m_shooterState;
       }
     },
@@ -63,253 +73,427 @@ public class ShooterSubsystem extends StateMachine {
 
       @Override
       public void execute() {
-        getInstance().m_shooterSpeedLeaderMotor.setControl(new VelocityVoltage(-5));
+        ShooterSubsystem shooter = getInstance();
+
+        shooter.m_shooterSpeedLeader.setControl(
+            shooter.m_shooterVelocityRequest.withVelocity(-5));
       }
 
       @Override
-      public SystemState nextState() {
+      public ShooterStates nextState() {
         return getInstance().m_shooterState;
       }
     }
-  }
-
-  private static ShooterSubsystem s_shooterInstance;
-  private ShooterStates m_shooterState;
-
-  private TalonFX m_turretMotor;
-  private TalonFX m_shooterSpeedLeaderMotor;
-  private TalonFX m_shooterSpeedFollowerMotor;
-  private TalonFX m_hoodAngleMotor;
-
-  private CANcoder encoder1;
-  private CANcoder encoder2;
-
-  private double m_hoodAngle;
-  private double m_rollerSpeeds;
-  private double m_turretAngleRelativeRobot;
-
-  private Translation2d m_shootingTarget;
-
-  public ShooterSubsystem() {
-    super(ShooterStates.CycleOff);
-
-    m_turretMotor = new TalonFX(Constants.MotorIdentification.TURRET_MOTOR_ID);
-    m_shooterSpeedLeaderMotor =
-        new TalonFX(Constants.MotorIdentification.SHOOTER_SPEED_LEADER_MOTOR_ID);
-    m_shooterSpeedFollowerMotor =
-        new TalonFX(Constants.MotorIdentification.SHOOTER_SPEED_FOLLOWER_MOTOR_ID);
-    m_hoodAngleMotor = new TalonFX(Constants.MotorIdentification.HOOD_ANGLE_MOTOR_ID);
-
-    TalonFXConfiguration turretConfig = new TalonFXConfiguration();
-    TalonFXConfiguration shooterSpeedLeaderConfig = new TalonFXConfiguration();
-    TalonFXConfiguration shooterSpeedFollowerConfig = new TalonFXConfiguration();
-    TalonFXConfiguration hoodAngleConfig = new TalonFXConfiguration();
-
-    m_turretMotor.getConfigurator().apply(turretConfig);
-    m_shooterSpeedLeaderMotor.getConfigurator().apply(shooterSpeedLeaderConfig);
-    m_shooterSpeedFollowerMotor.getConfigurator().apply(shooterSpeedFollowerConfig);
-    m_hoodAngleMotor.getConfigurator().apply(hoodAngleConfig);
-
-    m_shooterSpeedFollowerMotor.setControl(
-        new Follower(m_shooterSpeedLeaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
-
-    encoder1 = new CANcoder(MotorIdentification.ENCODER1);
-    encoder2 = new CANcoder(MotorIdentification.ENCODER2);
   }
 
   public static ShooterSubsystem getInstance() {
     if (s_shooterInstance == null) {
       s_shooterInstance = new ShooterSubsystem();
     }
+
     return s_shooterInstance;
+  }
+
+  private static ShooterSubsystem s_shooterInstance;
+  private ShooterStates m_shooterState = ShooterStates.CycleOff;
+
+  private final TalonFX m_turretMotor;
+  private final TalonFX m_shooterSpeedLeader;
+  private final TalonFX m_shooterSpeedFollower;
+  private final TalonFX m_hoodMotor;
+
+  private final CANcoder encoder1;
+  private final CANcoder encoder2;
+
+  private final PositionVoltage m_turretPositionRequest =
+      new PositionVoltage(0);
+  private final PositionVoltage m_hoodPositionRequest =
+      new PositionVoltage(0);
+  private final VelocityVoltage m_shooterVelocityRequest =
+      new VelocityVoltage(0);
+
+  private Translation2d m_shootingTarget =
+      new Translation2d();
+  private double m_turretAngleRelativeRobot = 0;
+  private double m_hoodAngle = 0;
+  private double m_rollerSpeeds = 0;
+  private double m_distanceToTarget = 0;
+  private double m_shooterHorizontalVelocity = 0;
+  private double m_verticalVelocity = 0;
+  private double m_exitVelocity = 0;
+
+  public ShooterSubsystem() {
+    super(ShooterStates.CycleOff);
+
+    m_turretMotor =
+        new TalonFX(
+            MotorIdentification.TURRET_MOTOR_ID);
+    m_shooterSpeedLeader =
+        new TalonFX(
+            MotorIdentification.SHOOTER_SPEED_LEADER_MOTOR_ID);
+    m_shooterSpeedFollower =
+        new TalonFX(
+            MotorIdentification.SHOOTER_SPEED_FOLLOWER_MOTOR_ID);
+    m_hoodMotor =
+        new TalonFX(
+            MotorIdentification.HOOD_ANGLE_MOTOR_ID);
+    encoder1 =
+        new CANcoder(
+            MotorIdentification.ENCODER1);
+    encoder2 =
+        new CANcoder(
+            MotorIdentification.ENCODER2);
+
+    TalonFXConfiguration turretConfig =
+        new TalonFXConfiguration();
+    TalonFXConfiguration shooterConfig =
+        new TalonFXConfiguration();
+    TalonFXConfiguration hoodConfig =
+        new TalonFXConfiguration();
+
+    m_turretMotor.getConfigurator().apply(turretConfig);
+    m_shooterSpeedLeader.getConfigurator().apply(shooterConfig);
+    m_hoodMotor.getConfigurator().apply(hoodConfig);
+
+    m_shooterSpeedFollower.setControl(
+        new Follower(
+            MotorIdentification.SHOOTER_SPEED_LEADER_MOTOR_ID,
+            MotorAlignmentValue.Opposed));
   }
 
   public void setShooterState(ShooterStates shooterState) {
     m_shooterState = shooterState;
   }
 
-  public void checkTurretPosition() {
+  public void updateShootingTarget() 
+  {
+    Pose2d robotPose =
+        DriveSubsystem.getInstance().getPose();
 
-    double[] possibilities1 = new double[ShooterConstants.TURRET_TEETH];
-    double[] possibilities2 = new double[ShooterConstants.TURRET_TEETH];
-
-    for (int i = 0; i < ShooterConstants.TURRET_TEETH; i++) {
-      double newValue =
-          (i + encoder1.getAbsolutePosition().getValueAsDouble())
-              * ((double) ShooterConstants.GEAR1_TEETH / ShooterConstants.TURRET_TEETH);
-      possibilities1[i] = newValue;
-    }
-
-    for (int i = 0; i < ShooterConstants.TURRET_TEETH; i++) {
-      double newValue =
-          (i + encoder2.getAbsolutePosition().getValueAsDouble())
-              * ((double) ShooterConstants.GEAR2_TEETH / ShooterConstants.TURRET_TEETH);
-      possibilities2[i] = newValue;
-    }
-
-    double match = -1;
-
-    outerloop:
-    for (double i : possibilities1) {
-      for (double j : possibilities2) {
-        if (Math.abs(i - j) <= 0.01) {
-          match = (i + j) / 2;
-          break outerloop;
-        }
-      }
-    }
-
-    if (match != -1) m_turretMotor.setPosition(match);
-  }
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
-
-  // PH 2026 Aim
-
-  private static double getVelocityXStationary(
-      double distance, double targetHeight, double maxBallYPos) {
-    double y_max = maxBallYPos;
-    double y_end = targetHeight;
-    double g = 9.81;
-
-    double x_vel =
-        distance * (Math.sqrt(g)) / (Math.sqrt(2 * y_max) + Math.sqrt(2 * (y_max - y_end)));
-    return x_vel;
-  }
-
-  /**
-   * Get the Y velocity of stationary ball shot
-   *
-   * @param maxBallYPos The Y value for the highest point of the ball's curve
-   * @return Value of Y velocity of the ball when shot stationary
-   */
-  private static double getVelocityYStationary(double maxBallYPos) {
-    double y_max = maxBallYPos;
-    double g = 9.81;
-    double y_vel = Math.sqrt(y_max * 2 * g);
-    return y_vel;
-  }
-
-  private void updateShootingTarget() {
-    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-      if (DriveSubsystem.getInstance().getPose().getX()
-          < Constants.HubConstants.BLUE_HUB_POS.getX()) {
-        m_shootingTarget = Constants.HubConstants.BLUE_HUB_POS;
-      } else {
-        if (DriveSubsystem.getInstance().getPose().getY()
-            < Constants.HubConstants.BLUE_HUB_POS.getY()) {
-          m_shootingTarget =
-              new Translation2d(
-                  Constants.HubConstants.BLUE_HUB_POS.getX(), Constants.HubConstants.LEFTY_POS);
-        } else {
-          m_shootingTarget =
-              new Translation2d(
-                  Constants.HubConstants.BLUE_HUB_POS.getX(), Constants.HubConstants.RIGHTY_POS);
-        }
-      }
-    } else {
-      if (DriveSubsystem.getInstance().getPose().getX()
-          > Constants.HubConstants.RED_HUB_POS.getX()) {
-        m_shootingTarget = Constants.HubConstants.RED_HUB_POS;
-      } else {
-        if (DriveSubsystem.getInstance().getPose().getY()
-            < Constants.HubConstants.RED_HUB_POS.getY()) {
-          m_shootingTarget =
-              new Translation2d(
-                  Constants.HubConstants.RED_HUB_POS.getX(), Constants.HubConstants.LEFTY_POS);
-        } else {
-          m_shootingTarget =
-              new Translation2d(
-                  Constants.HubConstants.RED_HUB_POS.getX(), Constants.HubConstants.RIGHTY_POS);
-        }
-      }
-    }
-  }
-
-  private void updateShooterValues() {
-
-    Pose2d robotPose = DriveSubsystem.getInstance().getPose();
-    Translation2d robotToHub = m_shootingTarget.minus(robotPose.getTranslation());
-    Rotation2d turretAngle = robotToHub.getAngle().minus(robotPose.getRotation());
-
-    m_turretAngleRelativeRobot = turretAngle.getRadians();
-
-    double distance = robotToHub.getNorm();
-    double targetHeight = 6.0;
-    double maxBallYPos = 8.0;
-
-    double xVelocity = getVelocityXStationary(distance, targetHeight, maxBallYPos);
-    double yVelocity = getVelocityYStationary(maxBallYPos);
-
-    m_hoodAngle = Math.atan2(yVelocity, xVelocity);
-
-    double exitVelocity = Math.hypot(xVelocity, yVelocity);
-
-    double bigWheelRadius = 0.0508;
-    double smallWheelRadius = 0.0254;
-    double angularVelocity = (2 * exitVelocity) / (bigWheelRadius + smallWheelRadius);
-
-    m_rollerSpeeds = angularVelocity / (2 * Math.PI);
-  }
-
-  private void setTurretPosition() {
-
-    updateShooterValues();
-
-    double currentMotorPosition = m_turretMotor.getPosition().getValueAsDouble();
-
-    double currentTurretAngle =
-        (currentMotorPosition / ShooterConstants.MOTOR_TURRET_GEAR_RATIO) * 2.0 * Math.PI;
-    double desiredTurretAngle = m_turretAngleRelativeRobot;
-    double targetTurretAngle = desiredTurretAngle;
-
-    while (targetTurretAngle - currentTurretAngle > Math.PI) {
-      targetTurretAngle -= 2.0 * Math.PI;
-    }
-
-    while (targetTurretAngle - currentTurretAngle < -Math.PI) {
-      targetTurretAngle += 2.0 * Math.PI;
-    }
-
-    if (targetTurretAngle < ShooterConstants.ANGLE_LOWER_BOUND) {
-
-      double flippedTarget = targetTurretAngle + 2.0 * Math.PI;
-
-      if (flippedTarget <= ShooterConstants.ANGLE_HIGHER_BOUND) {
-        targetTurretAngle = flippedTarget;
-      } else {
-        return;
-      }
-    }
-
-    if (targetTurretAngle > ShooterConstants.ANGLE_HIGHER_BOUND) {
-
-      double flippedTarget = targetTurretAngle - 2.0 * Math.PI;
-
-      if (flippedTarget >= ShooterConstants.ANGLE_LOWER_BOUND) {
-        targetTurretAngle = flippedTarget;
-      } else {
-        return;
-      }
-    }
-
-    if (targetTurretAngle < ShooterConstants.ANGLE_LOWER_BOUND
-        || targetTurretAngle > ShooterConstants.ANGLE_HIGHER_BOUND) {
+    if (robotPose == null) {
       return;
     }
 
-    double targetTurretRotations = targetTurretAngle / (2.0 * Math.PI);
-    double targetMotorPosition = targetTurretRotations * ShooterConstants.MOTOR_TURRET_GEAR_RATIO;
-    m_turretMotor.setControl(new PositionVoltage(targetMotorPosition));
+    DriverStation.Alliance alliance =
+        DriverStation.getAlliance().orElse(null);
+
+    if (alliance == DriverStation.Alliance.Blue) {
+      if (robotPose.getX()
+          < HubConstants.BLUE_HUB_POS.getX()) {
+        m_shootingTarget =
+            HubConstants.BLUE_HUB_POS;
+      } else {
+        double targetY;
+        if (robotPose.getY()
+            < HubConstants.BLUE_HUB_POS.getY()) {
+          targetY = HubConstants.LEFTY_POS;
+        } else {
+          targetY = HubConstants.RIGHTY_POS;
+        }
+        m_shootingTarget =
+            new Translation2d(
+                HubConstants.BLUE_HUB_POS.getX(),
+                targetY);
+      }
+    } else if (alliance == DriverStation.Alliance.Red) {
+      if (robotPose.getX()
+          > HubConstants.RED_HUB_POS.getX()) {
+        m_shootingTarget =
+            HubConstants.RED_HUB_POS;
+      } else {
+        double targetY;
+        if (robotPose.getY()
+            < HubConstants.RED_HUB_POS.getY()) {
+          targetY = HubConstants.LEFTY_POS;
+        } else {
+          targetY = HubConstants.RIGHTY_POS;
+        }
+
+        m_shootingTarget =
+            new Translation2d(
+                HubConstants.RED_HUB_POS.getX(),
+                targetY);
+      }
+    }
   }
 
-  private void setHoodAngle() {
+  public void updateShooterValues() {
 
-    double hoodRotations = m_hoodAngle / (2.0 * Math.PI);
-    double targetMotorPosition = hoodRotations * ShooterConstants.MOTOR_HOOD_GEAR_RATIO;
-    m_hoodAngleMotor.setControl(new PositionVoltage(targetMotorPosition));
+    Pose2d robotPose =
+        DriveSubsystem.getInstance().getPose();
+
+    if (robotPose == null
+        || m_shootingTarget == null) {
+      return;
+    }
+
+    Translation2d robotToTarget =
+        m_shootingTarget.minus(
+            robotPose.getTranslation());
+
+    m_distanceToTarget =
+        robotToTarget.getNorm();
+
+    double targetAngle =
+        Math.atan2(
+            robotToTarget.getY(),
+            robotToTarget.getX());
+
+ 
+    double targetHeight = 6.0;
+    double maxBallYPos = 8.0;
+    double stationaryXVelocity =
+        getVelocityXStationary(
+            m_distanceToTarget,
+            targetHeight,
+            maxBallYPos);
+    double stationaryYVelocity =
+        getVelocityYStationary(
+            maxBallYPos);
+
+    double desiredBallVelocityX =
+        stationaryXVelocity
+            * Math.cos(targetAngle);
+    double desiredBallVelocityY =
+        stationaryXVelocity
+            * Math.sin(targetAngle);
+
+    ChassisSpeeds robotVelocity =
+        DriveSubsystem.getInstance()
+            .getFieldRelativeSpeeds();
+    double shooterVelocityX =
+        desiredBallVelocityX
+            - robotVelocity.vxMetersPerSecond;
+    double shooterVelocityY =
+        desiredBallVelocityY
+            - robotVelocity.vyMetersPerSecond;
+
+    m_shooterHorizontalVelocity =
+        Math.hypot(
+            shooterVelocityX,
+            shooterVelocityY);
+
+    double shooterFieldAngle =
+        Math.atan2(
+            shooterVelocityY,
+            shooterVelocityX);
+
+    m_turretAngleRelativeRobot =
+        wrapRadians(
+            shooterFieldAngle
+                - robotPose.getRotation().getRadians());
+
+    m_verticalVelocity =
+        stationaryYVelocity;
+
+    m_exitVelocity =
+        Math.hypot(
+            m_shooterHorizontalVelocity,
+            m_verticalVelocity);
+
+    m_hoodAngle =
+        Math.atan2(
+            m_verticalVelocity,
+            m_shooterHorizontalVelocity);
+
+    double angularVelocity =
+        (2.0 * m_exitVelocity)
+            / (0.0508 + 0.0254);
+    m_rollerSpeeds =
+        angularVelocity
+            / (2.0 * Math.PI);
+  }
+
+  public double getVelocityXStationary(
+      double distance,
+      double targetHeight,
+      double maxBallYPos) {
+
+    return distance * Math.sqrt(9.81)
+        / (Math.sqrt(2 * maxBallYPos)
+            + Math.sqrt(
+                2 * (maxBallYPos - targetHeight)));
+  }
+
+  public double getVelocityYStationary(
+      double maxBallYPos) {
+
+    return Math.sqrt(
+        maxBallYPos * 2 * 9.81);
+  }
+
+  public void setTurretPosition() {
+
+    double motorPosition =
+        m_turretMotor
+            .getPosition()
+            .getValueAsDouble();
+
+    double currentTurretRotations =
+        motorPosition
+            / ShooterConstants.MOTOR_TURRET_GEAR_RATIO;
+
+    double currentTurretAngle =
+        currentTurretRotations
+            * 2.0
+            * Math.PI;
+
+    double lowerBound =
+        Math.toRadians(
+            ShooterConstants.ANGLE_LOWER_BOUND);
+
+    double upperBound =
+        Math.toRadians(
+            ShooterConstants.ANGLE_HIGHER_BOUND);
+
+    double bestAngle = Double.NaN;
+
+    double smallestDifference =
+        Double.POSITIVE_INFINITY;
+
+    for (int k = -3; k <= 3; k++) {
+
+      double candidateAngle =
+          m_turretAngleRelativeRobot
+              + k * 2.0 * Math.PI;
+
+      if (candidateAngle < lowerBound
+          || candidateAngle > upperBound) {
+
+        continue;
+      }
+
+      double difference =
+          Math.abs(
+              candidateAngle
+                  - currentTurretAngle);
+
+      if (difference < smallestDifference) {
+
+        smallestDifference = difference;
+        bestAngle = candidateAngle;
+      }
+    }
+
+    if (Double.isNaN(bestAngle)) {
+      return;
+    }
+
+    double desiredTurretRotations =
+        bestAngle
+            / (2.0 * Math.PI);
+
+    double desiredMotorPosition =
+        desiredTurretRotations
+            * ShooterConstants.MOTOR_TURRET_GEAR_RATIO;
+
+    m_turretMotor.setControl(
+        m_turretPositionRequest
+            .withPosition(desiredMotorPosition));
+  }
+
+  public void setHoodAngle() {
+    double desiredHoodRotations =
+        m_hoodAngle
+            / (2.0 * Math.PI);
+
+    double desiredMotorPosition =
+        desiredHoodRotations
+            * ShooterConstants.MOTOR_HOOD_GEAR_RATIO;
+
+    m_hoodMotor.setControl(
+        m_hoodPositionRequest
+            .withPosition(desiredMotorPosition));
+  }
+
+  public void checkTurretPosition() {
+    double[] possibilities1 =
+        new double[ShooterConstants.TURRET_TEETH];
+    double[] possibilities2 =
+        new double[ShooterConstants.TURRET_TEETH];
+
+    double encoder1Position =
+        encoder1
+            .getAbsolutePosition()
+            .getValueAsDouble();
+    double encoder2Position =
+        encoder2
+            .getAbsolutePosition()
+            .getValueAsDouble();
+
+    for (int i = 0;
+        i < ShooterConstants.TURRET_TEETH;
+        i++) {
+      possibilities1[i] =
+          (i + encoder1Position)
+              * ((double)
+                  ShooterConstants.GEAR1_TEETH
+                  / ShooterConstants.TURRET_TEETH);
+    }
+
+    for (int i = 0;
+        i < ShooterConstants.TURRET_TEETH;
+        i++) {
+      possibilities2[i] =
+          (i + encoder2Position)
+              * ((double)
+                  ShooterConstants.GEAR2_TEETH
+                  / ShooterConstants.TURRET_TEETH);
+    }
+
+    double bestPosition = -1;
+    double bestError =
+        Double.POSITIVE_INFINITY;
+
+    for (int i = 0;
+        i < ShooterConstants.TURRET_TEETH;
+        i++) {
+      for (int j = 0;
+          j < ShooterConstants.TURRET_TEETH;
+          j++) {
+        double error =
+            Math.abs(
+                possibilities1[i]
+                    - possibilities2[j]);
+        if (error < bestError) {
+          bestError = error;
+          bestPosition =
+              (possibilities1[i]
+                  + possibilities2[j])
+                  / 2.0;
+        }
+      }
+    }
+
+    if (bestError <= 0.01) {
+
+      double motorPosition =
+          bestPosition
+              * ShooterConstants.MOTOR_TURRET_GEAR_RATIO;
+
+      m_turretMotor.setPosition(
+          motorPosition);
+    }
+  }
+
+  private static double wrapRadians(
+      double angle) {
+
+    while (angle > Math.PI) {
+      angle -= 2.0 * Math.PI;
+    }
+    while (angle < -Math.PI) {
+      angle += 2.0 * Math.PI;
+    }
+
+    return angle;
+  }
+
+public double getTurretAngleRelativeRobot() {
+  return m_turretAngleRelativeRobot;
+}
+
+  @Override
+  public void periodic() {
   }
 }
