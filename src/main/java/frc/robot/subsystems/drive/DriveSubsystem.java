@@ -34,6 +34,19 @@ public class DriveSubsystem extends StateMachine {
 
   public enum DriveStates implements SystemState {
     AUTO {
+      @Override
+      public void execute() {
+        getInstance()
+            .goTo(
+                getInstance().m_currentWaypoint,
+                Constants.DriveConstants.MAX_SPEED
+                    .times(Constants.DriveConstants.FAST_SPEED_SCALAR)
+                    .in(MetersPerSecond),
+                getInstance().m_exitVelocity,
+                getInstance().m_targetRot,
+                getInstance().m_maxRotRate,
+                getInstance().m_turnDirMatters);
+      }
 
       @Override
       public SystemState nextState() {
@@ -113,6 +126,12 @@ public class DriveSubsystem extends StateMachine {
   private PIDController m_rotationPIDController;
   private PIDController m_translationPIDController;
   private static double s_currentSpeedScalar;
+  private volatile Pose2d m_currentWaypoint;
+  private volatile double m_exitVelocity;
+  private volatile double m_maxRotRate;
+  private volatile boolean m_turnDirMatters;
+  private volatile boolean m_turnLeft;
+  private volatile double m_targetRot;
 
   public DriveSubsystem() {
     super(DriveStates.DRIVER_CONTROL);
@@ -257,7 +276,8 @@ public class DriveSubsystem extends StateMachine {
       double maxVelocity,
       double exitVelocity,
       double targetRotation,
-      double maxRotationRate) {
+      double maxRotationRate,
+      boolean turnDirMatters) {
 
     Pose2d currentPose = s_drivetrain.getState().Pose;
     Translation2d positionDiff = location.getTranslation().minus(currentPose.getTranslation());
@@ -272,18 +292,54 @@ public class DriveSubsystem extends StateMachine {
     double xControl = trueVelocity * travelDirection.getCos();
     double yControl = trueVelocity * travelDirection.getSin();
 
-    double rotationRate =
-        MathUtil.clamp(
-            m_rotationPIDController.calculate(
-                currentPose.getRotation().getRadians(), targetRotation),
-            -maxRotationRate,
-            maxRotationRate);
+    double rotationRate;
+
+    if (getInstance().m_turnDirMatters) {
+      rotationRate =
+          m_rotationPIDController.calculate(currentPose.getRotation().getRadians(), targetRotation);
+      rotationRate =
+          (getInstance().m_turnLeft)
+              ? MathUtil.clamp(rotationRate, 0, maxRotationRate)
+              : MathUtil.clamp(rotationRate, -maxRotationRate, 0);
+
+    } else {
+      rotationRate =
+          MathUtil.clamp(
+              m_rotationPIDController.calculate(
+                  currentPose.getRotation().getRadians(), targetRotation),
+              -maxRotationRate,
+              maxRotationRate);
+    }
 
     s_drivetrain.setControl(
         s_autoDrive
             .withVelocityX(MetersPerSecond.of(xControl))
             .withVelocityY(MetersPerSecond.of(yControl))
             .withRotationalRate(rotationRate));
+  }
+
+  public boolean isAtWaypoint() {
+    return (getInstance().getDistance(getInstance().m_currentWaypoint.getTranslation()).in(Meters)
+            < Constants.AutoConstants.DISTANCE_THRESHOLD.in(Meters))
+        ? true
+        : false;
+  }
+
+  public void autoConfig(
+      Pose2d waypoint,
+      double exitVelocity,
+      double targetRot,
+      double maxRotRate,
+      boolean turnDirMatters,
+      boolean... turnLeft) {
+    getInstance().m_currentWaypoint = waypoint;
+    getInstance().m_exitVelocity = exitVelocity;
+    getInstance().m_targetRot = targetRot;
+    getInstance().m_maxRotRate = maxRotRate;
+    getInstance().m_turnDirMatters = turnDirMatters;
+    if (turnLeft.length > 0) {
+      getInstance().m_turnLeft = turnLeft[0];
+    }
   }
 
   public void configureBindings(

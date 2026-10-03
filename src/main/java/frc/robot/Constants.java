@@ -289,6 +289,8 @@ public final class Constants {
   }
 
   public static class AutoConstants {
+    public static final Distance DISTANCE_THRESHOLD = Meters.of(0.1524);
+
     public static final Pose2d BLUE_LEFT_TRENCH_AZ =
         new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
 
@@ -389,6 +391,30 @@ public final class Constants {
         new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
 
     public static final Pose2d BLUE_RIGHT_LEFT_TOP =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_CORNER_START =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_LEFT_CORNER_END =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_CORNER_START =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d BLUE_RIGHT_CORNER_END =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_CORNER_START =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_LEFT_CORNER_END =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_CORNER_START =
+        new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
+
+    public static final Pose2d RED_RIGHT_CORNER_END =
         new Pose2d(new Translation2d(0, 0), new Rotation2d(Degrees.of(0)));
   }
 }

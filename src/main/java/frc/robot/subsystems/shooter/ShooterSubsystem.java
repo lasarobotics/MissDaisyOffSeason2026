@@ -238,60 +238,6 @@ public class ShooterSubsystem extends StateMachine {
         ballSpeed.in(MetersPerSecond) / Constants.ShooterConstants.BALL_METERS_PER_MOTOR_ROTATION);
   }
 
-  public LinearVelocity getFuelVelocityX(
-      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
-
-    double speed = getFuelVelocity(launchSpeed).in(MetersPerSecond);
-
-    double fieldTurretAngle =
-        turretAngle.in(Radians)
-            + DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
-
-    return MetersPerSecond.of(
-        speed * Math.cos(hoodToElevation(hoodAngle).in(Radians)) * Math.cos(fieldTurretAngle));
-  }
-
-  public LinearVelocity getFuelVelocityY(
-      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
-
-    double speed = getFuelVelocity(launchSpeed).in(MetersPerSecond);
-
-    double fieldTurretAngle =
-        turretAngle.in(Radians)
-            + DriveSubsystem.getInstance().getRobotPose().getRotation().getRadians();
-
-    return MetersPerSecond.of(
-        speed * Math.cos(hoodToElevation(hoodAngle).in(Radians)) * Math.sin(fieldTurretAngle));
-  }
-
-  public LinearVelocity getFuelVelocityZ(
-      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
-
-    double speed = getFuelVelocity(launchSpeed).in(MetersPerSecond);
-
-    return MetersPerSecond.of(speed * Math.sin(hoodToElevation(hoodAngle).in(Radians)));
-  }
-
-  public LinearVelocity getFullVelocityX(
-      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
-    return MetersPerSecond.of(
-        getFuelVelocityX(hoodAngle, turretAngle, launchSpeed).in(MetersPerSecond)
-            + getTurretVelocityX().in(MetersPerSecond));
-  }
-
-  public LinearVelocity getFullVelocityY(
-      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
-    return MetersPerSecond.of(
-        getFuelVelocityY(hoodAngle, turretAngle, launchSpeed).in(MetersPerSecond)
-            + getTurretVelocityY().in(MetersPerSecond));
-  }
-
-  public LinearVelocity getFullVelocityZ(
-      Angle hoodAngle, Angle turretAngle, AngularVelocity launchSpeed) {
-    return MetersPerSecond.of(
-        getFuelVelocityZ(hoodAngle, turretAngle, launchSpeed).in(MetersPerSecond));
-  }
-
   public Translation2d getShooterFieldPosition() {
     Translation2d robotPosition = DriveSubsystem.getInstance().getRobotPose().getTranslation();
 
@@ -537,17 +483,6 @@ public class ShooterSubsystem extends StateMachine {
     return MetersPerSecond.of(
         shooterVelocity.in(RotationsPerSecond)
             * Constants.ShooterConstants.BALL_METERS_PER_MOTOR_ROTATION);
-  }
-
-  public double getFlightTime(Translation2d target, Angle desiredHoodAngle) {
-    Distance D = DriveSubsystem.getInstance().getDistance(target);
-    Distance dh =
-        Meters.of(
-            Constants.FieldConstants.HUB_Y_POS
-                - Constants.ShooterConstants.SHOOTER_OFFSET_Z.in(Meters));
-    return Math.sqrt(
-        ((2 * D.in(Meters) * Math.tan(desiredHoodAngle.in(Degrees) - dh.in(Meters))))
-            / Constants.FieldConstants.GRAVITY_VALUE);
   }
 
   public boolean atGoodHoodAngle(Angle desiredHoodAngle) {

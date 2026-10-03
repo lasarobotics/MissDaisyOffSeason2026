@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -31,6 +32,17 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public SystemState nextState() {
+        if (!DriverStation.isAutonomous()) {
+          if (getInstance().wantsToDriveUnwind()) {
+            return DRIVE_UNWIND;
+          }
+          if (getInstance().wantToActive()) {
+            return ACTIVE;
+          }
+          if (getInstance().wantToReverse()) {
+            return REVERSE;
+          }
+        }
         return this;
       }
     },
@@ -43,6 +55,9 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (getInstance().wantsToDriveUnwind()) {
           return DRIVE_UNWIND;
         }
@@ -64,6 +79,9 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (getInstance().wantsToDriveUnwind()) {
           return DRIVE_UNWIND;
         }
@@ -85,6 +103,9 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (getInstance().wantsToDriveUnwind()) {
           return DRIVE_UNWIND;
         }
@@ -106,6 +127,9 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
         if (getInstance().wantsToDriveUnwind()) {
           return DRIVE_UNWIND;
         }
