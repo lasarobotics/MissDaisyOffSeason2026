@@ -65,12 +65,12 @@ public class DriveSubsystem extends StateMachine {
                     .m_drive
                     .withVelocityX(
                         Constants.Drive.MAX_SPEED.times(
-                            -getInstance().m_strafeRequest.getAsDouble()
-                                * Math.abs(getInstance().m_strafeRequest.getAsDouble())))
-                    .withVelocityY(
-                        Constants.Drive.MAX_SPEED.times(
                             -getInstance().m_driveRequest.getAsDouble()
                                 * Math.abs(getInstance().m_driveRequest.getAsDouble())))
+                    .withVelocityY(
+                        Constants.Drive.MAX_SPEED.times(
+                            -getInstance().m_strafeRequest.getAsDouble()
+                                * Math.abs(getInstance().m_strafeRequest.getAsDouble())))
                     .withRotationalRate(rotationRate));
       }
 
@@ -135,7 +135,7 @@ public class DriveSubsystem extends StateMachine {
 
     m_autoChooser.setDefaultOption("Do Nothing", Commands.none());
 
-    m_autoChooser.addOption("BLine Test", followBLinePath("test"));
+    m_autoChooser.addOption("BLine Test", followBLinePath("test-path"));
 
     SmartDashboard.putData("Autonomous", m_autoChooser);
   }
@@ -166,7 +166,6 @@ public class DriveSubsystem extends StateMachine {
 
   public void configureBindings(
       DoubleSupplier driveRequest, DoubleSupplier strafeRequest, DoubleSupplier rotateRequest) {
-
     m_driveRequest = driveRequest;
     m_strafeRequest = strafeRequest;
     m_rotateRequest = rotateRequest;
@@ -191,7 +190,6 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public void driveRobotRelative(ChassisSpeeds speeds) {
-
     m_driveTrain.setControl(m_blineDriveRequest.withSpeeds(speeds));
   }
 
@@ -206,7 +204,6 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public Command getAutonomousCommand() {
-
     return m_autoChooser.getSelected();
   }
 
@@ -253,6 +250,9 @@ public class DriveSubsystem extends StateMachine {
 
       Logger.recordOutput(getName() + "/TagCount", limelightEstimate.tagCount);
     }
+
+    Logger.recordOutput("DriveSubsystem/Pose", m_driveTrain.getState().Pose);
+    Logger.recordOutput("DriveSubsystem/State", getInstance().m_driveState);
   }
 
   private void updateTurretLimelightPose() {

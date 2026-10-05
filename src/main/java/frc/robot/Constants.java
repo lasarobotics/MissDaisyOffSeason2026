@@ -34,21 +34,6 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static class MotorIds {
-    public static final int SLAP_DOWN_MOTOR_ID = 9;
-    public static final int INTAKE_ROLLER_LEADER_MOTOR_ID = 10;
-    public static final int INTAKE_ROLLER_FOLLOWER_MOTOR_ID = 11;
-    public static final int FEEDING_ROLLER_MOTOR_ID = 12;
-    public static final int SHOOTER_FEED_LEADER_MOTOR_ID = 13;
-    public static final int SHOOTER_FEED_FOLLOWER_MOTOR_ID = 14;
-    public static final int TURRET_MOTOR_ID = 15;
-    public static final int SHOOTER_SPEED_LEADER_MOTOR_ID = 16;
-    public static final int SHOOTER_SPEED_FOLLOWER_MOTOR_ID = 17;
-    public static final int HOOD_ANGLE_MOTOR_ID = 18;
-    public static final int ENCODER1 = 19;
-    public static final int ENCODER2 = 20;
-  }
-
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
     public static final LinearAcceleration MAX_ACCELERATION =

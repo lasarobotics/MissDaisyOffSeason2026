@@ -50,8 +50,8 @@ public class Robot extends LoggedRobot {
     HeadHoncho.getInstance().configureBindings(() -> m_activeToggle, m_controller.rightTrigger());
     DriveSubsystem.getInstance()
         .configureBindings(
-            () -> m_controller.getLeftY(), // drive x
-            () -> m_controller.getLeftX(), // drive y
+            () -> m_controller.getLeftY(),
+            () -> m_controller.getLeftX(),
             () -> m_controller.getRightX());
   }
 
@@ -83,7 +83,13 @@ public class Robot extends LoggedRobot {
 
   /** This autonomous runs the autonomous command selected by your {@link Robotcontainer} class. */
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    m_autonomousCommand = DriveSubsystem.getInstance().getAutonomousCommand();
+
+    if (m_autonomousCommand != null) {
+      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+    }
+  }
 
   /** This function is called periodically during autonomous. */
   @Override
