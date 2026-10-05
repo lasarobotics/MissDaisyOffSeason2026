@@ -4,6 +4,23 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+
+import com.ctre.phoenix6.controls.PositionVoltage;
+import edu.wpi.first.math.geometry.Rectangle2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,5 +32,204 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+  }
+
+  public static class MotorIds {
+    public static final int SLAP_DOWN_MOTOR_ID = 9;
+    public static final int INTAKE_ROLLER_LEADER_MOTOR_ID = 10;
+    public static final int INTAKE_ROLLER_FOLLOWER_MOTOR_ID = 11;
+    public static final int FEEDING_ROLLER_MOTOR_ID = 12;
+    public static final int SHOOTER_FEED_LEADER_MOTOR_ID = 13;
+    public static final int SHOOTER_FEED_FOLLOWER_MOTOR_ID = 14;
+    public static final int TURRET_MOTOR_ID = 15;
+    public static final int SHOOTER_SPEED_LEADER_MOTOR_ID = 16;
+    public static final int SHOOTER_SPEED_FOLLOWER_MOTOR_ID = 17;
+    public static final int HOOD_ANGLE_MOTOR_ID = 18;
+    public static final int ENCODER1 = 19;
+    public static final int ENCODER2 = 20;
+  }
+
+  public static class Drive {
+    public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
+    public static final LinearAcceleration MAX_ACCELERATION =
+        MetersPerSecondPerSecond.of(3); // TODO measure
+    public static final AngularVelocity MAX_ANGULAR_RATE =
+        RotationsPerSecond.of(0.75); // TODO measure
+    public static final AngularAcceleration MAX_ANGULAR_ACCELERATION =
+        RotationsPerSecondPerSecond.of(1); // TODO
+    // measure
+
+    public static final double STOW_DISTANCE_REQUIREMENT = 6.75;
+    public static final double CENTER_XPOS = 8.25;
+
+    public static final double DEADBAND_SCALAR = 0.1;
+    public static final double SLOW_SPEED_SCALAR = 0.1;
+    public static final double MID_SPEED_SCALAR = 0.5;
+    public static final double FAST_SPEED_SCALAR = 0.75;
+
+    public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
+    public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
+    public static final double ROTATION_DEADBAND = 0.002 * Math.PI * 2;
+  }
+
+  public static class Intake {
+    public static final int ARM_CAN_ID = 30;
+    public static final int LEADER_CAN_ID = 31;
+    public static final int FOLLOWER_CAN_ID = 32;
+
+    public static final PositionVoltage ARM_STOW_SETPOINT = new PositionVoltage(0);
+    public static final PositionVoltage ARM_DEPLOY_SETPOINT = new PositionVoltage(0);
+    public static final double INTAKE_STOW_SPEED = 0;
+    public static final double INTAKE_ACTIVE_SPEED = 0;
+    public static final double INTAKE_ROLLER_CIRCUMFIRENCE = 0;
+    public static final double INTAKE_MOTOR_GEAR_RATIO = 0;
+  }
+
+  public static class Serialization {
+    public static final int OMNI_CAN_ID = 40;
+    public static final int MECANUM_LEADER_CAN_ID = 41;
+    public static final int MECANUM_FOLLOWER_CAN_ID = 42;
+
+    public static final double OMNI_SPEED = 0;
+    public static final double MECANUM_SPEED = 0;
+    public static final double OMNI_REST_SPEED = 0;
+    public static final double MECANUM_REST_SPEED = 0;
+  }
+
+  public static class Shooter {
+    public static final int SHOOTER_LEADER_ID = 50;
+    public static final int SHOOTER_FOLLOWER_ID = 51;
+    public static final int HOOD_MOTOR_ID = 52;
+    public static final int TURRET_MOTOR_ID = 53;
+    public static final int ENCODER_ONE_TEETH = 17;
+    public static final int ENCODER_TWO_TEETH = 18;
+    public static final int TURRET_GEAR_TEETH = 92;
+    public static final int MOTOR_TURRET_GEAR_RATIO = 46;
+    public static final int ENCODER_TWO_ID = 54;
+    public static final int ENCODER_ONE_ID = 55;
+    public static final double CRT_EPSILON = 0.01;
+    public static final double SHOOTER_OFFSET_X = Inches.of(-4).in(Meters);
+    public static final double SHOOTER_OFFSET_Y = Inches.of(-3).in(Meters);
+    public static final double SHOOTER_OFFSET_RADIUS =
+        Math.hypot(SHOOTER_OFFSET_X, SHOOTER_OFFSET_Y);
+    public static final double CENTER_TO_EDGE = Inches.of(13.25).in(Meters);
+    public static final double HANG_TIME = 1.0;
+    public static final double MOTOR_HOOD_GEAR_RATIO =
+        (44.0 / 11.0)
+            * (32.0 / 18.0)
+            * (175.0 / 10.0); // Spins per motor to get 1 "rotation" of the rack if it were a circle
+    public static final double HOOD_COLLISION_TIME = 0.25;
+    public static final double HUB_HEIGHT = 1.83;
+    public static final LoggedNetworkNumber MAX_BALL_Y_POS =
+        new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
+    public static final double MOTOR_SHOOTER_GEAR_RATIO = 1;
+    public static final double HOOD_MAX_ANGLE = (19.0 / 175.0); // rotations
+    public static final double TURRET_DEADBAND =
+        0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
+    // meters away
+  }
+
+  public static class Field {
+    public static final Distance FIELD_X = Inches.of(650.12);
+    public static final Distance FIELD_Y = Inches.of(316.64);
+    public static final double NZ_MID_LINE_X = FIELD_X.in(Meters) / 2;
+    public static final double NZ_MID_LINE_Y = FIELD_Y.in(Meters) / 2;
+    public static final double HUB_WIDTH = Inches.of(47).in(Meters);
+    public static final double AZ_DEPTH = Inches.of(158.6).in(Meters);
+
+    public static final Translation2d BLUE_HUB_POS =
+        new Translation2d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y);
+    public static final Translation2d RED_HUB_POS =
+        new Translation2d(FIELD_X.in(Meters) - AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y);
+    public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 6.03);
+    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 1);
+    public static final Translation2d RED_LEFT_BUMP = new Translation2d(RED_HUB_POS.getX(), 2.01);
+    public static final Translation2d RED_RIGHT_BUMP = new Translation2d(RED_HUB_POS.getX(), 6.03);
+
+    public static final double NZ_RED_X = RED_HUB_POS.getX();
+    public static final double NZ_BLUE_X = BLUE_HUB_POS.getX();
+    public static final double TRENCH_WIDTH = Inches.of(50.34).in(Meters);
+    public static final Translation2d RED_LEFT_TRENCH_P1 =
+        new Translation2d(RED_HUB_POS.getX(), FIELD_Y.in(Meters));
+    public static final Translation2d RED_LEFT_TRENCH_P2 =
+        new Translation2d(RED_HUB_POS.getX(), FIELD_Y.in(Meters) - TRENCH_WIDTH);
+    public static final Translation2d RED_RIGHT_TRENCH_P1 =
+        new Translation2d(RED_HUB_POS.getX(), 0);
+    public static final Translation2d RED_RIGHT_TRENCH_P2 =
+        new Translation2d(RED_HUB_POS.getX(), TRENCH_WIDTH);
+    public static final Translation2d BLUE_RIGHT_TRENCH_P1 =
+        new Translation2d(BLUE_HUB_POS.getX(), 0);
+    public static final Translation2d BLUE_RIGHT_TRENCH_P2 =
+        new Translation2d(BLUE_HUB_POS.getX(), TRENCH_WIDTH);
+    public static final Translation2d BLUE_LEFT_TRENCH_P1 =
+        new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters));
+    public static final Translation2d BLUE_LEFT_TRENCH_P2 =
+        new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters) - TRENCH_WIDTH);
+
+    // corner a and corner b of blue tower
+    public static final Rectangle2d BLUE_TOWER =
+        new Rectangle2d(new Translation2d(0, 3.173), new Translation2d(1.108, 4.346));
+    public static final Rectangle2d RED_TOWER =
+        new Rectangle2d(
+            new Translation2d(FIELD_X.in(Meters), 3.173),
+            new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
+    public static final double GRAVITY_VALUE = 9.81;
+  }
+
+  public static class Hub {
+    public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
+    public static final Translation2d RED_HUB_POS = new Translation2d(11.9, 4.021);
+    public static final double BLUE_BUMP_XPOS = 0;
+    public static final double RED_BUMP_XPOS = 0;
+    public static final double LEFTY_POS = 0;
+    public static final double RIGHTY_POS = 0;
+  }
+
+  public static final class BLine {
+    public static final double MAX_VELOCITY_MPS = 4.0;
+    public static final double MAX_ACCELERATION_MPS2 = 3.0;
+    public static final double MAX_ANGULAR_VELOCITY_DEG_PER_SEC = 360.0;
+    public static final double MAX_ANGULAR_ACCELERATION_DEG_PER_SEC2 = 720.0;
+    public static final double END_TRANSLATION_TOLERANCE_METERS = 0.05;
+    public static final double END_ROTATION_TOLERANCE_DEG = 2.0;
+    public static final double INTERMEDIATE_HANDOFF_RADIUS_METERS = 0.30;
+
+    public static final double TRANSLATION_KP = 5.0;
+    public static final double TRANSLATION_KI = 0.0;
+    public static final double TRANSLATION_KD = 0.0;
+
+    public static final double ROTATION_KP = 3.0;
+    public static final double ROTATION_KI = 0.0;
+    public static final double ROTATION_KD = 0.0;
+
+    public static final double CROSS_TRACK_KP = 2.0;
+    public static final double CROSS_TRACK_KI = 0.0;
+    public static final double CROSS_TRACK_KD = 0.0;
+  }
+
+  public static final class Limelight {
+
+    public static final String LIMELIGHT_NAME = "limelight";
+
+    public static final double TURRET_PIVOT_FORWARD_METERS = 0.0;
+    public static final double TURRET_PIVOT_LEFT_METERS = 0.0;
+    public static final double TURRET_PIVOT_HEIGHT_METERS = 0.0;
+
+    public static final double CAMERA_FORWARD_METERS = 0.0;
+    public static final double CAMERA_LEFT_METERS = 0.0;
+    public static final double CAMERA_HEIGHT_METERS = 0.0;
+
+    public static final double CAMERA_YAW_AT_ZERO_DEG = 0.0;
+    public static final double CAMERA_PITCH_DEG = 0.0;
+    public static final double CAMERA_ROLL_DEG = 0.0;
+
+    public static final double MAX_TAG_AMBIGUITY = 1.0;
+    public static final double MAX_VISION_ANGULAR_VELOCITY_DEG_PER_SEC = 720.0;
+    public static final double MAX_SINGLE_TAG_DISTANCE_METERS = 0.0;
+
+    public static final double VISION_STD_DEV_X = 0.7;
+    public static final double VISION_STD_DEV_Y = 0.7;
+
+    public static final double VISION_STD_DEV_THETA = 9999999.0;
   }
 }

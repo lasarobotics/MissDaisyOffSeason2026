@@ -4,30 +4,116 @@
 
 package frc.robot.subsystems.serialization;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import org.littletonrobotics.junction.Logger;
 
-public class SerializationSubsystem extends StateMachine implements AutoCloseable {
+public class SerializationSubsystem extends StateMachine {
 
   public enum SerializationStates implements SystemState {
     REST {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void execute() {
+        getInstance().restOmni();
+        getInstance().restMecanum();
+      }
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return getInstance().m_requestedState;
       }
-    }
+    },
+
+    ACTIVE {
+      @Override
+      public void execute() {
+        getInstance().activateOmni(false);
+        if (!ShooterSubsystem.getInstance().isReadyToShoot()
+            || ShooterSubsystem.getInstance().robotCrossTrench()
+            || DriveSubsystem.getInstance().underTower()
+            || !ShooterSubsystem.getInstance().canSeeTarget()) {
+          getInstance().restMecanum();
+        } else {
+          getInstance().activateMecanum(false);
+        }
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_requestedState;
+      }
+    },
+
+    REVERSE {
+      @Override
+      public void execute() {
+        getInstance().activateOmni(true);
+        getInstance().activateMecanum(true);
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_requestedState;
+      }
+    },
   }
 
   private static SerializationSubsystem s_serializationInstance;
 
+  private SerializationStates m_requestedState;
+
+  private TalonFX m_omniMotor;
+  private TalonFX m_mecanumMotorLeader;
+  private TalonFX m_mecanumMotorFollower;
+
+  private VelocityDutyCycle m_serializationVelocityDutyCycle;
+
   public SerializationSubsystem() {
     super(SerializationStates.REST);
+
+    m_requestedState = SerializationStates.ACTIVE;
+
+    m_serializationVelocityDutyCycle = new VelocityDutyCycle(0);
+
+    m_omniMotor = new TalonFX(Constants.Serialization.OMNI_CAN_ID);
+    m_mecanumMotorLeader = new TalonFX(Constants.Serialization.MECANUM_LEADER_CAN_ID);
+    m_mecanumMotorFollower = new TalonFX(Constants.Serialization.MECANUM_FOLLOWER_CAN_ID);
+
+    TalonFXConfiguration omniConfig = new TalonFXConfiguration();
+    omniConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    omniConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    omniConfig.CurrentLimits.StatorCurrentLimit = 120;
+    omniConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    omniConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    omniConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
+    m_omniMotor.getConfigurator().apply(omniConfig);
+
+    TalonFXConfiguration mecanumConfig = new TalonFXConfiguration();
+    mecanumConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    mecanumConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    mecanumConfig.CurrentLimits.StatorCurrentLimit = 120;
+    mecanumConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    mecanumConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    mecanumConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
+    m_mecanumMotorLeader.getConfigurator().apply(mecanumConfig);
+    m_mecanumMotorFollower.getConfigurator().apply(mecanumConfig);
+
+    m_mecanumMotorFollower.setControl(
+        new Follower(m_mecanumMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+  }
+
+  public void setState(SerializationStates state) {
+    getInstance().m_requestedState = state;
   }
 
   public static SerializationSubsystem getInstance() {
@@ -37,11 +123,42 @@ public class SerializationSubsystem extends StateMachine implements AutoCloseabl
     return s_serializationInstance;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void restOmni() {
+    getInstance()
+        .m_omniMotor
+        .setControl(
+            getInstance()
+                .m_serializationVelocityDutyCycle
+                .withVelocity(Constants.Serialization.OMNI_REST_SPEED));
+  }
+
+  public void restMecanum() {
+    getInstance()
+        .m_mecanumMotorLeader
+        .setControl(
+            getInstance()
+                .m_serializationVelocityDutyCycle
+                .withVelocity(Constants.Serialization.MECANUM_REST_SPEED));
+  }
+
+  public void activateOmni(boolean reverse) {
+    double speed =
+        (reverse) ? -Constants.Serialization.OMNI_SPEED : Constants.Serialization.OMNI_SPEED;
+    getInstance()
+        .m_omniMotor
+        .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
+  }
+
+  public void activateMecanum(boolean reverse) {
+    double speed =
+        (reverse) ? -Constants.Serialization.MECANUM_SPEED : Constants.Serialization.MECANUM_SPEED;
+    getInstance()
+        .m_mecanumMotorLeader
+        .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
   }
 
   @Override
-  public void close() {}
+  public void periodic() {
+    Logger.recordOutput("SerializationSubsystem/State", getState().toString());
+  }
 }

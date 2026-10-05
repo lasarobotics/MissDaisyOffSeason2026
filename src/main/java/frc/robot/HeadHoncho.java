@@ -4,30 +4,111 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.DriveSubsystem.DriveStates;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem.IntakeStates;
+import frc.robot.subsystems.serialization.SerializationSubsystem;
+import frc.robot.subsystems.serialization.SerializationSubsystem.SerializationStates;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem.ShooterStates;
+import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
-public class HeadHoncho extends StateMachine implements AutoCloseable {
+public class HeadHoncho extends StateMachine {
 
   public enum HeadHonchoStates implements SystemState {
-    REST {
+    AUTO {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void initialize() {
+        DriveSubsystem.getInstance().setState(DriveStates.REST);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+      }
 
       @Override
       public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
+        return REST;
+      }
+    },
+    REST {
+      @Override
+      public void initialize() {
+
+        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
+        IntakeSubsystem.getInstance().setState(IntakeStates.REST);
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
+        if (getInstance().m_activeToggle.getAsBoolean()) {
+          return TOGGLE_ON;
+        }
+        return REST;
+      }
+    },
+    TOGGLE_ON {
+      @Override
+      public void initialize() {
+        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
+        if (!getInstance().m_activeToggle.getAsBoolean()) {
+          return REST;
+        }
+        return TOGGLE_ON;
+      }
+    },
+    REVERSE {
+      @Override
+      public void initialize() {
+        DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
+        IntakeSubsystem.getInstance().setState(IntakeStates.REVERSE);
+        SerializationSubsystem.getInstance().setState(SerializationStates.REVERSE);
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
+        if (getInstance().m_activeToggle.getAsBoolean()) {
+          return TOGGLE_ON;
+        }
         return REST;
       }
     }
   }
 
   private static HeadHoncho s_headHoncho;
+  private BooleanSupplier m_activeToggle;
+  private BooleanSupplier m_reverseButton;
 
   public HeadHoncho() {
-    super(HeadHonchoStates.REST);
+    super(HeadHonchoStates.REST); // TODO switch to auto
+  }
+
+  public void configureBindings(BooleanSupplier activeToggle, BooleanSupplier reverse) {
+    m_activeToggle = activeToggle;
+    m_reverseButton = reverse;
   }
 
   public static HeadHoncho getInstance() {
@@ -39,9 +120,14 @@ public class HeadHoncho extends StateMachine implements AutoCloseable {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    Logger.recordOutput("HeadHoncho/currentState", getState().toString());
+    Logger.recordOutput("HeadHoncho/activeToggle", m_activeToggle);
+    Logger.recordOutput("HeadHoncho/reverse", m_reverseButton);
+    Logger.recordOutput("Field/BLUE_HUB_POS", Constants.Field.BLUE_HUB_POS);
+    Logger.recordOutput("Field/BLUE_LEFT_BUMP", Constants.Field.BLUE_LEFT_BUMP);
+    Logger.recordOutput("Field/BLUE_RIGHT_BUMP", Constants.Field.BLUE_RIGHT_BUMP);
+    Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
+    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
+    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
   }
-
-  @Override
-  public void close() {}
 }

@@ -4,30 +4,115 @@
 
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
+import org.littletonrobotics.junction.Logger;
 
-public class IntakeSubsystem extends StateMachine implements AutoCloseable {
+public class IntakeSubsystem extends StateMachine {
 
   public enum IntakeStates implements SystemState {
     REST {
       @Override
-      public void initialize() {}
-
-      @Override
-      public void execute() {}
+      public void execute() {
+        getInstance().deployIntake();
+        getInstance().stopIntake();
+      }
 
       @Override
       public SystemState nextState() {
-        return REST;
+        return getInstance().m_requestedState;
       }
-    }
+    },
+
+    STOW {
+      @Override
+      public void execute() {
+        getInstance().stowIntake();
+        getInstance().stopIntake();
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_requestedState;
+      }
+    },
+
+    INTAKE {
+      @Override
+      public void execute() {
+        getInstance().deployIntake();
+        getInstance().activateIntake(false);
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_requestedState;
+      }
+    },
+
+    REVERSE {
+      @Override
+      public void execute() {
+        getInstance().deployIntake();
+        getInstance().activateIntake(true);
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_requestedState;
+      }
+    },
   }
 
   private static IntakeSubsystem s_intakeInstance;
 
+  private IntakeStates m_requestedState;
+
+  private TalonFX m_armMotor;
+  private TalonFX m_intakeMotorLeader;
+  private TalonFX m_intakeMotorFollower;
+
+  private VelocityDutyCycle m_intakeVelocityDutyCycle;
+
   public IntakeSubsystem() {
-    super(IntakeStates.REST);
+    super(IntakeStates.INTAKE);
+
+    m_requestedState = IntakeStates.INTAKE;
+
+    m_intakeVelocityDutyCycle = new VelocityDutyCycle(0);
+
+    m_armMotor = new TalonFX(Constants.Intake.ARM_CAN_ID);
+    m_intakeMotorLeader = new TalonFX(Constants.Intake.LEADER_CAN_ID);
+    m_intakeMotorFollower = new TalonFX(Constants.Intake.FOLLOWER_CAN_ID);
+
+    TalonFXConfiguration armConfig = new TalonFXConfiguration();
+    armConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    armConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    armConfig.CurrentLimits.StatorCurrentLimit = 120;
+    armConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    armConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
+    m_armMotor.getConfigurator().apply(armConfig);
+
+    TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
+    intakeConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    intakeConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    intakeConfig.CurrentLimits.StatorCurrentLimit = 120;
+    intakeConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    intakeConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    intakeConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+
+    m_intakeMotorLeader.getConfigurator().apply(intakeConfig);
+    m_intakeMotorFollower.getConfigurator().apply(intakeConfig);
+    m_intakeMotorFollower.setControl(
+        new Follower(m_intakeMotorLeader.getDeviceID(), MotorAlignmentValue.Aligned));
   }
 
   public static IntakeSubsystem getInstance() {
@@ -37,11 +122,37 @@ public class IntakeSubsystem extends StateMachine implements AutoCloseable {
     return s_intakeInstance;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void setState(IntakeStates state) {
+    getInstance().m_requestedState = state;
+  }
+
+  public void stopIntake() {
+    getInstance()
+        .m_intakeMotorLeader
+        .setControl(
+            getInstance()
+                .m_intakeVelocityDutyCycle
+                .withVelocity(Constants.Intake.INTAKE_STOW_SPEED));
+  }
+
+  public void activateIntake(boolean reverse) {
+    double intakeSpeed =
+        (reverse) ? -Constants.Intake.INTAKE_ACTIVE_SPEED : Constants.Intake.INTAKE_ACTIVE_SPEED;
+    getInstance()
+        .m_intakeMotorLeader
+        .setControl(getInstance().m_intakeVelocityDutyCycle.withVelocity(intakeSpeed));
+  }
+
+  public void deployIntake() {
+    getInstance().m_armMotor.setControl(Constants.Intake.ARM_DEPLOY_SETPOINT);
+  }
+
+  public void stowIntake() {
+    getInstance().m_armMotor.setControl(Constants.Intake.ARM_STOW_SETPOINT);
   }
 
   @Override
-  public void close() {}
+  public void periodic() {
+    Logger.recordOutput("IntakeSubsystem/State", getState().toString());
+  }
 }

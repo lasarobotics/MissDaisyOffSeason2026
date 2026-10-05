@@ -6,7 +6,16 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.serialization.SerializationSubsystem;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -15,17 +24,35 @@ import org.littletonrobotics.junction.LoggedRobot;
  */
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
+  private boolean m_activeToggle;
 
-  private final RobotContainer m_robotContainer;
+  private final CommandXboxController m_controller = new CommandXboxController(0);
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our Robotcontainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    Logger.addDataReceiver(new WPILOGWriter());
+    Logger.addDataReceiver(new NT4Publisher());
+
+    Logger.start();
+
+    DriveSubsystem.getInstance();
+    IntakeSubsystem.getInstance();
+    SerializationSubsystem.getInstance();
+    ShooterSubsystem.getInstance();
+    HeadHoncho.getInstance();
+
+    m_controller.rightBumper().onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
+    HeadHoncho.getInstance().configureBindings(() -> m_activeToggle, m_controller.rightTrigger());
+    DriveSubsystem.getInstance()
+        .configureBindings(
+            () -> m_controller.getLeftY(), // drive x
+            () -> m_controller.getLeftX(), // drive y
+            () -> m_controller.getRightX());
   }
 
   @Override
@@ -54,7 +81,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledPeriodic() {}
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /** This autonomous runs the autonomous command selected by your {@link Robotcontainer} class. */
   @Override
   public void autonomousInit() {}
 
