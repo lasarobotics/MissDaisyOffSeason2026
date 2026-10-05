@@ -4,10 +4,22 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
+
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
@@ -91,23 +103,37 @@ public class IntakeSubsystem extends StateMachine {
     m_intakeMotorLeader = new TalonFX(Constants.Intake.LEADER_CAN_ID);
     m_intakeMotorFollower = new TalonFX(Constants.Intake.FOLLOWER_CAN_ID);
 
-    TalonFXConfiguration armConfig = new TalonFXConfiguration();
-    armConfig.Slot0.withKP(0).withKI(0).withKD(0);
-    armConfig.CurrentLimits.SupplyCurrentLimit = 200;
-    armConfig.CurrentLimits.StatorCurrentLimit = 120;
-    armConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
-    armConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
-    armConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    TalonFXConfiguration armConfig =
+        new TalonFXConfiguration()
+            .withSlot0(
+                new Slot0Configs()
+                    .withKP(50)
+                    .withKD(1)
+                    .withKS(0.23046875)
+                    .withKG(-0.599609375)
+                    .withGravityType(GravityTypeValue.Arm_Cosine)
+                    .withGravityArmPositionOffset(Rotations.of(-0.2490234375)))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(34.97140121459961))
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(Rotations.of(0.30000001192092896))
+                    .withReverseSoftLimitEnable(true)
+                    .withReverseSoftLimitThreshold(Rotations.of(-0.10000000149011612)))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2))
+                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(5))
+                    .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(40)));
 
     m_armMotor.getConfigurator().apply(armConfig);
 
-    TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
-    intakeConfig.Slot0.withKP(0).withKI(0).withKD(0);
-    intakeConfig.CurrentLimits.SupplyCurrentLimit = 200;
-    intakeConfig.CurrentLimits.StatorCurrentLimit = 120;
-    intakeConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
-    intakeConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
-    intakeConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    TalonFXConfiguration intakeConfig =
+        new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
+            .withSlot0(new Slot0Configs().withKP(0.2).withKS(0.259765625).withKV(0.24))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(2.037));
 
     m_intakeMotorLeader.getConfigurator().apply(intakeConfig);
     m_intakeMotorFollower.getConfigurator().apply(intakeConfig);

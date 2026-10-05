@@ -12,7 +12,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -91,7 +90,6 @@ public class DriveSubsystem extends StateMachine {
 
   private CommandSwerveDrivetrain m_driveTrain;
   private SwerveRequest.FieldCentric m_drive;
-  private Translation2d m_hubPos;
 
   private final SwerveRequest.ApplyRobotSpeeds m_blineDriveRequest =
       new SwerveRequest.ApplyRobotSpeeds();
@@ -154,19 +152,14 @@ public class DriveSubsystem extends StateMachine {
     Optional<Alliance> ally = DriverStation.getAlliance();
 
     if (ally.isPresent()) {
-
       if (ally.get() == Alliance.Red) {
-
         m_driveTrain.setOperatorPerspectiveForward(
             CommandSwerveDrivetrain.kRedAlliancePerspectiveRotation);
-        m_hubPos = Constants.Hub.RED_HUB_POS;
       }
 
       if (ally.get() == Alliance.Blue) {
-
         m_driveTrain.setOperatorPerspectiveForward(
             CommandSwerveDrivetrain.kBlueAlliancePerspectiveRotation);
-        m_hubPos = Constants.Hub.BLUE_HUB_POS;
       }
     }
   }

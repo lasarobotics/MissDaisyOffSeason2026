@@ -4,10 +4,15 @@
 
 package frc.robot.subsystems.serialization;
 
+
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
@@ -87,13 +92,12 @@ public class SerializationSubsystem extends StateMachine {
     m_mecanumMotorLeader = new TalonFX(Constants.Serialization.MECANUM_LEADER_CAN_ID);
     m_mecanumMotorFollower = new TalonFX(Constants.Serialization.MECANUM_FOLLOWER_CAN_ID);
 
-    TalonFXConfiguration omniConfig = new TalonFXConfiguration();
-    omniConfig.Slot0.withKP(0).withKI(0).withKD(0);
-    omniConfig.CurrentLimits.SupplyCurrentLimit = 200;
-    omniConfig.CurrentLimits.StatorCurrentLimit = 120;
-    omniConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
-    omniConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
-    omniConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    TalonFXConfiguration omniConfig =
+        new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
+            .withSlot0(new Slot0Configs().withKS(0.1953125).withKV(0.6607))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(6));
 
     m_omniMotor.getConfigurator().apply(omniConfig);
 
