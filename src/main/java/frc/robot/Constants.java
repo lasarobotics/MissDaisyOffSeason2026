@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -19,6 +20,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.generated.TunerConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -66,8 +68,12 @@ public final class Constants {
     public static final PositionVoltage ARM_DEPLOY_SETPOINT = new PositionVoltage(0);
     public static final double INTAKE_STOW_SPEED = 0;
     public static final double INTAKE_ACTIVE_SPEED = 0;
-    public static final double INTAKE_ROLLER_CIRCUMFIRENCE = 0;
-    public static final double INTAKE_MOTOR_GEAR_RATIO = 0;
+    public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
+
+    public static final AngularVelocity INTAKE_ROLLER_SPEED =
+        RotationsPerSecond.of(
+            (2 * Drive.MAX_SPEED.in(MetersPerSecond))
+                / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
   }
 
   public static class Serialization {
@@ -75,10 +81,19 @@ public final class Constants {
     public static final int MECANUM_LEADER_CAN_ID = 41;
     public static final int MECANUM_FOLLOWER_CAN_ID = 42;
 
-    public static final double OMNI_SPEED = 0;
-    public static final double MECANUM_SPEED = 0;
-    public static final double OMNI_REST_SPEED = 0;
-    public static final double MECANUM_REST_SPEED = 0;
+    public static final LoggedNetworkNumber BALL_SPEED_INCREASER =
+        new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.1);
+
+    public static final Supplier<AngularVelocity> MECANUM_SPEED =
+        () -> {
+          return Intake.INTAKE_ROLLER_SPEED.plus(RotationsPerSecond.of(BALL_SPEED_INCREASER.get()));
+        };
+    public static final Supplier<AngularVelocity> OMNI_SPEED =
+        () -> {
+          return MECANUM_SPEED.get().plus(RotationsPerSecond.of(BALL_SPEED_INCREASER.get()));
+        };
+    public static final AngularVelocity MECANUM_REST_SPEED = RotationsPerSecond.of(0);
+    public static final AngularVelocity OMNI_REST_SPEED = RotationsPerSecond.of(0);
   }
 
   public static class Shooter {
@@ -89,7 +104,7 @@ public final class Constants {
     public static final int ENCODER_ONE_TEETH = 17;
     public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
-    public static final int MOTOR_TURRET_GEAR_RATIO = 46;
+
     public static final int ENCODER_TWO_ID = 54;
     public static final int ENCODER_ONE_ID = 55;
     public static final double CRT_EPSILON = 0.01;
@@ -99,15 +114,10 @@ public final class Constants {
         Math.hypot(SHOOTER_OFFSET_X, SHOOTER_OFFSET_Y);
     public static final double CENTER_TO_EDGE = Inches.of(13.25).in(Meters);
     public static final double HANG_TIME = 1.0;
-    public static final double MOTOR_HOOD_GEAR_RATIO =
-        (44.0 / 11.0)
-            * (32.0 / 18.0)
-            * (175.0 / 10.0); // Spins per motor to get 1 "rotation" of the rack if it were a circle
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final double HUB_HEIGHT = 1.83;
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
-    public static final double MOTOR_SHOOTER_GEAR_RATIO = 1;
     public static final double HOOD_MAX_ANGLE = (19.0 / 175.0); // rotations
     public static final double TURRET_DEADBAND =
         0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12

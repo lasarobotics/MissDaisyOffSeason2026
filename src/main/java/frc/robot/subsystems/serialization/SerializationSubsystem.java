@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.serialization;
 
-
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -14,6 +13,7 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
@@ -146,16 +146,14 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   public void activateOmni(boolean reverse) {
-    double speed =
-        (reverse) ? -Constants.Serialization.OMNI_SPEED : Constants.Serialization.OMNI_SPEED;
+    AngularVelocity speed = Constants.Serialization.OMNI_SPEED.get().times(reverse ? -1 : 1);
     getInstance()
         .m_omniMotor
         .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
   }
 
   public void activateMecanum(boolean reverse) {
-    double speed =
-        (reverse) ? -Constants.Serialization.MECANUM_SPEED : Constants.Serialization.MECANUM_SPEED;
+    AngularVelocity speed = Constants.Serialization.MECANUM_SPEED.get().times(reverse ? -1 : 1);
     getInstance()
         .m_mecanumMotorLeader
         .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));

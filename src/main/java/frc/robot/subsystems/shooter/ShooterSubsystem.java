@@ -106,15 +106,21 @@ public class ShooterSubsystem extends StateMachine {
             "ShooterSubsystem/AggregateAimPoint",
             new Pose2d(
                 DriveSubsystem.getInstance().getPose().getTranslation(),
-                new Rotation2d(
-                    (getInstance()
-                            .getTurretPos(
-                                getInstance().getTarget(),
-                                new Pose2d(
-                                    robotPose,
-                                    DriveSubsystem.getInstance().getPose().getRotation()))
-                        - (getInstance().m_turretMotor.getPosition().getValueAsDouble()
-                            / Constants.Shooter.MOTOR_TURRET_GEAR_RATIO)))));
+                DriveSubsystem.getInstance()
+                    .getPose()
+                    .getRotation()
+                    .plus(
+                        new Rotation2d(
+                            (getInstance()
+                                    .getTurretPos(
+                                        getInstance().getTarget(),
+                                        new Pose2d(
+                                            robotPose,
+                                            DriveSubsystem.getInstance().getPose().getRotation()))
+                                - (getInstance()
+                                    .m_turretMotor
+                                    .getPosition()
+                                    .getValueAsDouble()))))));
 
         getInstance()
             .setTurretPos(
@@ -168,8 +174,7 @@ public class ShooterSubsystem extends StateMachine {
     m_shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     m_hoodConfig = new TalonFXConfiguration();
     m_hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        Constants.Shooter.MOTOR_HOOD_GEAR_RATIO * Constants.Shooter.HOOD_MAX_ANGLE;
+    m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Shooter.HOOD_MAX_ANGLE;
     m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
     m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
@@ -239,10 +244,7 @@ public class ShooterSubsystem extends StateMachine {
     double xOffset = target.getX() - robotPose.getX();
     double yOffset = target.getY() - robotPose.getY();
     double angleToTarget = robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset);
-    double turretDesired =
-        -angleToTarget
-            - (m_turretMotor.getPosition().getValueAsDouble()
-                / Constants.Shooter.MOTOR_TURRET_GEAR_RATIO);
+    double turretDesired = -angleToTarget - (m_turretMotor.getPosition().getValueAsDouble());
     if (turretDesired < -Math.PI) {
       turretDesired += 2 * Math.PI;
     } else if (turretDesired > Math.PI) {
@@ -252,9 +254,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private void setTurretPos(double desiredPos) {
-    m_turretMotor.setControl(
-        m_positionVoltage.withPosition(
-            desiredPos / (2 * Math.PI) * Constants.Shooter.MOTOR_TURRET_GEAR_RATIO));
+    m_turretMotor.setControl(m_positionVoltage.withPosition(desiredPos / (2 * Math.PI)));
   }
 
   private double getHoodPos(double x_vel, double y_vel) {
@@ -267,16 +267,14 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private void setHoodPos(double hoodPos) {
-    m_hoodMotor.setControl(
-        m_positionVoltage.withPosition(
-            hoodPos / (2 * Math.PI) * Constants.Shooter.MOTOR_HOOD_GEAR_RATIO));
+    m_hoodMotor.setControl(m_positionVoltage.withPosition(hoodPos / (2 * Math.PI)));
   }
 
   private double getShooterSpeed(double x_vel, double y_vel) {
     double shootSpeed = Math.hypot(x_vel, y_vel);
     double desiredRPS = (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI);
-    double finalRPS = desiredRPS * Constants.Shooter.MOTOR_SHOOTER_GEAR_RATIO;
-    return finalRPS;
+    ;
+    return desiredRPS;
   }
 
   private void setShooterSpeed(double speed) {
@@ -451,8 +449,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public double getTurretRotation() {
-    return m_turretMotor.getPosition().getValueAsDouble()
-        / Constants.Shooter.MOTOR_TURRET_GEAR_RATIO;
+    return m_turretMotor.getPosition().getValueAsDouble();
   }
 
   private Translation2d getFuturePose(double time) {
