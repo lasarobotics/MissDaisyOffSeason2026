@@ -40,7 +40,6 @@ public class HeadHoncho extends StateMachine {
     REST {
       @Override
       public void initialize() {
-
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
         IntakeSubsystem.getInstance().setState(IntakeStates.REST);
@@ -61,8 +60,24 @@ public class HeadHoncho extends StateMachine {
       @Override
       public void initialize() {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
-        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
-        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+      }
+
+      @Override
+      public void execute() {
+        if (!( // ShooterSubsystem.getInstance().isReadyToShoot() &&
+        !ShooterSubsystem.getInstance().robotCrossTrench()
+            && !DriveSubsystem.getInstance().underTower()
+            && ShooterSubsystem.getInstance().canSeeTarget()
+            && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()))) {
+          ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
+
+          IntakeSubsystem.getInstance().setState(IntakeStates.REST);
+          SerializationSubsystem.getInstance().setState(SerializationStates.REST);
+        } else {
+          ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+          IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+          SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
+        }
       }
 
       @Override
@@ -129,5 +144,21 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
+    Logger.recordOutput(
+        "HeadHoncho/ballChecksPass",
+        // ShooterSubsystem.getInstance().isReadyToShoot() && TODO
+        !ShooterSubsystem.getInstance().robotCrossTrench()
+            && !DriveSubsystem.getInstance().underTower()
+            && ShooterSubsystem.getInstance().canSeeTarget()
+            && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()));
+
+    Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());
+    Logger.recordOutput(
+        "HeadHoncho/crossTrench", !ShooterSubsystem.getInstance().robotCrossTrench());
+    Logger.recordOutput("HeadHoncho/underTower", !DriveSubsystem.getInstance().underTower());
+    Logger.recordOutput("HeadHoncho/canSeeTarget", ShooterSubsystem.getInstance().canSeeTarget());
+    Logger.recordOutput(
+        "HeadHoncho/shifts",
+        !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()));
   }
 }

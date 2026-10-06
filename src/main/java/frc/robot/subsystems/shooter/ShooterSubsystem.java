@@ -202,7 +202,7 @@ public class ShooterSubsystem extends StateMachine {
     m_selectedState = state;
   }
 
-  private boolean inAZ() {
+  public boolean inAZ() {
     if (m_blueAlliance) {
       return DriveSubsystem.getInstance().getPose().getX() < Constants.Field.NZ_BLUE_X;
     } else {
@@ -210,7 +210,7 @@ public class ShooterSubsystem extends StateMachine {
     }
   }
 
-  private boolean inNZ() {
+  public boolean inNZ() {
     return DriveSubsystem.getInstance().getPose().getX() > Constants.Field.NZ_BLUE_X
         && DriveSubsystem.getInstance().getPose().getX() < Constants.Field.NZ_RED_X;
   }
@@ -340,6 +340,9 @@ public class ShooterSubsystem extends StateMachine {
 
   /*Check all line segments of the 2 hubs and see if it intersects the robot and target line segment */
   public boolean canSeeTarget() {
+    if (inAZ()) {
+      return true;
+    }
     Translation2d a =
         DriveSubsystem.getInstance()
             .getPose()
