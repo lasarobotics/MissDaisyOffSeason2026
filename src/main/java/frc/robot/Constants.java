@@ -14,6 +14,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -132,14 +133,19 @@ public final class Constants {
     public static final double HUB_WIDTH = Inches.of(47).in(Meters);
     public static final double AZ_DEPTH = Inches.of(158.6).in(Meters);
 
-    public static final Translation2d BLUE_HUB_POS =
-        new Translation2d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y);
-    public static final Translation2d RED_HUB_POS =
-        new Translation2d(FIELD_X.in(Meters) - AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y);
-    public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 6.03);
-    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(BLUE_HUB_POS.getX(), 1);
-    public static final Translation2d RED_LEFT_BUMP = new Translation2d(RED_HUB_POS.getX(), 2.01);
-    public static final Translation2d RED_RIGHT_BUMP = new Translation2d(RED_HUB_POS.getX(), 6.03);
+    public static final Translation3d BLUE_HUB_POS =
+        new Translation3d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
+    public static final Translation3d RED_HUB_POS =
+        new Translation3d(
+            FIELD_X.in(Meters) - AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
+    public static final Translation3d BLUE_LEFT_BUMP =
+        new Translation3d(BLUE_HUB_POS.getX(), 6.03, 0);
+    public static final Translation3d BLUE_RIGHT_BUMP =
+        new Translation3d(BLUE_HUB_POS.getX(), 1, 0);
+    public static final Translation3d RED_LEFT_BUMP =
+        new Translation3d(RED_HUB_POS.getX(), 2.01, 0);
+    public static final Translation3d RED_RIGHT_BUMP =
+        new Translation3d(RED_HUB_POS.getX(), 6.03, 0);
 
     public static final double NZ_RED_X = RED_HUB_POS.getX();
     public static final double NZ_BLUE_X = BLUE_HUB_POS.getX();

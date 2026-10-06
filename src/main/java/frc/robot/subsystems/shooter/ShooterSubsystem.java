@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -63,13 +64,12 @@ public class ShooterSubsystem extends StateMachine {
             getInstance()
                 .transformByTangentialRotationSpeed(
                     getInstance().getFuturePose(Constants.Shooter.HANG_TIME));
-        Translation2d targetDiff = getInstance().getTarget().minus(robotPose);
+        Translation3d target = getInstance().getTarget();
+        Translation2d targetDiff = target.toTranslation2d().minus(robotPose);
         double distance = targetDiff.getNorm();
         double x_vel =
             getVelocityXStationary(
-                distance,
-                Constants.Shooter.HUB_HEIGHT,
-                Constants.Shooter.MAX_BALL_Y_POS.getAsDouble());
+                distance, target.getZ(), Constants.Shooter.MAX_BALL_Y_POS.getAsDouble());
         double y_vel = getVelocityYStationary(Constants.Shooter.MAX_BALL_Y_POS.getAsDouble());
 
         getInstance().m_readytoShoot =
@@ -77,7 +77,7 @@ public class ShooterSubsystem extends StateMachine {
                     getInstance().getTurretRotation()
                         - getInstance()
                             .getTurretPos(
-                                getInstance().getTarget(),
+                                target.toTranslation2d(),
                                 new Pose2d(
                                     robotPose,
                                     DriveSubsystem.getInstance().getPose().getRotation())))
@@ -98,7 +98,7 @@ public class ShooterSubsystem extends StateMachine {
                 new Rotation2d(
                     getInstance()
                         .getTurretPos(
-                            getInstance().getTarget(),
+                            target.toTranslation2d(),
                             new Pose2d(
                                 robotPose,
                                 DriveSubsystem.getInstance().getPose().getRotation())))));
@@ -113,7 +113,7 @@ public class ShooterSubsystem extends StateMachine {
                         new Rotation2d(
                             (getInstance()
                                     .getTurretPos(
-                                        getInstance().getTarget(),
+                                        target.toTranslation2d(),
                                         new Pose2d(
                                             robotPose,
                                             DriveSubsystem.getInstance().getPose().getRotation()))
@@ -126,7 +126,7 @@ public class ShooterSubsystem extends StateMachine {
             .setTurretPos(
                 getInstance()
                     .getTurretPos(
-                        getInstance().getTarget(),
+                        target.toTranslation2d(),
                         new Pose2d(
                             robotPose, DriveSubsystem.getInstance().getPose().getRotation())));
         getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
@@ -215,7 +215,7 @@ public class ShooterSubsystem extends StateMachine {
         && DriveSubsystem.getInstance().getPose().getX() < Constants.Field.NZ_RED_X;
   }
 
-  private Translation2d getTarget() {
+  private Translation3d getTarget() {
     if (m_blueAlliance) {
       if (inAZ()) {
         return Constants.Field.BLUE_HUB_POS;
@@ -349,7 +349,7 @@ public class ShooterSubsystem extends StateMachine {
                     Constants.Shooter.SHOOTER_OFFSET_Y,
                     new Rotation2d(0)))
             .getTranslation();
-    Translation2d b = getTarget();
+    Translation2d b = getTarget().toTranslation2d();
     Translation2d blueBottomRight =
         new Translation2d(
             Constants.Field.BLUE_HUB_POS.getX() - Constants.Field.HUB_WIDTH / 2,
