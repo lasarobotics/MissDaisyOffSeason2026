@@ -28,6 +28,7 @@ public class HeadHoncho extends StateMachine {
         DriveSubsystem.getInstance().setState(DriveStates.REST);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
         IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+        SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
       }
 
       @Override
@@ -72,6 +73,7 @@ public class HeadHoncho extends StateMachine {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
         IntakeSubsystem.getInstance().setState(IntakeStates.REST);
+        SerializationSubsystem.getInstance().setState(SerializationStates.REST);
       }
 
       @Override
@@ -87,6 +89,9 @@ public class HeadHoncho extends StateMachine {
 
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
+        }
+        if (getInstance().m_reverseButton.getAsBoolean()) {
+          return REVERSE;
         }
         return REST;
       }
@@ -120,9 +125,14 @@ public class HeadHoncho extends StateMachine {
           return this;
         }
 
+        if (getInstance().m_reverseButton.getAsBoolean()) {
+          return REVERSE;
+        }
+
         if (!getInstance().m_activeToggle.getAsBoolean()) {
           return REST;
         }
+
         return TOGGLE_ON;
       }
     },
@@ -147,7 +157,10 @@ public class HeadHoncho extends StateMachine {
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
-        return REST;
+        if (!getInstance().m_reverseButton.getAsBoolean()) {
+          return REST;
+        }
+        return REVERSE;
       }
     }
   }
