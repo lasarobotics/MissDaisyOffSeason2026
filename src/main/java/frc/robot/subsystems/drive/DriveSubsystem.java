@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
@@ -29,9 +31,6 @@ import frc.robot.fsm.SystemState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
-
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -274,7 +273,8 @@ public class DriveSubsystem extends StateMachine {
     double robotSpaceY = Constants.Limelight.TURRET_PIVOT_LEFT_METERS + rotatedLeft;
     double robotSpaceZ =
         Constants.Limelight.TURRET_PIVOT_HEIGHT_METERS + Constants.Limelight.CAMERA_HEIGHT_METERS;
-    double cameraYaw = Constants.Limelight.CAMERA_YAW_AT_ZERO_DEG.in(Degrees) + Math.toDegrees(turretAngle);
+    double cameraYaw =
+        Constants.Limelight.CAMERA_YAW_AT_ZERO_DEG.in(Degrees) + Math.toDegrees(turretAngle);
 
     LimelightHelpers.setCameraPose_RobotSpace(
         Constants.Limelight.LIMELIGHT_NAME,

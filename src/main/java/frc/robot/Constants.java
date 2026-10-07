@@ -8,19 +8,15 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.generated.TunerConstants;
 import java.util.function.Supplier;
@@ -42,9 +38,8 @@ public final class Constants {
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
 
-    public static final double WHEEL_FROM_CENTER_DIST =
-        Inches.of(15.476).in(Meters);
-  
+    public static final double WHEEL_FROM_CENTER_DIST = Inches.of(15.476).in(Meters);
+
     public static final AngularVelocity MAX_ANGULAR_RATE =
         RotationsPerSecond.of(
             MAX_SPEED.in(MetersPerSecond) / (2 * Math.PI * WHEEL_FROM_CENTER_DIST));
@@ -144,7 +139,7 @@ public final class Constants {
         new Translation3d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
     public static final Translation3d RED_HUB_POS =
         new Translation3d(
-            FIELD_X.in(Meters) - AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
+            FIELD_X.in(Meters) - AZ_DEPTH - HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
     public static final Translation3d BLUE_LEFT_BUMP =
         new Translation3d(BLUE_HUB_POS.getX(), 6.03, 0);
     public static final Translation3d BLUE_RIGHT_BUMP =
@@ -156,19 +151,24 @@ public final class Constants {
 
     public static final double NZ_RED_X = RED_HUB_POS.getX();
     public static final double NZ_BLUE_X = BLUE_HUB_POS.getX();
+
     public static final double TRENCH_WIDTH = Inches.of(50.34).in(Meters);
+
     public static final Translation2d RED_LEFT_TRENCH_P1 =
         new Translation2d(RED_HUB_POS.getX(), FIELD_Y.in(Meters));
     public static final Translation2d RED_LEFT_TRENCH_P2 =
         new Translation2d(RED_HUB_POS.getX(), FIELD_Y.in(Meters) - TRENCH_WIDTH);
+
     public static final Translation2d RED_RIGHT_TRENCH_P1 =
         new Translation2d(RED_HUB_POS.getX(), 0);
     public static final Translation2d RED_RIGHT_TRENCH_P2 =
         new Translation2d(RED_HUB_POS.getX(), TRENCH_WIDTH);
+
     public static final Translation2d BLUE_RIGHT_TRENCH_P1 =
         new Translation2d(BLUE_HUB_POS.getX(), 0);
     public static final Translation2d BLUE_RIGHT_TRENCH_P2 =
         new Translation2d(BLUE_HUB_POS.getX(), TRENCH_WIDTH);
+
     public static final Translation2d BLUE_LEFT_TRENCH_P1 =
         new Translation2d(BLUE_HUB_POS.getX(), FIELD_Y.in(Meters));
     public static final Translation2d BLUE_LEFT_TRENCH_P2 =
@@ -183,7 +183,7 @@ public final class Constants {
             new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
     public static final double GRAVITY_VALUE = 9.81;
   }
-  
+
   public static final class BLine {
     public static final double MAX_VELOCITY_MPS = 4.0;
     public static final double MAX_ACCELERATION_MPS2 = 3.0;
@@ -211,7 +211,7 @@ public final class Constants {
     public static final String LIMELIGHT_NAME = "limelight";
 
     public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
-    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters) ;
+    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters);
     public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(-5.445).in(Meters);
 
     public static final double CAMERA_FORWARD_METERS = Inches.of(-8.17).in(Meters);

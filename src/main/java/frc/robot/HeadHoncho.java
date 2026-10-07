@@ -95,17 +95,15 @@ public class HeadHoncho extends StateMachine {
       @Override
       public void initialize() {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
       }
 
       @Override
       public void execute() {
         if (!(getInstance().ballChecksPass())) {
-          ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
-
           IntakeSubsystem.getInstance().setState(IntakeStates.REST);
           SerializationSubsystem.getInstance().setState(SerializationStates.REST);
         } else {
-          ShooterSubsystem.getInstance().setState(ShooterStates.ON);
           IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
           SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
         }
@@ -160,7 +158,7 @@ public class HeadHoncho extends StateMachine {
   private BooleanSupplier m_zeroToggle;
 
   public HeadHoncho() {
-    super(HeadHonchoStates.REST); // TODO switch to auto
+    super(HeadHonchoStates.REST);
   }
 
   public boolean finishedZeroing() {

@@ -189,26 +189,31 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodMotor = new TalonFX(Constants.Shooter.HOOD_MOTOR_ID);
     m_turretMotor = new TalonFX(Constants.Shooter.TURRET_MOTOR_ID);
     m_encoderOne = new CANcoder(Constants.Shooter.ENCODER_ONE_ID);
-    m_encoderOne = new CANcoder(Constants.Shooter.ENCODER_TWO_ID);
+    m_encoderTwo = new CANcoder(Constants.Shooter.ENCODER_TWO_ID);
+
     m_velocityVoltage = new VelocityVoltage(0);
     m_positionVoltage = new PositionVoltage(0);
+
     m_shooterFollower.setControl(
         new Follower(m_shooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
     m_shooterConfig = new TalonFXConfiguration();
     m_shooterConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
     m_hoodConfig = new TalonFXConfiguration();
     m_hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Shooter.HOOD_MAX_ANGLE;
     m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
     m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
     m_turretConfig = new TalonFXConfiguration(); // TODO SET PID SV VALUES FOR ALL SUBSYSTEMS
     m_turretConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
     m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 23.0;
     m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     m_turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -23.0;
     m_turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
     m_shooterLeader.getConfigurator().apply(m_shooterConfig);
     m_shooterFollower.getConfigurator().apply(m_shooterConfig);
     m_hoodMotor.getConfigurator().apply(m_hoodConfig);
