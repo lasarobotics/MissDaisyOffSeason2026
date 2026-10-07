@@ -189,6 +189,7 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodMotor.getConfigurator().apply(m_hoodConfig);
     m_turretMotor.getConfigurator().apply(m_turretConfig);
     // updateTurretEncoder();
+    m_hoodMotor.setPosition(0);
   }
 
   public static ShooterSubsystem getInstance() {
