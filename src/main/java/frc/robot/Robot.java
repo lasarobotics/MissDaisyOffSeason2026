@@ -47,7 +47,9 @@ public class Robot extends LoggedRobot {
     HeadHoncho.getInstance();
 
     m_controller.rightBumper().onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
-    HeadHoncho.getInstance().configureBindings(() -> m_activeToggle, m_controller.rightTrigger());
+    HeadHoncho.getInstance()
+        .configureBindings(
+            () -> m_activeToggle, m_controller.rightTrigger(), m_controller.povDown());
     DriveSubsystem.getInstance()
         .configureBindings(
             () -> m_controller.getLeftY(),

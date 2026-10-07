@@ -76,6 +76,9 @@ public final class Constants {
         RotationsPerSecond.of(
             (2 * Drive.MAX_SPEED.in(MetersPerSecond))
                 / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
+
+    public static final double ZERO_VOLTAGE = 3.0;
+    public static final double ZERO_THRESHOLD = 3.0;
   }
 
   public static class Serialization {
@@ -124,6 +127,8 @@ public final class Constants {
     public static final double TURRET_DEADBAND =
         0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
     // meters away
+    public static final double ZERO_VOLTAGE = 3.0;
+    public static final double ZERO_THRESHOLD = 3.0;
   }
 
   public static class Field {
