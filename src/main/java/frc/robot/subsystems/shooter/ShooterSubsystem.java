@@ -99,7 +99,7 @@ public class ShooterSubsystem extends StateMachine {
             Math.abs(
                     getInstance().getTurretRotation()
                         - getInstance()
-                            .getTurretPos(
+                            .getDesiredTurretPos(
                                 target.toTranslation2d(),
                                 new Pose2d(
                                     robotPose,
@@ -120,7 +120,7 @@ public class ShooterSubsystem extends StateMachine {
                 robotPose,
                 new Rotation2d(
                     getInstance()
-                        .getTurretPos(
+                        .getDesiredTurretPos(
                             target.toTranslation2d(),
                             new Pose2d(
                                 robotPose,
@@ -135,7 +135,7 @@ public class ShooterSubsystem extends StateMachine {
                     .plus(
                         new Rotation2d(
                             (getInstance()
-                                    .getTurretPos(
+                                    .getDesiredTurretPos(
                                         target.toTranslation2d(),
                                         new Pose2d(
                                             robotPose,
@@ -148,7 +148,7 @@ public class ShooterSubsystem extends StateMachine {
         getInstance()
             .setTurretPos(
                 getInstance()
-                    .getTurretPos(
+                    .getDesiredTurretPos(
                         target.toTranslation2d(),
                         new Pose2d(
                             robotPose, DriveSubsystem.getInstance().getPose().getRotation())));
@@ -267,7 +267,7 @@ public class ShooterSubsystem extends StateMachine {
     }
   }
 
-  private double getTurretPos(Translation2d target, Pose2d robotPose) {
+  private double getDesiredTurretPos(Translation2d target, Pose2d robotPose) {
     if (target == null) {
       return 0;
     }
@@ -356,7 +356,7 @@ public class ShooterSubsystem extends StateMachine {
      * as well as checking current vs future pose to see if
      * robot will cross trench in forseeable future(HOOD_COLLISION_TIME secondsto be precise)
      */
-    Translation2d toEdgeOfRobot = new Translation2d(Constants.Shooter.CENTER_TO_EDGE, 0);
+    Translation2d toEdgeOfRobot = new Translation2d(Constants.Shooter.CENTER_TO_EDGE.in(Meters), 0);
     boolean underTrench =
         (segmentsIntersect(a, b, c, d)
             || segmentsIntersect(a.minus(toEdgeOfRobot), a.plus(toEdgeOfRobot), c, d));
@@ -506,7 +506,7 @@ public class ShooterSubsystem extends StateMachine {
         MathUtil.applyDeadband(
                 DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
                 Constants.Drive.ROTATION_DEADBAND)
-            * Constants.Shooter.SHOOTER_OFFSET_RADIUS;
+            * Constants.Shooter.SHOOTER_OFFSET_RADIUS.in(Meters);
     Translation2d transformationVector =
         new Translation2d(
             linearTangentSpeed * Constants.Shooter.HANG_TIME * 10,

@@ -107,11 +107,11 @@ public final class Constants {
     public static final int ENCODER_TWO_ID = 54;
     public static final int ENCODER_ONE_ID = 55;
     public static final double CRT_EPSILON = 0.01;
-    public static final double SHOOTER_OFFSET_X = Inches.of(-4).in(Meters);
-    public static final double SHOOTER_OFFSET_Y = Inches.of(-3).in(Meters);
-    public static final double SHOOTER_OFFSET_RADIUS =
-        Math.hypot(SHOOTER_OFFSET_X, SHOOTER_OFFSET_Y);
-    public static final double CENTER_TO_EDGE = Inches.of(13.25).in(Meters);
+    public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
+    public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
+    public static final Distance SHOOTER_OFFSET_RADIUS =
+        Meters.of(Math.hypot(SHOOTER_OFFSET_X.in(Inches), SHOOTER_OFFSET_Y.in(Inches)));
+    public static final Distance CENTER_TO_EDGE = Inches.of(13.25);
     public static final double HANG_TIME = 1.0;
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final double HUB_HEIGHT = 1.83;
@@ -208,21 +208,21 @@ public final class Constants {
 
     public static final String LIMELIGHT_NAME = "limelight";
 
-    public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
-    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters);
-    public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(-5.445).in(Meters);
+    public static final Distance TURRET_PIVOT_FORWARD = Inches.of(-4);
+    public static final Distance TURRET_PIVOT_LEFT = Inches.of(-3);
+    public static final Distance TURRET_PIVOT_HEIGHT = Inches.of(-5.445);
 
-    public static final double CAMERA_FORWARD_METERS = Inches.of(-8.17).in(Meters);
-    public static final double CAMERA_LEFT_METERS = 0.0;
-    public static final double CAMERA_HEIGHT_METERS = Inches.of(4.56).in(Meters);
+    public static final Distance CAMERA_FORWARD = Inches.of(-8.17);
+    public static final Distance CAMERA_LEFT = Meters.of(0.0);
+    public static final Distance CAMERA_HEIGHT = Inches.of(4.56);
 
-    public static final Angle CAMERA_YAW_AT_ZERO_DEG = Degrees.of(25.006);
-    public static final double CAMERA_PITCH_DEG = 0.0;
-    public static final double CAMERA_ROLL_DEG = 0.0;
+    public static final Angle CAMERA_YAW_AT_ZERO = Degrees.of(25.006);
+    public static final Angle CAMERA_PITCH = Degrees.of(0.0);
+    public static final Angle CAMERA_ROLL = Degrees.of(0.0);
 
     public static final double MAX_TAG_AMBIGUITY = 1.0;
-    public static final double MAX_VISION_ANGULAR_VELOCITY_DEG_PER_SEC = 720.0;
-    public static final double MAX_SINGLE_TAG_DISTANCE_METERS = 0.0;
+    public static final Angle MAX_VISION_ANGULAR_VELOCITY_PER_SEC = Degrees.of(720.0);
+    public static final Distance MAX_SINGLE_TAG_DISTANCE = Meters.of(0.0);
 
     public static final double VISION_STD_DEV_X = 0.7;
     public static final double VISION_STD_DEV_Y = 0.7;
