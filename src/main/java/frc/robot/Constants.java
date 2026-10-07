@@ -8,19 +8,14 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
-import com.ctre.phoenix6.controls.PositionVoltage;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.generated.TunerConstants;
 import java.util.function.Supplier;
@@ -42,9 +37,8 @@ public final class Constants {
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
 
-    public static final double WHEEL_FROM_CENTER_DIST =
-        Inches.of(15.476).in(Meters);
-  
+    public static final double WHEEL_FROM_CENTER_DIST = Inches.of(15.476).in(Meters);
+
     public static final AngularVelocity MAX_ANGULAR_RATE =
         RotationsPerSecond.of(
             MAX_SPEED.in(MetersPerSecond) / (2 * Math.PI * WHEEL_FROM_CENTER_DIST));
@@ -67,8 +61,8 @@ public final class Constants {
     public static final int LEADER_CAN_ID = 31;
     public static final int FOLLOWER_CAN_ID = 32;
 
-    public static final PositionVoltage ARM_STOW_SETPOINT = new PositionVoltage(0);
-    public static final PositionVoltage ARM_DEPLOY_SETPOINT = new PositionVoltage(0);
+    public static final Angle ARM_STOW_SETPOINT = Degrees.of(0);
+    public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0);
     public static final double INTAKE_STOW_SPEED = 0;
     public static final double INTAKE_ACTIVE_SPEED = 0;
     public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
@@ -183,7 +177,7 @@ public final class Constants {
             new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
     public static final double GRAVITY_VALUE = 9.81;
   }
-  
+
   public static final class BLine {
     public static final double MAX_VELOCITY_MPS = 4.0;
     public static final double MAX_ACCELERATION_MPS2 = 3.0;
@@ -211,7 +205,7 @@ public final class Constants {
     public static final String LIMELIGHT_NAME = "limelight";
 
     public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
-    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters) ;
+    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters);
     public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(-5.445).in(Meters);
 
     public static final double CAMERA_FORWARD_METERS = Inches.of(-8.17).in(Meters);

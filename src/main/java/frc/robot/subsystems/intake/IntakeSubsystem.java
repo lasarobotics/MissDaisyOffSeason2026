@@ -16,6 +16,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -118,10 +119,13 @@ public class IntakeSubsystem extends StateMachine {
 
   private boolean m_finishedZero;
 
+  private PositionVoltage m_positionRequest;
+
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
 
     m_finishedZero = false;
+    m_positionRequest = new PositionVoltage(0);
 
     m_requestedState = IntakeStates.INTAKE;
 
@@ -196,11 +200,17 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   public void deployIntake() {
-    getInstance().m_armMotor.setControl(Constants.Intake.ARM_DEPLOY_SETPOINT);
+    getInstance()
+        .m_armMotor
+        .setControl(
+            getInstance().m_positionRequest.withPosition(Constants.Intake.ARM_DEPLOY_SETPOINT));
   }
 
   public void stowIntake() {
-    getInstance().m_armMotor.setControl(Constants.Intake.ARM_STOW_SETPOINT);
+    getInstance()
+        .m_armMotor
+        .setControl(
+            getInstance().m_positionRequest.withPosition(Constants.Intake.ARM_STOW_SETPOINT));
   }
 
   public boolean finishedZero() {
