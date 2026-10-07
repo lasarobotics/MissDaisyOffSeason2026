@@ -169,15 +169,14 @@ public class HeadHoncho extends StateMachine {
       getInstance().m_zeroToggle = () -> false;
       IntakeSubsystem.getInstance().setFinishedZero(false);
       ShooterSubsystem.getInstance().setFinishedZero(false);
-      IntakeSubsystem.getInstance().setIsZeroing(false);
-      ShooterSubsystem.getInstance().setIsZeroing(false);
       return true;
     }
     return false;
   }
 
   public boolean isZeroing() {
-    if (ShooterSubsystem.getInstance().isZeroing() || IntakeSubsystem.getInstance().isZeroing()) {
+    if (ShooterSubsystem.getInstance().getState().equals(ShooterStates.ZERO)
+        || IntakeSubsystem.getInstance().getState().equals(IntakeStates.ZERO)) {
       return true;
     }
     return false;

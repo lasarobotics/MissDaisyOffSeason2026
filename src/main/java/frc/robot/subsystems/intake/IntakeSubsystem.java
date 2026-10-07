@@ -49,7 +49,6 @@ public class IntakeSubsystem extends StateMachine {
             .m_armMotor
             .setControl(
                 getInstance().m_velocityVoltage.withVelocity(Constants.Intake.ZERO_VOLTAGE));
-        getInstance().setIsZeroing(true);
       }
 
       @Override
@@ -118,13 +117,11 @@ public class IntakeSubsystem extends StateMachine {
   private VelocityVoltage m_velocityVoltage;
 
   private boolean m_finishedZero;
-  private boolean m_isZeroing;
 
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
 
     m_finishedZero = false;
-    m_isZeroing = false;
 
     m_requestedState = IntakeStates.INTAKE;
 
@@ -212,14 +209,6 @@ public class IntakeSubsystem extends StateMachine {
 
   public void setFinishedZero(boolean value) {
     getInstance().m_finishedZero = value;
-  }
-
-  public boolean isZeroing() {
-    return getInstance().m_isZeroing;
-  }
-
-  public void setIsZeroing(boolean value) {
-    getInstance().m_isZeroing = value;
   }
 
   @Override
