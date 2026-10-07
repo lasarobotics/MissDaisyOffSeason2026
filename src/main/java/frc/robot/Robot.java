@@ -59,7 +59,7 @@ public class Robot extends LoggedRobot {
   }
 
   public static void setZeroToggle(boolean value) {
-    m_zeroToggle = value;
+    Commands.runOnce(() -> m_zeroToggle = !m_zeroToggle);
   }
 
   @Override
