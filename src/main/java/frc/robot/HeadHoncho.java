@@ -160,5 +160,7 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput(
         "HeadHoncho/shifts",
         !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()));
+    Logger.recordOutput("GameHelpers/scoringTimeLeft", GameHelpers.scoringTimeLeft());
+    Logger.recordOutput("GameHelpers/matchTimeLeft", GameHelpers.matchTimeLeft());
   }
 }
