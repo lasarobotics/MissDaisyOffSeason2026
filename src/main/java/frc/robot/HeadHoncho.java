@@ -38,6 +38,34 @@ public class HeadHoncho extends StateMachine {
         return REST;
       }
     },
+
+    ZERO {
+      @Override
+      public void initialize() {
+        DriveSubsystem.getInstance().setState(DriveStates.REST);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ZERO);
+        IntakeSubsystem.getInstance().setState(IntakeStates.ZERO);
+        SerializationSubsystem.getInstance().setState(SerializationStates.REST);
+      }
+
+      @Override
+      public SystemState nextState() {
+        if (DriverStation.isAutonomous()) {
+          return AUTO;
+        }
+
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
+
+        if (getInstance().m_activeToggle.getAsBoolean()) {
+          return TOGGLE_ON;
+        }
+        return REST;
+      }
+    },
+
     REST {
       @Override
       public void initialize() {
@@ -51,6 +79,12 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
+
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
+
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
@@ -82,6 +116,12 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
+
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
+
         if (!getInstance().m_activeToggle.getAsBoolean()) {
           return REST;
         }
@@ -102,6 +142,10 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
@@ -113,14 +157,37 @@ public class HeadHoncho extends StateMachine {
   private static HeadHoncho s_headHoncho;
   private BooleanSupplier m_activeToggle;
   private BooleanSupplier m_reverseButton;
+  private BooleanSupplier m_zeroToggle;
 
   public HeadHoncho() {
     super(HeadHonchoStates.REST); // TODO switch to auto
   }
 
-  public void configureBindings(BooleanSupplier activeToggle, BooleanSupplier reverse) {
-    m_activeToggle = activeToggle;
-    m_reverseButton = reverse;
+  public boolean finishedZeroing() {
+    if (IntakeSubsystem.getInstance().finishedZero()
+        && ShooterSubsystem.getInstance().finishedZero()) {
+      getInstance().m_zeroToggle = () -> false;
+      IntakeSubsystem.getInstance().setFinishedZero(false);
+      ShooterSubsystem.getInstance().setFinishedZero(false);
+      IntakeSubsystem.getInstance().setIsZeroing(false);
+      ShooterSubsystem.getInstance().setIsZeroing(false);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isZeroing() {
+    if (ShooterSubsystem.getInstance().isZeroing() || IntakeSubsystem.getInstance().isZeroing()) {
+      return true;
+    }
+    return false;
+  }
+
+  public void configureBindings(
+      BooleanSupplier activeToggle, BooleanSupplier reverse, BooleanSupplier zeroIntake) {
+    getInstance().m_activeToggle = activeToggle;
+    getInstance().m_reverseButton = reverse;
+    getInstance().m_zeroToggle = zeroIntake;
   }
 
   public static HeadHoncho getInstance() {

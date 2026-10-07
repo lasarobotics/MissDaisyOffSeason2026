@@ -16,7 +16,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -34,6 +34,31 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().stopIntake();
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_requestedState;
+      }
+    },
+
+    ZERO {
+      @Override
+      public void initialize() {
+        getInstance()
+            .m_armMotor
+            .setControl(
+                getInstance().m_velocityVoltage.withVelocity(Constants.Intake.ZERO_VOLTAGE));
+        getInstance().setIsZeroing(true);
+      }
+
+      @Override
+      public void execute() {
+        if (getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
+            >= Constants.Intake.ZERO_THRESHOLD) {
+          getInstance().m_armMotor.setPosition(0.0);
+          getInstance().setFinishedZero(true);
+        }
       }
 
       @Override
@@ -90,14 +115,20 @@ public class IntakeSubsystem extends StateMachine {
   private TalonFX m_intakeMotorLeader;
   private TalonFX m_intakeMotorFollower;
 
-  private VelocityDutyCycle m_intakeVelocityDutyCycle;
+  private VelocityVoltage m_velocityVoltage;
+
+  private boolean m_finishedZero;
+  private boolean m_isZeroing;
 
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
 
+    m_finishedZero = false;
+    m_isZeroing = false;
+
     m_requestedState = IntakeStates.INTAKE;
 
-    m_intakeVelocityDutyCycle = new VelocityDutyCycle(0);
+    m_velocityVoltage = new VelocityVoltage(0);
 
     m_armMotor = new TalonFX(Constants.Intake.ARM_CAN_ID);
     m_intakeMotorLeader = new TalonFX(Constants.Intake.LEADER_CAN_ID);
@@ -156,9 +187,7 @@ public class IntakeSubsystem extends StateMachine {
     getInstance()
         .m_intakeMotorLeader
         .setControl(
-            getInstance()
-                .m_intakeVelocityDutyCycle
-                .withVelocity(Constants.Intake.INTAKE_STOW_SPEED));
+            getInstance().m_velocityVoltage.withVelocity(Constants.Intake.INTAKE_STOW_SPEED));
   }
 
   public void activateIntake(boolean reverse) {
@@ -166,7 +195,7 @@ public class IntakeSubsystem extends StateMachine {
         (reverse) ? -Constants.Intake.INTAKE_ACTIVE_SPEED : Constants.Intake.INTAKE_ACTIVE_SPEED;
     getInstance()
         .m_intakeMotorLeader
-        .setControl(getInstance().m_intakeVelocityDutyCycle.withVelocity(intakeSpeed));
+        .setControl(getInstance().m_velocityVoltage.withVelocity(intakeSpeed));
   }
 
   public void deployIntake() {
@@ -175,6 +204,22 @@ public class IntakeSubsystem extends StateMachine {
 
   public void stowIntake() {
     getInstance().m_armMotor.setControl(Constants.Intake.ARM_STOW_SETPOINT);
+  }
+
+  public boolean finishedZero() {
+    return getInstance().m_finishedZero;
+  }
+
+  public void setFinishedZero(boolean value) {
+    getInstance().m_finishedZero = value;
+  }
+
+  public boolean isZeroing() {
+    return getInstance().m_isZeroing;
+  }
+
+  public void setIsZeroing(boolean value) {
+    getInstance().m_isZeroing = value;
   }
 
   @Override

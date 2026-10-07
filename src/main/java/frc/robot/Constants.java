@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -15,6 +16,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -40,12 +42,11 @@ public final class Constants {
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
     public static final LinearAcceleration MAX_ACCELERATION =
-        MetersPerSecondPerSecond.of(3); // TODO measure
+        MetersPerSecondPerSecond.of(3); 
     public static final AngularVelocity MAX_ANGULAR_RATE =
-        RotationsPerSecond.of(0.75); // TODO measure
+        RotationsPerSecond.of(0.75);
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION =
-        RotationsPerSecondPerSecond.of(1); // TODO
-    // measure
+        RotationsPerSecondPerSecond.of(1); 
 
     public static final double STOW_DISTANCE_REQUIREMENT = 6.75;
     public static final double CENTER_XPOS = 8.25;
@@ -75,6 +76,9 @@ public final class Constants {
         RotationsPerSecond.of(
             (2 * Drive.MAX_SPEED.in(MetersPerSecond))
                 / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
+
+    public static final double ZERO_VOLTAGE = 3.0;
+    public static final double ZERO_THRESHOLD = 3.0;
   }
 
   public static class Serialization {
@@ -123,6 +127,8 @@ public final class Constants {
     public static final double TURRET_DEADBAND =
         0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
     // meters away
+    public static final double ZERO_VOLTAGE = 3.0;
+    public static final double ZERO_THRESHOLD = 3.0;
   }
 
   public static class Field {
@@ -212,15 +218,15 @@ public final class Constants {
 
     public static final String LIMELIGHT_NAME = "limelight";
 
-    public static final double TURRET_PIVOT_FORWARD_METERS = 0.0;
-    public static final double TURRET_PIVOT_LEFT_METERS = 0.0;
-    public static final double TURRET_PIVOT_HEIGHT_METERS = 0.0;
+    public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
+    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters) ;
+    public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(-5.445).in(Meters);
 
-    public static final double CAMERA_FORWARD_METERS = 0.0;
+    public static final double CAMERA_FORWARD_METERS = Inches.of(-8.17).in(Meters);
     public static final double CAMERA_LEFT_METERS = 0.0;
-    public static final double CAMERA_HEIGHT_METERS = 0.0;
+    public static final double CAMERA_HEIGHT_METERS = Inches.of(4.56).in(Meters);
 
-    public static final double CAMERA_YAW_AT_ZERO_DEG = 0.0;
+    public static final Angle CAMERA_YAW_AT_ZERO_DEG = Degrees.of(25.006);
     public static final double CAMERA_PITCH_DEG = 0.0;
     public static final double CAMERA_ROLL_DEG = 0.0;
 

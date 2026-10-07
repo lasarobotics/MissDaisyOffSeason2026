@@ -25,6 +25,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
   private boolean m_activeToggle;
+  private boolean m_zeroToggle;
 
   private final CommandXboxController m_controller = new CommandXboxController(0);
 
@@ -47,7 +48,9 @@ public class Robot extends LoggedRobot {
     HeadHoncho.getInstance();
 
     m_controller.rightBumper().onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
-    HeadHoncho.getInstance().configureBindings(() -> m_activeToggle, m_controller.rightTrigger());
+    m_controller.povDown().onTrue(Commands.runOnce(() -> m_zeroToggle = !m_zeroToggle));
+    HeadHoncho.getInstance()
+        .configureBindings(() -> m_activeToggle, m_controller.rightTrigger(), () -> m_zeroToggle);
     DriveSubsystem.getInstance()
         .configureBindings(
             () -> m_controller.getLeftY(),

@@ -57,6 +57,30 @@ public class ShooterSubsystem extends StateMachine {
         return getInstance().m_selectedState;
       }
     },
+    ZERO {
+      @Override
+      public void initialize() {
+        getInstance()
+            .m_hoodMotor
+            .setControl(
+                getInstance().m_velocityVoltage.withVelocity(Constants.Shooter.ZERO_VOLTAGE));
+        getInstance().setIsZeroing(true);
+      }
+
+      @Override
+      public void execute() {
+        if (getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
+            >= Constants.Intake.ZERO_THRESHOLD) {
+          getInstance().m_hoodMotor.setPosition(0.0);
+          getInstance().setFinishedZero(true);
+        }
+      }
+
+      @Override
+      public SystemState nextState() {
+        return getInstance().m_selectedState;
+      }
+    },
     ON {
       @Override
       public void execute() {
@@ -155,9 +179,13 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFXConfiguration m_turretConfig;
   private boolean m_blueAlliance;
   private boolean m_readytoShoot;
+  private boolean m_finishedZero;
+  private boolean m_isZeroing;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
+    m_finishedZero = false;
+    m_isZeroing = false;
     setState(ShooterStates.OFF);
     m_shooterLeader = new TalonFX(Constants.Shooter.SHOOTER_LEADER_ID);
     m_shooterFollower = new TalonFX(Constants.Shooter.SHOOTER_FOLLOWER_ID);
@@ -489,6 +517,22 @@ public class ShooterSubsystem extends StateMachine {
 
   public boolean isReadyToShoot() {
     return m_readytoShoot;
+  }
+
+  public boolean finishedZero() {
+    return getInstance().m_finishedZero;
+  }
+
+  public void setFinishedZero(boolean value) {
+    getInstance().m_finishedZero = value;
+  }
+
+  public boolean isZeroing() {
+    return getInstance().m_isZeroing;
+  }
+
+  public void setIsZeroing(boolean value) {
+    getInstance().m_isZeroing = value;
   }
 
   @Override
