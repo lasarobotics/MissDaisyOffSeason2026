@@ -91,19 +91,14 @@ public class GameHelpers {
     // S3: 80-55
     // S4: 55-30
     Logger.recordOutput("GameHelpers/wonAuto", wonAuto);
-    Logger.recordOutput("GameHelpers/time", time);
     if (wonAuto) {
       boolean s1 = 105 <= time && time <= 130;
       boolean s3 = 55 <= time && time <= 80;
-      Logger.recordOutput("GameHelpers/s1", s1);
-      Logger.recordOutput("GameHelpers/s2", s3);
       // not in either inactive period
       return (!(s1 || s3));
     } else {
       boolean s2 = 80 <= time && time <= 105;
       boolean s4 = 30 <= time && time <= 55;
-      Logger.recordOutput("GameHelpers/s3", s2);
-      Logger.recordOutput("GameHelpers/s4", s4);
       // not in either inactive period
       return (!(s2 || s4));
     }

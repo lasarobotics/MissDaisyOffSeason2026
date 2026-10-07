@@ -84,6 +84,8 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link Robotcontainer} class. */
   @Override
   public void autonomousInit() {
+    GameHelpers.zeroTimer();
+    GameHelpers.initializeStartNumber();
     m_autonomousCommand = DriveSubsystem.getInstance().getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
@@ -97,6 +99,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    GameHelpers.zeroTimer();
+    GameHelpers.initializeStartNumber();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

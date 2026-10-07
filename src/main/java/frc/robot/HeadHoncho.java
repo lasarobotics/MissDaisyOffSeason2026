@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -64,11 +65,7 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public void execute() {
-        if (!( // ShooterSubsystem.getInstance().isReadyToShoot() &&
-        !ShooterSubsystem.getInstance().robotCrossTrench()
-            && !DriveSubsystem.getInstance().underTower()
-            && ShooterSubsystem.getInstance().canSeeTarget()
-            && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()))) {
+        if (!(getInstance().ballChecksPass())) {
           ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
 
           IntakeSubsystem.getInstance().setState(IntakeStates.REST);
@@ -133,6 +130,20 @@ public class HeadHoncho extends StateMachine {
     return s_headHoncho;
   }
 
+  private boolean ballChecksPass() {
+    boolean readytoShoot;
+    if (!RobotBase.isSimulation()) {
+      readytoShoot = ShooterSubsystem.getInstance().isReadyToShoot();
+    } else {
+      readytoShoot = true;
+    }
+    return readytoShoot
+        && !ShooterSubsystem.getInstance().robotCrossTrench()
+        && !DriveSubsystem.getInstance().underTower()
+        && ShooterSubsystem.getInstance().canSeeTarget()
+        && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive());
+  }
+
   @Override
   public void periodic() {
     Logger.recordOutput("HeadHoncho/currentState", getState().toString());
@@ -144,13 +155,7 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
-    Logger.recordOutput(
-        "HeadHoncho/ballChecksPass",
-        // ShooterSubsystem.getInstance().isReadyToShoot() && TODO
-        !ShooterSubsystem.getInstance().robotCrossTrench()
-            && !DriveSubsystem.getInstance().underTower()
-            && ShooterSubsystem.getInstance().canSeeTarget()
-            && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()));
+    Logger.recordOutput("HeadHoncho/ballChecksPass", ballChecksPass());
 
     Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());
     Logger.recordOutput(
