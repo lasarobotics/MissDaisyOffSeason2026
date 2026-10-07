@@ -61,10 +61,9 @@ public final class Constants {
     public static final int LEADER_CAN_ID = 31;
     public static final int FOLLOWER_CAN_ID = 32;
 
-    public static final Angle ARM_STOW_SETPOINT = Degrees.of(0);
-    public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0);
-    public static final double INTAKE_STOW_SPEED = 0;
-    public static final double INTAKE_ACTIVE_SPEED = 0;
+    public static final Angle ARM_STOW_SETPOINT = Degrees.of(0.0);
+    public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.0);
+    public static final AngularVelocity INTAKE_ACTIVE_SPEED = RotationsPerSecond.of(0);
     public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
 
     public static final AngularVelocity INTAKE_ROLLER_SPEED =

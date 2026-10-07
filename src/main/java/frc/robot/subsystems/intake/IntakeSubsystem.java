@@ -185,15 +185,14 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   public void stopIntake() {
-    getInstance()
-        .m_intakeMotorLeader
-        .setControl(
-            getInstance().m_velocityVoltage.withVelocity(Constants.Intake.INTAKE_STOW_SPEED));
+    getInstance().m_intakeMotorLeader.stopMotor();
   }
 
   public void activateIntake(boolean reverse) {
     double intakeSpeed =
-        (reverse) ? -Constants.Intake.INTAKE_ACTIVE_SPEED : Constants.Intake.INTAKE_ACTIVE_SPEED;
+        (reverse)
+            ? -Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond)
+            : Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond);
     getInstance()
         .m_intakeMotorLeader
         .setControl(getInstance().m_velocityVoltage.withVelocity(intakeSpeed));
