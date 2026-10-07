@@ -22,6 +22,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
@@ -35,6 +36,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().stopIntake();
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -50,14 +52,18 @@ public class IntakeSubsystem extends StateMachine {
             .m_armMotor
             .setControl(
                 getInstance().m_velocityVoltage.withVelocity(Constants.Intake.ZERO_VOLTAGE));
+        getInstance().m_zeroTimer.reset();
+        getInstance().m_zeroTimer.start();
       }
 
       @Override
       public void execute() {
-        if (getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
-            >= Constants.Intake.ZERO_THRESHOLD) {
+        if (getInstance().m_zeroTimer.hasElapsed(Constants.Intake.ZERO_SECONDS_WAIT)
+            && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
+                >= Constants.Intake.ZERO_THRESHOLD) {
           getInstance().m_armMotor.setPosition(0.0);
           getInstance().setFinishedZero(true);
+          getInstance().setState(INTAKE);
         }
       }
 
@@ -72,6 +78,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().stowIntake();
         getInstance().stopIntake();
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -85,6 +92,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().activateIntake(false);
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -98,6 +106,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().activateIntake(true);
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -120,6 +129,8 @@ public class IntakeSubsystem extends StateMachine {
   private boolean m_finishedZero;
 
   private PositionVoltage m_positionRequest;
+
+  private Timer m_zeroTimer;
 
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);

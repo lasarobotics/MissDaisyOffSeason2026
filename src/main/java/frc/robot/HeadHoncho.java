@@ -84,7 +84,7 @@ public class HeadHoncho extends StateMachine {
 
         if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
             || getInstance().isZeroing()) {
-          return this;
+          return ZERO;
         }
 
         if (getInstance().m_activeToggle.getAsBoolean()) {
@@ -122,7 +122,7 @@ public class HeadHoncho extends StateMachine {
 
         if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
             || getInstance().isZeroing()) {
-          return this;
+          return ZERO;
         }
 
         if (getInstance().m_reverseButton.getAsBoolean()) {
@@ -152,7 +152,7 @@ public class HeadHoncho extends StateMachine {
         }
         if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
             || getInstance().isZeroing()) {
-          return this;
+          return ZERO;
         }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
@@ -177,7 +177,7 @@ public class HeadHoncho extends StateMachine {
   public boolean finishedZeroing() {
     if (IntakeSubsystem.getInstance().finishedZero()
         && ShooterSubsystem.getInstance().finishedZero()) {
-      getInstance().m_zeroToggle = () -> false;
+      Robot.setZeroToggle(false);
       IntakeSubsystem.getInstance().setFinishedZero(false);
       ShooterSubsystem.getInstance().setFinishedZero(false);
       return true;
@@ -194,10 +194,10 @@ public class HeadHoncho extends StateMachine {
   }
 
   public void configureBindings(
-      BooleanSupplier activeToggle, BooleanSupplier reverse, BooleanSupplier zeroIntake) {
+      BooleanSupplier activeToggle, BooleanSupplier reverse, BooleanSupplier zeroToggle) {
     getInstance().m_activeToggle = activeToggle;
     getInstance().m_reverseButton = reverse;
-    getInstance().m_zeroToggle = zeroIntake;
+    getInstance().m_zeroToggle = zeroToggle;
   }
 
   public static HeadHoncho getInstance() {

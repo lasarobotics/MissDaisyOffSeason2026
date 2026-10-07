@@ -29,6 +29,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
@@ -42,6 +43,7 @@ public class ShooterSubsystem extends StateMachine {
       @Override
       public void initialize() {
         getInstance().m_readytoShoot = false;
+        getInstance().m_zeroTimer.stop();
 
         if (!RobotBase.isSimulation()) {
           getInstance().updateTurretEncoder();
@@ -64,14 +66,18 @@ public class ShooterSubsystem extends StateMachine {
             .m_hoodMotor
             .setControl(
                 getInstance().m_velocityVoltage.withVelocity(Constants.Shooter.ZERO_VOLTAGE));
+        getInstance().m_zeroTimer.reset();
+        getInstance().m_zeroTimer.start();
       }
 
       @Override
       public void execute() {
-        if (getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
-            >= Constants.Intake.ZERO_THRESHOLD) {
+        if (getInstance().m_zeroTimer.hasElapsed(Constants.Shooter.ZERO_SECONDS_WAIT)
+            && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
+                >= Constants.Intake.ZERO_THRESHOLD) {
           getInstance().m_hoodMotor.setPosition(0.0);
           getInstance().setFinishedZero(true);
+          getInstance().setState(ON);
         }
       }
 
@@ -179,6 +185,7 @@ public class ShooterSubsystem extends StateMachine {
   private boolean m_blueAlliance;
   private boolean m_readytoShoot;
   private boolean m_finishedZero;
+  private Timer m_zeroTimer;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);

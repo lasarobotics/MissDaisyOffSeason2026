@@ -73,6 +73,8 @@ public final class Constants {
 
     public static final double ZERO_VOLTAGE = 3.0;
     public static final double ZERO_THRESHOLD = 3.0;
+
+    public static final double ZERO_SECONDS_WAIT = 0.2;
   }
 
   public static class Serialization {
@@ -123,6 +125,7 @@ public final class Constants {
     // meters away
     public static final double ZERO_VOLTAGE = 3.0;
     public static final double ZERO_THRESHOLD = 3.0;
+    public static final double ZERO_SECONDS_WAIT = 0.2;
   }
 
   public static class Field {
