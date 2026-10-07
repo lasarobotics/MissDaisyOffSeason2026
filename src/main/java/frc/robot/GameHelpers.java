@@ -90,6 +90,7 @@ public class GameHelpers {
     // S2: 105-80
     // S3: 80-55
     // S4: 55-30
+    Logger.recordOutput("GameHelpers/wonAuto", wonAuto);
     if (wonAuto) {
       boolean s1 = 105 <= time && time <= 130;
       boolean s3 = 55 <= time && time <= 80;

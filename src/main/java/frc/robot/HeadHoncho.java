@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -53,7 +54,8 @@ public class HeadHoncho extends StateMachine {
           return AUTO;
         }
 
-        if (!getInstance().finishedZeroing() && getInstance().isZeroing()) {
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
           return this;
         }
 
@@ -77,6 +79,12 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
+
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
+
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
@@ -91,11 +99,7 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public void execute() {
-        if (!( // ShooterSubsystem.getInstance().isReadyToShoot() &&
-        !ShooterSubsystem.getInstance().robotCrossTrench()
-            && !DriveSubsystem.getInstance().underTower()
-            && ShooterSubsystem.getInstance().canSeeTarget()
-            && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()))) {
+        if (!(getInstance().ballChecksPass())) {
           ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
 
           IntakeSubsystem.getInstance().setState(IntakeStates.REST);
@@ -112,6 +116,12 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
+
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
+
         if (!getInstance().m_activeToggle.getAsBoolean()) {
           return REST;
         }
@@ -132,6 +142,10 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
+        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
+            || getInstance().isZeroing()) {
+          return this;
+        }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
@@ -143,7 +157,7 @@ public class HeadHoncho extends StateMachine {
   private static HeadHoncho s_headHoncho;
   private BooleanSupplier m_activeToggle;
   private BooleanSupplier m_reverseButton;
-  private BooleanSupplier m_zeroAll;
+  private BooleanSupplier m_zeroToggle;
 
   public HeadHoncho() {
     super(HeadHonchoStates.REST); // TODO switch to auto
@@ -152,17 +166,17 @@ public class HeadHoncho extends StateMachine {
   public boolean finishedZeroing() {
     if (IntakeSubsystem.getInstance().finishedZero()
         && ShooterSubsystem.getInstance().finishedZero()) {
+      getInstance().m_zeroToggle = () -> false;
       IntakeSubsystem.getInstance().setFinishedZero(false);
       ShooterSubsystem.getInstance().setFinishedZero(false);
-      IntakeSubsystem.getInstance().setIsZeroing(false);
-      ShooterSubsystem.getInstance().setIsZeroing(false);
       return true;
     }
     return false;
   }
 
   public boolean isZeroing() {
-    if (ShooterSubsystem.getInstance().isZeroing() || IntakeSubsystem.getInstance().isZeroing()) {
+    if (ShooterSubsystem.getInstance().getState().equals(ShooterStates.ZERO)
+        || IntakeSubsystem.getInstance().getState().equals(IntakeStates.ZERO)) {
       return true;
     }
     return false;
@@ -172,7 +186,7 @@ public class HeadHoncho extends StateMachine {
       BooleanSupplier activeToggle, BooleanSupplier reverse, BooleanSupplier zeroIntake) {
     getInstance().m_activeToggle = activeToggle;
     getInstance().m_reverseButton = reverse;
-    getInstance().m_zeroAll = zeroIntake;
+    getInstance().m_zeroToggle = zeroIntake;
   }
 
   public static HeadHoncho getInstance() {
@@ -180,6 +194,20 @@ public class HeadHoncho extends StateMachine {
       s_headHoncho = new HeadHoncho();
     }
     return s_headHoncho;
+  }
+
+  private boolean ballChecksPass() {
+    boolean readytoShoot;
+    if (!RobotBase.isSimulation()) {
+      readytoShoot = ShooterSubsystem.getInstance().isReadyToShoot();
+    } else {
+      readytoShoot = true;
+    }
+    return readytoShoot
+        && !ShooterSubsystem.getInstance().robotCrossTrench()
+        && !DriveSubsystem.getInstance().underTower()
+        && ShooterSubsystem.getInstance().canSeeTarget()
+        && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive());
   }
 
   @Override
@@ -193,13 +221,7 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
-    Logger.recordOutput(
-        "HeadHoncho/ballChecksPass",
-        // ShooterSubsystem.getInstance().isReadyToShoot() && TODO
-        !ShooterSubsystem.getInstance().robotCrossTrench()
-            && !DriveSubsystem.getInstance().underTower()
-            && ShooterSubsystem.getInstance().canSeeTarget()
-            && !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()));
+    Logger.recordOutput("HeadHoncho/ballChecksPass", ballChecksPass());
 
     Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());
     Logger.recordOutput(
@@ -209,5 +231,7 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput(
         "HeadHoncho/shifts",
         !(ShooterSubsystem.getInstance().inAZ() && !GameHelpers.isHubActive()));
+    Logger.recordOutput("GameHelpers/scoringTimeLeft", GameHelpers.scoringTimeLeft());
+    Logger.recordOutput("GameHelpers/matchTimeLeft", GameHelpers.matchTimeLeft());
   }
 }

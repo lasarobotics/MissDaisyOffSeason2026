@@ -25,6 +25,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
   private boolean m_activeToggle;
+  private boolean m_zeroToggle;
 
   private final CommandXboxController m_controller = new CommandXboxController(0);
 
@@ -47,9 +48,9 @@ public class Robot extends LoggedRobot {
     HeadHoncho.getInstance();
 
     m_controller.rightBumper().onTrue(Commands.runOnce(() -> m_activeToggle = !m_activeToggle));
+    m_controller.povDown().onTrue(Commands.runOnce(() -> m_zeroToggle = !m_zeroToggle));
     HeadHoncho.getInstance()
-        .configureBindings(
-            () -> m_activeToggle, m_controller.rightTrigger(), m_controller.povDown());
+        .configureBindings(() -> m_activeToggle, m_controller.rightTrigger(), () -> m_zeroToggle);
     DriveSubsystem.getInstance()
         .configureBindings(
             () -> m_controller.getLeftY(),
@@ -86,6 +87,8 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link Robotcontainer} class. */
   @Override
   public void autonomousInit() {
+    GameHelpers.zeroTimer();
+    GameHelpers.initializeStartNumber();
     m_autonomousCommand = DriveSubsystem.getInstance().getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
@@ -99,6 +102,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    GameHelpers.zeroTimer();
+    GameHelpers.initializeStartNumber();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
