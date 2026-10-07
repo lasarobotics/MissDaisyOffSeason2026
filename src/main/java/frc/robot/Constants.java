@@ -41,12 +41,13 @@ public final class Constants {
 
   public static class Drive {
     public static final LinearVelocity MAX_SPEED = TunerConstants.kSpeedAt12Volts;
-    public static final LinearAcceleration MAX_ACCELERATION =
-        MetersPerSecondPerSecond.of(3); 
+
+    public static final double WHEEL_FROM_CENTER_DIST =
+        Inches.of(15.476).in(Meters);
+  
     public static final AngularVelocity MAX_ANGULAR_RATE =
-        RotationsPerSecond.of(0.75);
-    public static final AngularAcceleration MAX_ANGULAR_ACCELERATION =
-        RotationsPerSecondPerSecond.of(1); 
+        RotationsPerSecond.of(
+            MAX_SPEED.in(MetersPerSecond) / (2 * Math.PI * WHEEL_FROM_CENTER_DIST));
 
     public static final double STOW_DISTANCE_REQUIREMENT = 6.75;
     public static final double CENTER_XPOS = 8.25;
@@ -182,16 +183,7 @@ public final class Constants {
             new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
     public static final double GRAVITY_VALUE = 9.81;
   }
-
-  public static class Hub {
-    public static final Translation2d BLUE_HUB_POS = new Translation2d(4.61, 4.021);
-    public static final Translation2d RED_HUB_POS = new Translation2d(11.9, 4.021);
-    public static final double BLUE_BUMP_XPOS = 0;
-    public static final double RED_BUMP_XPOS = 0;
-    public static final double LEFTY_POS = 0;
-    public static final double RIGHTY_POS = 0;
-  }
-
+  
   public static final class BLine {
     public static final double MAX_VELOCITY_MPS = 4.0;
     public static final double MAX_ACCELERATION_MPS2 = 3.0;
