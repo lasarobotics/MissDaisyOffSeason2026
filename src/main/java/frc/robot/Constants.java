@@ -81,17 +81,18 @@ public final class Constants {
     public static final int OMNI_CAN_ID = 40;
     public static final int MECANUM_LEADER_CAN_ID = 41;
     public static final int MECANUM_FOLLOWER_CAN_ID = 42;
-
+    public static final Distance OMNI_WHEEL_DIAMETER = Inches.of(6);
+    public static final Distance MECANUM_WHEEL_DIAMETER = Inches.of(2.25);
     public static final LoggedNetworkNumber BALL_SPEED_INCREASER =
         new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.1);
 
     public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
-          return Intake.INTAKE_ROLLER_SPEED.plus(RotationsPerSecond.of(BALL_SPEED_INCREASER.get()));
+          return RotationsPerSecond.of((2 * Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())/(Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
         };
     public static final Supplier<AngularVelocity> OMNI_SPEED =
         () -> {
-          return MECANUM_SPEED.get().plus(RotationsPerSecond.of(BALL_SPEED_INCREASER.get()));
+          return RotationsPerSecond.of((2 * Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())/(Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
         };
     public static final AngularVelocity MECANUM_REST_SPEED = RotationsPerSecond.of(0);
     public static final AngularVelocity OMNI_REST_SPEED = RotationsPerSecond.of(0);

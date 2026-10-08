@@ -43,7 +43,6 @@ public class ShooterSubsystem extends StateMachine {
       @Override
       public void initialize() {
         getInstance().m_readytoShoot = false;
-        getInstance().m_zeroTimer.stop();
 
         if (!RobotBase.isSimulation()) {
           getInstance().updateTurretEncoder();
@@ -60,16 +59,18 @@ public class ShooterSubsystem extends StateMachine {
       }
     },
     ZERO {
+      Timer m_zeroTimer = new Timer();
+
       @Override
       public void initialize() {
         getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE);
-        getInstance().m_zeroTimer.reset();
-        getInstance().m_zeroTimer.start();
+        m_zeroTimer.reset();
+        m_zeroTimer.start();
       }
 
       @Override
       public void execute() {
-        if (getInstance().m_zeroTimer.hasElapsed(Constants.Shooter.ZERO_SECONDS_WAIT)
+        if (m_zeroTimer.hasElapsed(Constants.Shooter.ZERO_SECONDS_WAIT)
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Intake.ZERO_THRESHOLD) {
           getInstance().m_hoodMotor.setPosition(0.0);
@@ -182,8 +183,6 @@ public class ShooterSubsystem extends StateMachine {
   private boolean m_blueAlliance;
   private boolean m_readytoShoot;
   private boolean m_finishedZero;
-
-  private Timer m_zeroTimer;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
@@ -414,8 +413,8 @@ public class ShooterSubsystem extends StateMachine {
             Constants.Field.RED_HUB_POS.getY() + Constants.Field.HUB_WIDTH / 2);
     Translation2d redTopRight =
         new Translation2d(
-            Constants.Field.RED_HUB_POS.getX() - Constants.Field.HUB_WIDTH / 2,
-            Constants.Field.RED_HUB_POS.getY() + Constants.Field.HUB_WIDTH / 2);
+            Constants.Field.RED_HUB_POS.getX() + Constants.Field.HUB_WIDTH / 2,
+            Constants.Field.RED_HUB_POS.getY() - Constants.Field.HUB_WIDTH / 2);
     Translation2d redTopLeft =
         new Translation2d(
             Constants.Field.RED_HUB_POS.getX() + Constants.Field.HUB_WIDTH / 2,
@@ -514,7 +513,7 @@ public class ShooterSubsystem extends StateMachine {
             * Constants.Shooter.SHOOTER_OFFSET_RADIUS.in(Meters);
     Translation2d transformationVector =
         new Translation2d(
-            linearTangentSpeed * Constants.Shooter.HANG_TIME * 10,
+            linearTangentSpeed * Constants.Shooter.HANG_TIME,
             DriveSubsystem.getInstance()
                 .getPose()
                 .getRotation()
