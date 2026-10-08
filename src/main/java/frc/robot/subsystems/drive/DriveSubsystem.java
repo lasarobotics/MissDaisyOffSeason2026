@@ -337,10 +337,10 @@ public class DriveSubsystem extends StateMachine {
     double sin = Math.sin(turretAngle);
     double rotatedForward = cameraForward * cos - cameraLeft * sin;
     double rotatedLeft = cameraForward * sin + cameraLeft * cos;
-    double robotSpaceX = Constants.Limelight.TURRET_PIVOT_FORWARD.in(Meters) + rotatedForward;
-    double robotSpaceY = Constants.Limelight.TURRET_PIVOT_LEFT.in(Meters) + rotatedLeft;
+    double robotSpaceX = Constants.Limelight.TURRET_PIVOT_FORWARD_METERS + rotatedForward;
+    double robotSpaceY = Constants.Limelight.TURRET_PIVOT_LEFT_METERS + rotatedLeft;
     double robotSpaceZ =
-        Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters)
+        Constants.Limelight.TURRET_PIVOT_HEIGHT_METERS
             + Constants.Limelight.CAMERA_HEIGHT.in(Meters);
     double cameraYaw =
         Constants.Limelight.CAMERA_YAW_AT_ZERO.in(Degrees) + Math.toDegrees(turretAngle);
