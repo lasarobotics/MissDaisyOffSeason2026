@@ -9,9 +9,9 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.VecBuilder;
@@ -20,7 +20,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -37,10 +36,6 @@ import frc.robot.fsm.SystemState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
-import junit.textui.TestRunner;
-
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -53,16 +48,11 @@ public class DriveSubsystem extends StateMachine {
         getInstance()
             .m_driveTrain
             .setControl(
-                getInstance()
-                    .m_drive
-                    .withVelocityX(0)
-                    .withVelocityY(0)
-                    .withRotationalRate(0));
+                getInstance().m_drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
       }
 
       @Override
-      public void execute() {
-      }
+      public void execute() {}
 
       @Override
       public SystemState nextState() {
@@ -241,22 +231,21 @@ public class DriveSubsystem extends StateMachine {
     Path path = new Path(m_autoChooser.getSelected());
 
     if (shouldFlip) {
-        path.flip();
+      path.flip();
     }
     if (shouldMirror) {
-        path.mirror();
+      path.mirror();
     }
 
-    Command orientModules = Commands.runOnce(
-        () -> this.setModuleOrientations(
-            path.getInitialModuleDirection(this::getPose)
-        )
-    );
+    Command orientModules =
+        Commands.runOnce(
+            () -> this.setModuleOrientations(path.getInitialModuleDirection(this::getPose)));
 
-    Command auto = Commands.sequence(
-        orientModules,
-        Commands.waitUntil(this::modulesAtRequestedOrientation),
-        followBLinePath(path));
+    Command auto =
+        Commands.sequence(
+            orientModules,
+            Commands.waitUntil(this::modulesAtRequestedOrientation),
+            followBLinePath(path));
 
     return auto;
   }
@@ -272,11 +261,12 @@ public class DriveSubsystem extends StateMachine {
     SwerveModule[] modules = getInstance().m_driveTrain.getModules();
 
     for (SwerveModule module : modules) {
-        SwerveModulePosition pos = module.getPosition(true);
+      SwerveModulePosition pos = module.getPosition(true);
 
-        if (Math.abs(pos.angle.getDegrees() - getInstance().requestedPreMatch.getDegrees()) > Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Degrees)) {
-            return false;
-        }
+      if (Math.abs(pos.angle.getDegrees() - getInstance().requestedPreMatch.getDegrees())
+          > Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Degrees)) {
+        return false;
+      }
     }
     return true;
   }
@@ -288,8 +278,7 @@ public class DriveSubsystem extends StateMachine {
     return ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, getPose().getRotation());
   }
 
-  private void limelightThread()
-  {
+  private void limelightThread() {
     updateTurretLimelightPose();
 
     LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
@@ -321,8 +310,8 @@ public class DriveSubsystem extends StateMachine {
     }
 
     try {
-        Thread.sleep(15);
-      } catch (InterruptedException e) {}
+      Thread.sleep(15);
+    } catch (InterruptedException e) {
     }
   }
 
