@@ -50,6 +50,8 @@ public class IntakeSubsystem extends StateMachine {
       @Override
       public void initialize() {
         getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE);
+        m_zeroTimer.reset();
+        m_zeroTimer.start();
       }
 
       @Override
