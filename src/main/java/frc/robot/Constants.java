@@ -206,15 +206,17 @@ public final class Constants {
     public static final double CROSS_TRACK_KP = 2.0;
     public static final double CROSS_TRACK_KI = 0.0;
     public static final double CROSS_TRACK_KD = 0.0;
+
+    public static final Angle PREMATCH_MODULE_TOLERANCE = Degrees.of(45);
   }
 
   public static final class Limelight {
 
     public static final String LIMELIGHT_NAME = "limelight";
 
-    public static final Distance TURRET_PIVOT_FORWARD = Inches.of(-4);
-    public static final Distance TURRET_PIVOT_LEFT = Inches.of(-3);
-    public static final Distance TURRET_PIVOT_HEIGHT = Inches.of(-5.445);
+    public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
+    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters) ;
+    public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(15.445).in(Meters);
 
     public static final Distance CAMERA_FORWARD = Inches.of(-8.17);
     public static final Distance CAMERA_LEFT = Meters.of(0.0);
