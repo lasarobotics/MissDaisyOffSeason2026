@@ -7,12 +7,16 @@ package frc.robot.subsystems.drive;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -29,6 +33,7 @@ import frc.robot.fsm.SystemState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
+import junit.textui.TestRunner;
 
 import static edu.wpi.first.units.Units.Degrees;
 
@@ -40,10 +45,20 @@ public class DriveSubsystem extends StateMachine {
   public enum DriveStates implements SystemState {
     REST {
       @Override
-      public void initialize() {}
+      public void initialize() {
+        getInstance()
+            .m_driveTrain
+            .setControl(
+                getInstance()
+                    .m_drive
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withRotationalRate(0));
+      }
 
       @Override
-      public void execute() {}
+      public void execute() {
+      }
 
       @Override
       public SystemState nextState() {
@@ -91,13 +106,17 @@ public class DriveSubsystem extends StateMachine {
   private java.util.function.DoubleSupplier m_strafeRequest;
   private java.util.function.DoubleSupplier m_rotateRequest;
 
+  private Rotation2d requestedPreMatch = null;
+  private boolean shouldMirror; // midline
+  private boolean shouldFlip; // alliance
+
   private CommandSwerveDrivetrain m_driveTrain;
   private SwerveRequest.FieldCentric m_drive;
 
   private final SwerveRequest.ApplyRobotSpeeds m_blineDriveRequest =
       new SwerveRequest.ApplyRobotSpeeds();
   private final FollowPath.Builder m_blinePathBuilder;
-  private final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
+  private final SendableChooser<String> m_autoChooser = new SendableChooser<>();
 
   public DriveSubsystem() {
 
@@ -136,11 +155,15 @@ public class DriveSubsystem extends StateMachine {
             .withDefaultShouldFlip()
             .withTRatioBasedTranslationHandoffs(true);
 
-    m_autoChooser.setDefaultOption("Do Nothing", Commands.none());
+    m_autoChooser.setDefaultOption("Do Nothing", "nothing");
 
-    m_autoChooser.addOption("BLine Test", followBLinePath("test-path"));
+    m_autoChooser.addOption("BLine Test", "test");
 
     SmartDashboard.putData("Autonomous", m_autoChooser);
+
+    SmartDashboard.putBoolean("shouldFlip", shouldFlip);
+    SmartDashboard.putBoolean("shouldMirror", shouldMirror);
+
   }
 
   public static DriveSubsystem getInstance() {
@@ -201,13 +224,53 @@ public class DriveSubsystem extends StateMachine {
         || Constants.Field.RED_TOWER.contains(getPose().getTranslation()));
   }
 
-  public Command followBLinePath(String pathName) {
+  public Command followBLinePath(Path path) {
 
-    return m_blinePathBuilder.build(new Path(pathName));
+    return m_blinePathBuilder.build(path);
   }
 
   public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected();
+    Path path = new Path(m_autoChooser.getSelected());
+
+    if (shouldFlip) {
+        path.flip();
+    }
+    if (shouldMirror) {
+        path.mirror();
+    }
+
+    Command orientModules = Commands.runOnce(
+        () -> this.setModuleOrientations(
+            path.getInitialModuleDirection(this::getPose)
+        )
+    );
+
+    Command auto = Commands.sequence(
+        orientModules,
+        Commands.waitUntil(this::modulesAtRequestedOrientation),
+        followBLinePath(path));
+
+    return auto;
+  }
+
+  private void setModuleOrientations(Rotation2d rot) {
+    SwerveRequest.PointWheelsAt pointWheelsRequest = new SwerveRequest.PointWheelsAt();
+    requestedPreMatch = rot;
+    getInstance().m_driveTrain.setControl(pointWheelsRequest.withModuleDirection(rot));
+  }
+
+  private boolean modulesAtRequestedOrientation() {
+
+    SwerveModule[] modules = getInstance().m_driveTrain.getModules();
+
+    for (SwerveModule module : modules) {
+        SwerveModulePosition pos = module.getPosition(true);
+
+        if (Math.abs(pos.angle.getDegrees() - getInstance().requestedPreMatch.getDegrees()) > Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Degrees)) {
+            return false;
+        }
+    }
+    return true;
   }
 
   public ChassisSpeeds getFieldRelativeSpeeds() {

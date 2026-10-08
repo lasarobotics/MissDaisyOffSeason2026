@@ -204,6 +204,8 @@ public final class Constants {
     public static final double CROSS_TRACK_KP = 2.0;
     public static final double CROSS_TRACK_KI = 0.0;
     public static final double CROSS_TRACK_KD = 0.0;
+
+    public static final Angle PREMATCH_MODULE_TOLERANCE = Degrees.of(45);
   }
 
   public static final class Limelight {
@@ -212,7 +214,7 @@ public final class Constants {
 
     public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
     public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters) ;
-    public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(-5.445).in(Meters);
+    public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(15.445).in(Meters);
 
     public static final double CAMERA_FORWARD_METERS = Inches.of(-8.17).in(Meters);
     public static final double CAMERA_LEFT_METERS = 0.0;
