@@ -9,7 +9,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -79,14 +79,14 @@ public class SerializationSubsystem extends StateMachine {
   private TalonFX m_mecanumMotorLeader;
   private TalonFX m_mecanumMotorFollower;
 
-  private VelocityDutyCycle m_serializationVelocityDutyCycle;
+  private VelocityVoltage m_velocityVoltage;
 
   public SerializationSubsystem() {
     super(SerializationStates.REST);
 
     m_requestedState = SerializationStates.ACTIVE;
 
-    m_serializationVelocityDutyCycle = new VelocityDutyCycle(0);
+    m_velocityVoltage = new VelocityVoltage(0);
 
     m_omniMotor = new TalonFX(Constants.Serialization.OMNI_CAN_ID);
     m_mecanumMotorLeader = new TalonFX(Constants.Serialization.MECANUM_LEADER_CAN_ID);
@@ -131,9 +131,7 @@ public class SerializationSubsystem extends StateMachine {
     getInstance()
         .m_omniMotor
         .setControl(
-            getInstance()
-                .m_serializationVelocityDutyCycle
-                .withVelocity(Constants.Serialization.OMNI_REST_SPEED));
+            getInstance().m_velocityVoltage.withVelocity(Constants.Serialization.OMNI_REST_SPEED));
   }
 
   public void restMecanum() {
@@ -141,22 +139,20 @@ public class SerializationSubsystem extends StateMachine {
         .m_mecanumMotorLeader
         .setControl(
             getInstance()
-                .m_serializationVelocityDutyCycle
+                .m_velocityVoltage
                 .withVelocity(Constants.Serialization.MECANUM_REST_SPEED));
   }
 
   public void activateOmni(boolean reverse) {
     AngularVelocity speed = Constants.Serialization.OMNI_SPEED.get().times(reverse ? -1 : 1);
-    getInstance()
-        .m_omniMotor
-        .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
+    getInstance().m_omniMotor.setControl(getInstance().m_velocityVoltage.withVelocity(speed));
   }
 
   public void activateMecanum(boolean reverse) {
     AngularVelocity speed = Constants.Serialization.MECANUM_SPEED.get().times(reverse ? -1 : 1);
     getInstance()
         .m_mecanumMotorLeader
-        .setControl(getInstance().m_serializationVelocityDutyCycle.withVelocity(speed));
+        .setControl(getInstance().m_velocityVoltage.withVelocity(speed));
   }
 
   @Override

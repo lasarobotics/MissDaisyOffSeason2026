@@ -16,11 +16,13 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
@@ -34,6 +36,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().stopIntake();
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -45,18 +48,19 @@ public class IntakeSubsystem extends StateMachine {
     ZERO {
       @Override
       public void initialize() {
-        getInstance()
-            .m_armMotor
-            .setControl(
-                getInstance().m_velocityVoltage.withVelocity(Constants.Intake.ZERO_VOLTAGE));
+        getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE);
+        getInstance().m_zeroTimer.reset();
+        getInstance().m_zeroTimer.start();
       }
 
       @Override
       public void execute() {
-        if (getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
-            >= Constants.Intake.ZERO_THRESHOLD) {
+        if (getInstance().m_zeroTimer.hasElapsed(Constants.Intake.ZERO_SECONDS_WAIT)
+            && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
+                >= Constants.Intake.ZERO_THRESHOLD) {
           getInstance().m_armMotor.setPosition(0.0);
           getInstance().setFinishedZero(true);
+          getInstance().setState(INTAKE);
         }
       }
 
@@ -71,6 +75,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().stowIntake();
         getInstance().stopIntake();
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -84,6 +89,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().activateIntake(false);
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -97,6 +103,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().activateIntake(true);
+        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -118,10 +125,15 @@ public class IntakeSubsystem extends StateMachine {
 
   private boolean m_finishedZero;
 
+  private PositionVoltage m_positionRequest;
+
+  private Timer m_zeroTimer;
+
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
 
     m_finishedZero = false;
+    m_positionRequest = new PositionVoltage(0);
 
     m_requestedState = IntakeStates.INTAKE;
 
@@ -181,26 +193,31 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   public void stopIntake() {
-    getInstance()
-        .m_intakeMotorLeader
-        .setControl(
-            getInstance().m_velocityVoltage.withVelocity(Constants.Intake.INTAKE_STOW_SPEED));
+    getInstance().m_intakeMotorLeader.stopMotor();
   }
 
   public void activateIntake(boolean reverse) {
     double intakeSpeed =
-        (reverse) ? -Constants.Intake.INTAKE_ACTIVE_SPEED : Constants.Intake.INTAKE_ACTIVE_SPEED;
+        (reverse)
+            ? -Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond)
+            : Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond);
     getInstance()
         .m_intakeMotorLeader
         .setControl(getInstance().m_velocityVoltage.withVelocity(intakeSpeed));
   }
 
   public void deployIntake() {
-    getInstance().m_armMotor.setControl(Constants.Intake.ARM_DEPLOY_SETPOINT);
+    getInstance()
+        .m_armMotor
+        .setControl(
+            getInstance().m_positionRequest.withPosition(Constants.Intake.ARM_DEPLOY_SETPOINT));
   }
 
   public void stowIntake() {
-    getInstance().m_armMotor.setControl(Constants.Intake.ARM_STOW_SETPOINT);
+    getInstance()
+        .m_armMotor
+        .setControl(
+            getInstance().m_positionRequest.withPosition(Constants.Intake.ARM_STOW_SETPOINT));
   }
 
   public boolean finishedZero() {

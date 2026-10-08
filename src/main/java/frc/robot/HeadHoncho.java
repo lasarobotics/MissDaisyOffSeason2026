@@ -28,6 +28,7 @@ public class HeadHoncho extends StateMachine {
         DriveSubsystem.getInstance().setState(DriveStates.REST);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
         IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+        SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
       }
 
       @Override
@@ -72,6 +73,7 @@ public class HeadHoncho extends StateMachine {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
         IntakeSubsystem.getInstance().setState(IntakeStates.REST);
+        SerializationSubsystem.getInstance().setState(SerializationStates.REST);
       }
 
       @Override
@@ -82,11 +84,14 @@ public class HeadHoncho extends StateMachine {
 
         if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
             || getInstance().isZeroing()) {
-          return this;
+          return ZERO;
         }
 
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
+        }
+        if (getInstance().m_reverseButton.getAsBoolean()) {
+          return REVERSE;
         }
         return REST;
       }
@@ -95,18 +100,15 @@ public class HeadHoncho extends StateMachine {
       @Override
       public void initialize() {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
       }
 
       @Override
       public void execute() {
         if (!(getInstance().ballChecksPass())) {
-          ShooterSubsystem.getInstance().setState(ShooterStates.OFF);
-
-          IntakeSubsystem.getInstance().setState(IntakeStates.REST);
           SerializationSubsystem.getInstance().setState(SerializationStates.REST);
         } else {
-          ShooterSubsystem.getInstance().setState(ShooterStates.ON);
-          IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
           SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
         }
       }
@@ -119,12 +121,17 @@ public class HeadHoncho extends StateMachine {
 
         if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
             || getInstance().isZeroing()) {
-          return this;
+          return ZERO;
+        }
+
+        if (getInstance().m_reverseButton.getAsBoolean()) {
+          return REVERSE;
         }
 
         if (!getInstance().m_activeToggle.getAsBoolean()) {
           return REST;
         }
+
         return TOGGLE_ON;
       }
     },
@@ -144,12 +151,15 @@ public class HeadHoncho extends StateMachine {
         }
         if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
             || getInstance().isZeroing()) {
-          return this;
+          return ZERO;
         }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
-        return REST;
+        if (!getInstance().m_reverseButton.getAsBoolean()) {
+          return REST;
+        }
+        return REVERSE;
       }
     }
   }
@@ -160,13 +170,13 @@ public class HeadHoncho extends StateMachine {
   private BooleanSupplier m_zeroToggle;
 
   public HeadHoncho() {
-    super(HeadHonchoStates.REST); // TODO switch to auto
+    super(HeadHonchoStates.REST);
   }
 
   public boolean finishedZeroing() {
     if (IntakeSubsystem.getInstance().finishedZero()
         && ShooterSubsystem.getInstance().finishedZero()) {
-      getInstance().m_zeroToggle = () -> false;
+      Robot.setZeroToggle(false);
       IntakeSubsystem.getInstance().setFinishedZero(false);
       ShooterSubsystem.getInstance().setFinishedZero(false);
       return true;
@@ -183,10 +193,10 @@ public class HeadHoncho extends StateMachine {
   }
 
   public void configureBindings(
-      BooleanSupplier activeToggle, BooleanSupplier reverse, BooleanSupplier zeroIntake) {
+      BooleanSupplier activeToggle, BooleanSupplier reverse, BooleanSupplier zeroToggle) {
     getInstance().m_activeToggle = activeToggle;
     getInstance().m_reverseButton = reverse;
-    getInstance().m_zeroToggle = zeroIntake;
+    getInstance().m_zeroToggle = zeroToggle;
   }
 
   public static HeadHoncho getInstance() {
@@ -220,7 +230,7 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("Field/BLUE_RIGHT_BUMP", Constants.Field.BLUE_RIGHT_BUMP);
     Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
-    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
+    Logger.recordOutput("Field/RED_LEFT_BUMP", Constants.Field.RED_LEFT_BUMP);
     Logger.recordOutput("HeadHoncho/ballChecksPass", ballChecksPass());
 
     Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());

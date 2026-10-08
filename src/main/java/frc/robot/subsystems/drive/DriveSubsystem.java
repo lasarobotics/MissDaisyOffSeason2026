@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
@@ -326,26 +330,28 @@ public class DriveSubsystem extends StateMachine {
     double turretAngle =
         frc.robot.subsystems.shooter.ShooterSubsystem.getInstance().getTurretRotation();
 
-    double cameraForward = Constants.Limelight.CAMERA_FORWARD_METERS;
-    double cameraLeft = Constants.Limelight.CAMERA_LEFT_METERS;
+    double cameraForward = Constants.Limelight.CAMERA_FORWARD.in(Meters);
+    double cameraLeft = Constants.Limelight.CAMERA_LEFT.in(Meters);
 
     double cos = Math.cos(turretAngle);
     double sin = Math.sin(turretAngle);
     double rotatedForward = cameraForward * cos - cameraLeft * sin;
     double rotatedLeft = cameraForward * sin + cameraLeft * cos;
-    double robotSpaceX = Constants.Limelight.TURRET_PIVOT_FORWARD_METERS + rotatedForward;
-    double robotSpaceY = Constants.Limelight.TURRET_PIVOT_LEFT_METERS + rotatedLeft;
+    double robotSpaceX = Constants.Limelight.TURRET_PIVOT_FORWARD.in(Meters) + rotatedForward;
+    double robotSpaceY = Constants.Limelight.TURRET_PIVOT_LEFT.in(Meters) + rotatedLeft;
     double robotSpaceZ =
-        Constants.Limelight.TURRET_PIVOT_HEIGHT_METERS + Constants.Limelight.CAMERA_HEIGHT_METERS;
-    double cameraYaw = Constants.Limelight.CAMERA_YAW_AT_ZERO_DEG.in(Degrees) + Math.toDegrees(turretAngle);
+        Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters)
+            + Constants.Limelight.CAMERA_HEIGHT.in(Meters);
+    double cameraYaw =
+        Constants.Limelight.CAMERA_YAW_AT_ZERO.in(Degrees) + Math.toDegrees(turretAngle);
 
     LimelightHelpers.setCameraPose_RobotSpace(
         Constants.Limelight.LIMELIGHT_NAME,
         robotSpaceX,
         robotSpaceY,
         robotSpaceZ,
-        Constants.Limelight.CAMERA_ROLL_DEG,
-        Constants.Limelight.CAMERA_PITCH_DEG,
+        Constants.Limelight.CAMERA_ROLL.in(Degrees),
+        Constants.Limelight.CAMERA_PITCH.in(Degrees),
         cameraYaw);
   }
 
@@ -359,7 +365,7 @@ public class DriveSubsystem extends StateMachine {
     }
 
     if (Math.abs(m_driveTrain.getState().Speeds.omegaRadiansPerSecond)
-        > Math.toRadians(Constants.Limelight.MAX_VISION_ANGULAR_VELOCITY_DEG_PER_SEC)) {
+        > Constants.Limelight.MAX_VISION_ANGULAR_VELOCITY_PER_SEC.in(Radians)) {
 
       return null;
     }

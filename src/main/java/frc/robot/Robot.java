@@ -25,7 +25,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
   private boolean m_activeToggle;
-  private boolean m_zeroToggle;
+  private static boolean m_zeroToggle;
 
   private final CommandXboxController m_controller = new CommandXboxController(0);
 
@@ -56,6 +56,10 @@ public class Robot extends LoggedRobot {
             () -> m_controller.getLeftY(),
             () -> m_controller.getLeftX(),
             () -> m_controller.getRightX());
+  }
+
+  public static void setZeroToggle(boolean value) {
+    Commands.runOnce(() -> m_zeroToggle = !m_zeroToggle);
   }
 
   @Override
