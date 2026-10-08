@@ -45,7 +45,8 @@ public class ShooterSubsystem extends StateMachine {
         getInstance().m_readytoShoot = false;
 
         if (!RobotBase.isSimulation()) {
-          getInstance().updateTurretEncoder();
+          Thread turretUpdateThread = new Thread(() -> getInstance().updateTurretEncoder());
+          turretUpdateThread.start();
         }
 
         getInstance().m_turretMotor.setControl(getInstance().m_positionVoltage.withPosition(0));
