@@ -101,15 +101,14 @@ public class HeadHoncho extends StateMachine {
       public void initialize() {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
       }
 
       @Override
       public void execute() {
         if (!(getInstance().ballChecksPass())) {
-          IntakeSubsystem.getInstance().setState(IntakeStates.REST);
           SerializationSubsystem.getInstance().setState(SerializationStates.REST);
         } else {
-          IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
           SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
         }
       }
@@ -231,7 +230,7 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("Field/BLUE_RIGHT_BUMP", Constants.Field.BLUE_RIGHT_BUMP);
     Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
     Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
-    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
+    Logger.recordOutput("Field/RED_LEFT_BUMP", Constants.Field.RED_LEFT_BUMP);
     Logger.recordOutput("HeadHoncho/ballChecksPass", ballChecksPass());
 
     Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());
