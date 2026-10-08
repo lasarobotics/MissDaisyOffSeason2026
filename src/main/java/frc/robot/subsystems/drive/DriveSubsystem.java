@@ -116,6 +116,7 @@ public class DriveSubsystem extends StateMachine {
 
   private CommandSwerveDrivetrain m_driveTrain;
   private SwerveRequest.FieldCentric m_drive;
+  protected final Thread m_limelight_thread;
 
   private final SwerveRequest.ApplyRobotSpeeds m_blineDriveRequest =
       new SwerveRequest.ApplyRobotSpeeds();
@@ -168,6 +169,9 @@ public class DriveSubsystem extends StateMachine {
     SmartDashboard.putBoolean("shouldFlip", shouldFlip);
     SmartDashboard.putBoolean("shouldMirror", shouldMirror);
 
+    m_limelight_thread = new Thread(this::limelightThread);
+    m_limelight_thread.setDaemon(true);
+    m_limelight_thread.start();
   }
 
   public static DriveSubsystem getInstance() {
@@ -284,8 +288,8 @@ public class DriveSubsystem extends StateMachine {
     return ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, getPose().getRotation());
   }
 
-  @Override
-  public void periodic() {
+  private void limelightThread()
+  {
     updateTurretLimelightPose();
 
     LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
@@ -316,11 +320,14 @@ public class DriveSubsystem extends StateMachine {
       Logger.recordOutput(getName() + "/LimeLight Pose", limelightEstimate.pose);
     }
 
-    if (limelightEstimate != null) {
-
-      Logger.recordOutput(getName() + "/TagCount", limelightEstimate.tagCount);
+    try {
+        Thread.sleep(15);
+      } catch (InterruptedException e) {}
     }
+  }
 
+  @Override
+  public void periodic() {
     Logger.recordOutput("DriveSubsystem/Pose", m_driveTrain.getState().Pose);
     Logger.recordOutput("DriveSubsystem/State", getInstance().m_driveState);
   }
