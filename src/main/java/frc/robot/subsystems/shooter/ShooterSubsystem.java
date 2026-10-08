@@ -62,10 +62,7 @@ public class ShooterSubsystem extends StateMachine {
     ZERO {
       @Override
       public void initialize() {
-        getInstance()
-            .m_hoodMotor
-            .setControl(
-                getInstance().m_velocityVoltage.withVelocity(Constants.Shooter.ZERO_VOLTAGE));
+        getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE);
         getInstance().m_zeroTimer.reset();
         getInstance().m_zeroTimer.start();
       }
