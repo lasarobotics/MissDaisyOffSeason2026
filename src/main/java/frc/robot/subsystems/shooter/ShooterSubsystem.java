@@ -182,6 +182,7 @@ public class ShooterSubsystem extends StateMachine {
   private boolean m_blueAlliance;
   private boolean m_readytoShoot;
   private boolean m_finishedZero;
+
   private Timer m_zeroTimer;
 
   public ShooterSubsystem() {
