@@ -70,7 +70,7 @@ public class ShooterSubsystem extends StateMachine {
 
       @Override
       public void execute() {
-        if (m_zeroTimer.hasElapsed(Constants.Shooter.ZERO_SECONDS_WAIT)
+        if (m_zeroTimer.hasElapsed(Constants.Shooter.ZEROING_DELAY)
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Intake.ZERO_THRESHOLD) {
           getInstance().m_hoodMotor.setPosition(0.0);

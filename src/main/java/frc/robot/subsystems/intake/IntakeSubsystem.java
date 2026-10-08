@@ -36,7 +36,6 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().stopIntake();
-        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -46,16 +45,16 @@ public class IntakeSubsystem extends StateMachine {
     },
 
     ZERO {
+      Timer m_zeroTimer = new Timer();
+
       @Override
       public void initialize() {
         getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE);
-        getInstance().m_zeroTimer.reset();
-        getInstance().m_zeroTimer.start();
       }
 
       @Override
       public void execute() {
-        if (getInstance().m_zeroTimer.hasElapsed(Constants.Intake.ZERO_SECONDS_WAIT)
+        if (m_zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
             && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Intake.ZERO_THRESHOLD) {
           getInstance().m_armMotor.setPosition(0.0);
@@ -75,7 +74,6 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().stowIntake();
         getInstance().stopIntake();
-        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -89,7 +87,6 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().activateIntake(false);
-        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -103,7 +100,6 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         getInstance().deployIntake();
         getInstance().activateIntake(true);
-        getInstance().m_zeroTimer.stop();
       }
 
       @Override
@@ -126,8 +122,6 @@ public class IntakeSubsystem extends StateMachine {
   private boolean m_finishedZero;
 
   private PositionVoltage m_positionRequest;
-
-  private Timer m_zeroTimer;
 
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);

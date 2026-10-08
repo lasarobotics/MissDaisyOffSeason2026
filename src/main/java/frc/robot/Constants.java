@@ -74,7 +74,7 @@ public final class Constants {
     public static final double ZERO_VOLTAGE = 3.0;
     public static final double ZERO_THRESHOLD = 3.0;
 
-    public static final double ZERO_SECONDS_WAIT = 0.2;
+    public static final double ZEROING_DELAY = 0.2;
   }
 
   public static class Serialization {
@@ -88,11 +88,15 @@ public final class Constants {
 
     public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
-          return RotationsPerSecond.of((2 * Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())/(Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
+          return RotationsPerSecond.of(
+              (2 * Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
+                  / (Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
         };
     public static final Supplier<AngularVelocity> OMNI_SPEED =
         () -> {
-          return RotationsPerSecond.of((2 * Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())/(Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
+          return RotationsPerSecond.of(
+              (2 * Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())
+                  / (Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
         };
     public static final AngularVelocity MECANUM_REST_SPEED = RotationsPerSecond.of(0);
     public static final AngularVelocity OMNI_REST_SPEED = RotationsPerSecond.of(0);
@@ -126,7 +130,7 @@ public final class Constants {
     // meters away
     public static final double ZERO_VOLTAGE = 3.0;
     public static final double ZERO_THRESHOLD = 3.0;
-    public static final double ZERO_SECONDS_WAIT = 0.2;
+    public static final double ZEROING_DELAY = 0.2;
   }
 
   public static class Field {
@@ -215,7 +219,7 @@ public final class Constants {
     public static final String LIMELIGHT_NAME = "limelight";
 
     public static final double TURRET_PIVOT_FORWARD_METERS = Inches.of(-4).in(Meters);
-    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters) ;
+    public static final double TURRET_PIVOT_LEFT_METERS = Inches.of(-3).in(Meters);
     public static final double TURRET_PIVOT_HEIGHT_METERS = Inches.of(15.445).in(Meters);
 
     public static final Distance CAMERA_FORWARD = Inches.of(-8.17);
