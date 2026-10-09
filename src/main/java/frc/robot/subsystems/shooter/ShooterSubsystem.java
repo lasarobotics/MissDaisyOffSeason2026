@@ -8,9 +8,17 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -19,6 +27,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -49,9 +58,9 @@ public class ShooterSubsystem extends StateMachine {
           turretUpdateThread.start();
         }
 
-        getInstance().m_turretMotor.setControl(getInstance().m_positionVoltage.withPosition(0));
-        getInstance().m_shooterLeader.setControl(getInstance().m_velocityVoltage.withVelocity(0));
-        getInstance().m_hoodMotor.setControl(getInstance().m_positionVoltage.withPosition(0));
+        getInstance().m_shooterLeader.setControl(getInstance().m_shooterRequest.withVelocity(0));
+        getInstance().m_hoodMotor.setControl(getInstance().m_hoodRequest.withPosition(0));
+        getInstance().m_turretMotor.setControl(getInstance().m_turretRequest.withPosition(0));
       }
 
       @Override
@@ -175,12 +184,13 @@ public class ShooterSubsystem extends StateMachine {
   private TalonFX m_hoodMotor;
   private CANcoder m_encoderOne;
   private CANcoder m_encoderTwo;
-  private VelocityVoltage m_velocityVoltage;
-  private PositionVoltage m_positionVoltage;
-  private TalonFXConfiguration m_shooterConfig;
-  private TalonFXConfiguration m_hoodConfig;
+
+  private VelocityVoltage m_shooterRequest;
+  private PositionVoltage m_hoodRequest;
+  private PositionVoltage m_turretRequest;
+
   private TalonFX m_turretMotor;
-  private TalonFXConfiguration m_turretConfig;
+
   private boolean m_blueAlliance;
   private boolean m_readytoShoot;
   private boolean m_finishedZero;
@@ -196,33 +206,60 @@ public class ShooterSubsystem extends StateMachine {
     m_encoderOne = new CANcoder(Constants.Shooter.ENCODER_ONE_ID);
     m_encoderTwo = new CANcoder(Constants.Shooter.ENCODER_TWO_ID);
 
-    m_velocityVoltage = new VelocityVoltage(0);
-    m_positionVoltage = new PositionVoltage(0);
+    m_shooterRequest = new VelocityVoltage(0);
+    m_hoodRequest = new PositionVoltage(0);
+    m_turretRequest = new PositionVoltage(0);
 
     m_shooterFollower.setControl(
         new Follower(m_shooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
-    m_shooterConfig = new TalonFXConfiguration();
-    m_shooterConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    m_shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
+    shooterConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    m_hoodConfig = new TalonFXConfiguration();
-    m_hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Shooter.HOOD_MAX_ANGLE;
-    m_hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
-    m_hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
+    hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Shooter.HOOD_MAX_ANGLE;
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-    m_turretConfig = new TalonFXConfiguration(); // TODO SET PID SV VALUES FOR ALL SUBSYSTEMS
-    m_turretConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 23.0;
-    m_turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    m_turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -23.0;
-    m_turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    TalonFXConfiguration turretConfig =
+        new TalonFXConfiguration()
+            .withSlot0(new Slot0Configs().withKP(75).withKS(0.2197265625))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(46))
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(Rotations.of(0.25))
+                    .withReverseSoftLimitEnable(true)
+                    .withReverseSoftLimitThreshold(Rotations.of(-0.25)))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2.5))
+                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(1.5)));
 
-    m_shooterLeader.getConfigurator().apply(m_shooterConfig);
-    m_shooterFollower.getConfigurator().apply(m_shooterConfig);
-    m_hoodMotor.getConfigurator().apply(m_hoodConfig);
-    m_turretMotor.getConfigurator().apply(m_turretConfig);
+    CANcoderConfiguration encoderOneConfig =
+        new CANcoderConfiguration()
+            .withMagnetSensor(
+                new MagnetSensorConfigs()
+                    .withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.99))
+                    .withMagnetOffset(Rotations.of(-0.417236328125))
+                    .withSensorDirection(SensorDirectionValue.Clockwise_Positive));
+
+    CANcoderConfiguration encoderTwoConfig =
+        new CANcoderConfiguration()
+            .withMagnetSensor(
+                new MagnetSensorConfigs()
+                    .withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.99))
+                    .withMagnetOffset(Rotations.of(-0.396728515625))
+                    .withSensorDirection(SensorDirectionValue.Clockwise_Positive));
+
+    m_shooterLeader.getConfigurator().apply(shooterConfig);
+    m_shooterFollower.getConfigurator().apply(shooterConfig);
+    m_hoodMotor.getConfigurator().apply(hoodConfig);
+    m_turretMotor.getConfigurator().apply(turretConfig);
+    m_encoderOne.getConfigurator().apply(encoderOneConfig);
+    m_encoderTwo.getConfigurator().apply(encoderTwoConfig);
     // updateTurretEncoder();
   }
 
@@ -289,7 +326,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private void setTurretPos(double desiredPos) {
-    m_turretMotor.setControl(m_positionVoltage.withPosition(desiredPos / (2 * Math.PI)));
+    m_turretMotor.setControl(m_turretRequest.withPosition(desiredPos / (2 * Math.PI)));
   }
 
   private double getHoodPos(double x_vel, double y_vel) {
@@ -302,7 +339,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private void setHoodPos(double hoodPos) {
-    m_hoodMotor.setControl(m_positionVoltage.withPosition(hoodPos / (2 * Math.PI)));
+    m_hoodMotor.setControl(m_hoodRequest.withPosition(hoodPos / (2 * Math.PI)));
   }
 
   private double getShooterSpeed(double x_vel, double y_vel) {
@@ -313,7 +350,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private void setShooterSpeed(double speed) {
-    m_shooterLeader.setControl(m_velocityVoltage.withVelocity(speed));
+    m_shooterLeader.setControl(m_shooterRequest.withVelocity(speed));
   }
 
   private static double getVelocityXStationary(
