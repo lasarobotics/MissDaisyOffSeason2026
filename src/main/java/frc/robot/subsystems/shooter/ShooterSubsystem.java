@@ -507,11 +507,13 @@ public class ShooterSubsystem extends StateMachine {
     }
 
     double matchingValue = 0;
+    boolean foundSolution = false;
     outerLoop:
     for (double eOnePossible : encoderOnePossible) {
       for (double eTwoPossible : encoderTwoPossible) {
         if (Math.abs(eTwoPossible - eOnePossible) < Constants.Shooter.CRT_EPSILON) {
           matchingValue = (eOnePossible + eTwoPossible) / 2;
+          foundSolution = true;
           break outerLoop;
         }
 
@@ -520,7 +522,10 @@ public class ShooterSubsystem extends StateMachine {
         }
       }
     }
-    m_turretMotor.setPosition(matchingValue);
+
+    if (foundSolution) {
+      m_turretMotor.setPosition(matchingValue);
+    }
   }
 
   public double getTurretRotation() {
