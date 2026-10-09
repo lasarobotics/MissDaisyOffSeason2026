@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
@@ -258,9 +260,9 @@ public class DriveSubsystem extends StateMachine {
 
   private boolean modulesAtRequestedOrientation() {
 
-    SwerveModule[] modules = getInstance().m_driveTrain.getModules();
+    SwerveModule<TalonFX, TalonFX, CANcoder>[] modules = getInstance().m_driveTrain.getModules();
 
-    for (SwerveModule module : modules) {
+    for (SwerveModule<TalonFX, TalonFX, CANcoder> module : modules) {
       SwerveModulePosition pos = module.getPosition(true);
 
       if (Math.abs(pos.angle.getDegrees() - getInstance().requestedPreMatch.getDegrees())

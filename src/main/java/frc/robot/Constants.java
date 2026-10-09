@@ -226,8 +226,8 @@ public final class Constants {
     public static final Distance CAMERA_LEFT = Meters.of(0.0);
     public static final Distance CAMERA_HEIGHT = Inches.of(4.56);
 
-    public static final Angle CAMERA_YAW_AT_ZERO = Degrees.of(25.006);
-    public static final Angle CAMERA_PITCH = Degrees.of(0.0);
+    public static final Angle CAMERA_YAW_AT_ZERO = Degrees.of(0);
+    public static final Angle CAMERA_PITCH = Degrees.of(25.006);
     public static final Angle CAMERA_ROLL = Degrees.of(0.0);
 
     public static final double MAX_TAG_AMBIGUITY = 1.0;
