@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -492,11 +493,11 @@ public class ShooterSubsystem extends StateMachine {
     double encoderTwoPosition = encoderTwoSignal.getValue().in(Rotations);
     double[] encoderOnePossible = new double[Constants.Shooter.ENCODER_ONE_TEETH];
     double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
+
     /*
      * Basically, the turret rotates from -0.5 to 0.5 rotations,
      * so based on this, as well as the period of alignment with the encoders (mod smth)
      * we want to check negative and positive domains of i in this case
-     *
      */
     for (int i = -5; i < 10; i++) {
       encoderOnePossible[i] =
