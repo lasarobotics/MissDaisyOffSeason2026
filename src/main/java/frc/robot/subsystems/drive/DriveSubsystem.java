@@ -38,6 +38,8 @@ import frc.robot.fsm.SystemState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -109,6 +111,7 @@ public class DriveSubsystem extends StateMachine {
   private CommandSwerveDrivetrain m_driveTrain;
   private SwerveRequest.FieldCentric m_drive;
   protected final Thread m_limelight_thread;
+  private static volatile Map<String, Double> m_limelightHeartbeat;
 
   private final SwerveRequest.ApplyRobotSpeeds m_blineDriveRequest =
       new SwerveRequest.ApplyRobotSpeeds();
@@ -160,6 +163,9 @@ public class DriveSubsystem extends StateMachine {
 
     SmartDashboard.putBoolean("shouldFlip", shouldFlip);
     SmartDashboard.putBoolean("shouldMirror", shouldMirror);
+
+    m_limelightHeartbeat = new HashMap<>();
+    m_limelightHeartbeat.put(Constants.Limelight.LIMELIGHT_NAME, 0.0);
 
     m_limelight_thread = new Thread(this::limelightThread);
     m_limelight_thread.setDaemon(true);
@@ -281,39 +287,42 @@ public class DriveSubsystem extends StateMachine {
   }
 
   private void limelightThread() {
-    updateTurretLimelightPose();
 
-    LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
+    while (true) {
+      updateTurretLimelightPose();
 
-    if (limelightEstimate != null && limelightEstimate.tagCount > 0) {
+      LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
 
-      if (!DriverStation.isDisabled()) {
+      if (limelightEstimate != null && limelightEstimate.tagCount > 0) {
 
-        m_driveTrain.setVisionMeasurementStdDevs(
-            VecBuilder.fill(
-                Constants.Limelight.VISION_STD_DEV_X,
-                Constants.Limelight.VISION_STD_DEV_Y,
-                Constants.Limelight.VISION_STD_DEV_THETA));
+        if (!DriverStation.isDisabled()) {
 
-        m_driveTrain.addVisionMeasurement(
-            limelightEstimate.pose.toPose2d(),
-            Utils.fpgaToCurrentTime(limelightEstimate.timestampSeconds));
+          m_driveTrain.setVisionMeasurementStdDevs(
+              VecBuilder.fill(
+                  Constants.Limelight.VISION_STD_DEV_X,
+                  Constants.Limelight.VISION_STD_DEV_Y,
+                  Constants.Limelight.VISION_STD_DEV_THETA));
 
-      } else {
+          m_driveTrain.addVisionMeasurement(
+              limelightEstimate.pose.toPose2d(),
+              Utils.fpgaToCurrentTime(limelightEstimate.timestampSeconds));
 
-        m_driveTrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 0.1));
+        } else {
 
-        m_driveTrain.addVisionMeasurement(
-            limelightEstimate.pose.toPose2d(),
-            Utils.fpgaToCurrentTime(limelightEstimate.timestampSeconds));
+          m_driveTrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 0.1));
+
+          m_driveTrain.addVisionMeasurement(
+              limelightEstimate.pose.toPose2d(),
+              Utils.fpgaToCurrentTime(limelightEstimate.timestampSeconds));
+        }
+
+        Logger.recordOutput(getName() + "/LimeLight Pose", limelightEstimate.pose);
       }
 
-      Logger.recordOutput(getName() + "/LimeLight Pose", limelightEstimate.pose);
-    }
-
-    try {
-      Thread.sleep(15);
-    } catch (InterruptedException e) {
+      try {
+        Thread.sleep(15);
+      } catch (InterruptedException e) {
+      }
     }
   }
 
@@ -327,6 +336,8 @@ public class DriveSubsystem extends StateMachine {
 
     double turretAngle =
         frc.robot.subsystems.shooter.ShooterSubsystem.getInstance().getTurretRotation();
+
+    turretAngle *= 2 * Math.PI;
 
     double cameraForward = Constants.Limelight.CAMERA_FORWARD.in(Meters);
     double cameraLeft = Constants.Limelight.CAMERA_LEFT.in(Meters);
@@ -354,9 +365,18 @@ public class DriveSubsystem extends StateMachine {
   }
 
   private LimelightHelpers.PoseEstimate getFilteredPoseEstimate() {
-
     LimelightHelpers.PoseEstimate pose_estimate =
         LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.Limelight.LIMELIGHT_NAME);
+
+    String limelight = Constants.Limelight.LIMELIGHT_NAME;
+    double hb = LimelightHelpers.getHeartbeat(limelight);
+    Double savedHb = m_limelightHeartbeat.get(limelight);
+
+    if (savedHb == null || savedHb == hb) {
+      return null;
+    } else {
+      m_limelightHeartbeat.put(limelight, hb);
+    }
 
     if (pose_estimate == null) {
       return null;
