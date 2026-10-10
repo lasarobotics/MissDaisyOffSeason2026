@@ -107,11 +107,18 @@ public class ShooterSubsystem extends StateMachine {
     ON {
       @Override
       public void execute() {
+        Translation3d target = getInstance().getTarget();
+        double hangTime =
+            ((Math.sqrt(Constants.Shooter.MAX_BALL_Y_POS.getAsDouble() * 2)
+                    + Math.sqrt(
+                        2 * (Constants.Shooter.MAX_BALL_Y_POS.getAsDouble() - target.getZ())))
+                / Math.sqrt(Constants.Field.GRAVITY_VALUE));
+
         Translation2d robotPose =
             getInstance()
                 .transformByTangentialRotationSpeed(
-                    getInstance().getFuturePose(Constants.Shooter.HANG_TIME));
-        Translation3d target = getInstance().getTarget();
+                    getInstance().getFuturePose(hangTime), hangTime);
+
         Translation2d targetDiff = target.toTranslation2d().minus(robotPose);
         double distance = targetDiff.getNorm();
         double x_vel =
@@ -573,7 +580,8 @@ public class ShooterSubsystem extends StateMachine {
   /*The turret could be rotating with the robot,
   as such we want to transform out future pose
   by the tangential velocity and direction in order to have accurate SOTM */
-  private Translation2d transformByTangentialRotationSpeed(Translation2d currentPos) {
+  private Translation2d transformByTangentialRotationSpeed(
+      Translation2d currentPos, double hangTime) {
     double linearTangentSpeed =
         MathUtil.applyDeadband(
                 DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
@@ -582,7 +590,7 @@ public class ShooterSubsystem extends StateMachine {
     // 90degrees CCW because CCW is positive and we want tangential velocity vector
     Translation2d transformationVector =
         new Translation2d(
-            linearTangentSpeed * Constants.Shooter.HANG_TIME,
+            linearTangentSpeed * hangTime,
             DriveSubsystem.getInstance().getPose().getRotation().plus(Rotation2d.kCCW_90deg));
     return currentPos.plus(transformationVector);
   }

@@ -123,7 +123,6 @@ public final class Constants {
     public static final Distance SHOOTER_OFFSET_RADIUS =
         Inches.of(Math.hypot(SHOOTER_OFFSET_X.in(Inches), SHOOTER_OFFSET_Y.in(Inches)));
     public static final Distance CENTER_TO_EDGE = Inches.of(13.25);
-    public static final double HANG_TIME = 1.0;
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
