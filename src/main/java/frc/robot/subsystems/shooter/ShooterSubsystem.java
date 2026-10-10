@@ -328,7 +328,8 @@ public class ShooterSubsystem extends StateMachine {
     double yOffset = target.getY() - robotPose.getY();
     Angle angleToTarget =
         Radians.of(robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset));
-    Angle turretDesired = angleToTarget.times(-1).minus(getTurretPosition());
+    Angle turretDesired = angleToTarget.plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET);
+
     if (turretDesired.lt(Degrees.of(-90))) {
       turretDesired = turretDesired.plus(Rotations.of(1));
     } else if (turretDesired.gt(Degrees.of(90))) {

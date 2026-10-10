@@ -124,8 +124,11 @@ public final class Constants {
     public static final double CRT_EPSILON = 0.01;
     public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
     public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
+    // shooter 0 degrees is half a rotation from robot front
+    public static final Angle SHOOTER_ROTATION_OFFSET = Rotations.of(0.5);
     public static final Distance SHOOTER_OFFSET_RADIUS =
         Inches.of(Math.hypot(SHOOTER_OFFSET_X.in(Inches), SHOOTER_OFFSET_Y.in(Inches)));
+
     public static final Distance CENTER_TO_EDGE = Inches.of(13.25);
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
