@@ -128,7 +128,7 @@ public final class Constants {
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
     public static final Angle TURRET_DEADBAND = Radians.of(0.035);
-    public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
+    public static final Voltage ZERO_VOLTAGE = Volts.of(-3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
     public static Angle HOOD_ZERO_SETPOINT = Degrees.of(0.0);
