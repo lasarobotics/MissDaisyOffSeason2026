@@ -73,10 +73,17 @@ public class ShooterSubsystem extends StateMachine {
     },
     ZERO {
       Timer zeroTimer = new Timer();
+      Thread turretUpdateThread;
 
       @Override
       public void initialize() {
+        getInstance().setShooterSpeed(0);
+
         getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
+        getInstance().setTurretPos(getInstance().getTurretPosition());
+        turretUpdateThread = new Thread(() -> getInstance().updateTurretEncoder());
+        turretUpdateThread.start();
+
         zeroTimer.reset();
         zeroTimer.start();
       }
@@ -85,7 +92,8 @@ public class ShooterSubsystem extends StateMachine {
       public void execute() {
         if (zeroTimer.hasElapsed(Constants.Shooter.ZEROING_DELAY)
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
-                >= Constants.Shooter.ZERO_THRESHOLD.in(Amps)) {
+                >= Constants.Shooter.ZERO_THRESHOLD.in(Amps)
+            && !turretUpdateThread.isAlive()) {
           getInstance().m_hoodMotor.setPosition(0.0);
           getInstance().setState(ShooterStates.OFF);
         }
