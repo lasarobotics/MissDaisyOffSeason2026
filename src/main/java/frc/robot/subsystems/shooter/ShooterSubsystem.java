@@ -495,17 +495,17 @@ public class ShooterSubsystem extends StateMachine {
     double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
 
     /*
-     * Basically, the turret rotates from -0.5 to 0.5 rotations,
-     * so based on this, as well as the period of alignment with the encoders (mod smth)
-     * we want to check negative and positive domains of i in this case
+     * Basically, the turret rotates from -0.5 to 0.5 rotations.
+     * Every turret rotation is ~5.2 encoder rotations
+     * so we check 5 encoder rotations in each direction to be safe
      */
-    for (int i = -5; i < 10; i++) {
+    for (int i = -5; i < 5; i++) {
       encoderOnePossible[i] =
           (i + encoderOnePosition)
               * ((double) Constants.Shooter.ENCODER_ONE_TEETH
                   / Constants.Shooter.TURRET_GEAR_TEETH);
     }
-    for (int i = 0; i < Constants.Shooter.ENCODER_TWO_TEETH; i++) {
+    for (int i = -5; i < 5; i++) {
       encoderTwoPossible[i] =
           (i + encoderTwoPosition)
               * ((double) Constants.Shooter.ENCODER_TWO_TEETH
