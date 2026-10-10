@@ -84,12 +84,11 @@ public class DriveSubsystem extends StateMachine {
                     .m_drive
                     .withVelocityX(
                         Constants.Drive.MAX_SPEED.times(
-                            -getInstance().m_driveRequest.getAsDouble()
-                                * Math.abs(getInstance().m_driveRequest.getAsDouble())))
+                            -getInstance().squareInput(getInstance().m_driveRequest.getAsDouble())))
                     .withVelocityY(
                         Constants.Drive.MAX_SPEED.times(
-                            -getInstance().m_strafeRequest.getAsDouble()
-                                * Math.abs(getInstance().m_strafeRequest.getAsDouble())))
+                            -getInstance()
+                                .squareInput(getInstance().m_strafeRequest.getAsDouble())))
                     .withRotationalRate(rotationRate));
       }
 
@@ -131,7 +130,6 @@ public class DriveSubsystem extends StateMachine {
 
     m_drive =
         new SwerveRequest.FieldCentric()
-            .withDeadband(Constants.Drive.MAX_SPEED.times(Constants.Drive.DEADBAND_SCALAR))
             .withRotationalDeadband(Constants.Drive.MAX_ANGULAR_RATE.times(0.1))
             .withDriveRequestType(DriveRequestType.Velocity)
             .withSteerRequestType(SteerRequestType.MotionMagicExpo)
@@ -441,5 +439,10 @@ public class DriveSubsystem extends StateMachine {
     }
 
     return pose_estimate;
+  }
+
+  private double squareInput(double input) {
+    input = MathUtil.applyDeadband(input, Constants.Drive.DEADBAND_SCALAR);
+    return Math.copySign(input * input, input);
   }
 }
