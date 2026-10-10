@@ -531,7 +531,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public Angle getTurretPosition() {
-    return Rotations.of(m_turretMotor.getPosition().getValueAsDouble());
+    return m_turretMotor.getPosition().getValue();
   }
 
   private Translation2d getFuturePose(double time) {
