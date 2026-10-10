@@ -16,6 +16,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -109,6 +110,7 @@ public class DriveSubsystem extends StateMachine {
   private Rotation2d requestedPreMatch = null;
   private boolean shouldMirror; // midline
   private boolean shouldFlip; // alliance
+  private boolean modulesAligned = false;
 
   private CommandSwerveDrivetrain m_driveTrain;
   private SwerveRequest.FieldCentric m_drive;
@@ -154,7 +156,6 @@ public class DriveSubsystem extends StateMachine {
                 new PIDController(BLine.TRANSLATION_KP, BLine.TRANSLATION_KI, BLine.TRANSLATION_KD),
                 new PIDController(BLine.ROTATION_KP, BLine.ROTATION_KI, BLine.ROTATION_KD),
                 new PIDController(BLine.CROSS_TRACK_KP, BLine.CROSS_TRACK_KI, BLine.CROSS_TRACK_KD))
-            .withDefaultShouldFlip()
             .withTRatioBasedTranslationHandoffs(true);
 
     m_autoChooser.setDefaultOption("Do Nothing", "nothing");
@@ -240,24 +241,44 @@ public class DriveSubsystem extends StateMachine {
   public Command getAutonomousCommand() {
     Path path = new Path(m_autoChooser.getSelected());
 
-    if (shouldFlip) {
+    boolean flip = SmartDashboard.getBoolean("shouldFlip", false);
+    boolean mirror = SmartDashboard.getBoolean("shouldMirror", false);
+
+    if (flip) {
       path.flip();
     }
-    if (shouldMirror) {
+
+    if (mirror) {
       path.mirror();
     }
 
     Command orientModules =
         Commands.runOnce(
-            () -> this.setModuleOrientations(path.getInitialModuleDirection(this::getPose)));
+            () -> {
+              modulesAligned = false;
+              setModuleOrientations(path.getInitialModuleDirection(this::getPose));
+            });
 
-    Command auto =
-        Commands.sequence(
-            orientModules,
-            Commands.waitUntil(this::modulesAtRequestedOrientation),
-            followBLinePath(path));
+    Command waitForAlignment =
+        Commands.waitUntil(this::modulesAtRequestedOrientation).withTimeout(2.0);
 
-    return auto;
+    Command recordAlignment =
+        Commands.runOnce(
+            () -> {
+              modulesAligned = modulesAtRequestedOrientation();
+              SmartDashboard.putBoolean("Modules Aligned", modulesAligned);
+            });
+
+    Command followOnlyIfAligned =
+        Commands.either(
+            followBLinePath(path),
+            Commands.runOnce(
+                () -> {
+                  DriverStation.reportWarning("Modules never reached restination", false);
+                }),
+            () -> modulesAligned);
+
+    return Commands.sequence(orientModules, waitForAlignment, recordAlignment, followOnlyIfAligned);
   }
 
   private void setModuleOrientations(Rotation2d rot) {
@@ -267,17 +288,23 @@ public class DriveSubsystem extends StateMachine {
   }
 
   private boolean modulesAtRequestedOrientation() {
+    if (requestedPreMatch == null) {
+      return false;
+    }
 
-    SwerveModule<TalonFX, TalonFX, CANcoder>[] modules = getInstance().m_driveTrain.getModules();
+    SwerveModule<TalonFX, TalonFX, CANcoder>[] modules = m_driveTrain.getModules();
 
     for (SwerveModule<TalonFX, TalonFX, CANcoder> module : modules) {
       SwerveModulePosition pos = module.getPosition(true);
 
-      if (Math.abs(pos.angle.getDegrees() - getInstance().requestedPreMatch.getDegrees())
-          > Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Degrees)) {
+      double angleDifference =
+          Math.abs(MathUtil.angleModulus(pos.angle.getRadians() - requestedPreMatch.getRadians()));
+
+      if (angleDifference > Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Radians)) {
         return false;
       }
     }
+
     return true;
   }
 
