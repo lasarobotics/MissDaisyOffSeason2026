@@ -57,8 +57,6 @@ public final class Constants {
     public static final double MID_SPEED_SCALAR = 0.5;
     public static final double FAST_SPEED_SCALAR = 0.75;
 
-    public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
-    public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
     public static final double ROTATION_DEADBAND = 0.002 * Math.PI * 2;
   }
 
@@ -240,12 +238,13 @@ public final class Constants {
     public static final Angle CAMERA_ROLL = Degrees.of(0.0);
 
     public static final double MAX_TAG_AMBIGUITY = 1.0;
-    public static final Angle MAX_VISION_ANGULAR_VELOCITY_PER_SEC = Degrees.of(720.0);
-    public static final Distance MAX_SINGLE_TAG_DISTANCE = Meters.of(0.0);
+    public static final Angle MAX_VISION_ANGULAR_VELOCITY_PER_SEC = Rotations.of(1);
 
     public static final double VISION_STD_DEV_X = 0.7;
     public static final double VISION_STD_DEV_Y = 0.7;
-
     public static final double VISION_STD_DEV_THETA = 9999999.0;
+
+    public static final double SINGLE_TAG_AMBIGUITY_CUTOFF = 0.5;
+    public static final double SINGLE_TAG_DISTANCE_CUTOFF = 5;
   }
 }

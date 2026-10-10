@@ -427,12 +427,12 @@ public class DriveSubsystem extends StateMachine {
 
       RawFiducial tag = pose_estimate.rawFiducials[0];
 
-      if (tag.ambiguity > Constants.Drive.SINGLE_TAG_AMBIGUITY_CUTOFF) {
+      if (tag.ambiguity > Constants.Limelight.SINGLE_TAG_AMBIGUITY_CUTOFF) {
 
         return null;
       }
 
-      if (tag.distToCamera > Constants.Drive.SINGLE_TAG_DISTANCE_CUTOFF) {
+      if (tag.distToCamera > Constants.Limelight.SINGLE_TAG_DISTANCE_CUTOFF) {
 
         return null;
       }
