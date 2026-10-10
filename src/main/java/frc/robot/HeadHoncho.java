@@ -153,13 +153,13 @@ public class HeadHoncho extends StateMachine {
             || getInstance().isZeroing()) {
           return ZERO;
         }
+        if (getInstance().m_reverseButton.getAsBoolean()) {
+          return REVERSE;
+        }
         if (getInstance().m_activeToggle.getAsBoolean()) {
           return TOGGLE_ON;
         }
-        if (!getInstance().m_reverseButton.getAsBoolean()) {
-          return REST;
-        }
-        return REVERSE;
+        return REST;
       }
     }
   }
