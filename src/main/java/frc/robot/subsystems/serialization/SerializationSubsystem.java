@@ -17,8 +17,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
-import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.Logger;
 
 public class SerializationSubsystem extends StateMachine {
@@ -39,16 +37,9 @@ public class SerializationSubsystem extends StateMachine {
 
     ACTIVE {
       @Override
-      public void execute() {
+      public void initialize() {
         getInstance().activateOmni(false);
-        if (!ShooterSubsystem.getInstance().isReadyToShoot()
-            || ShooterSubsystem.getInstance().robotCrossTrench()
-            || DriveSubsystem.getInstance().underTower()
-            || !ShooterSubsystem.getInstance().canSeeTarget()) {
-          getInstance().restMecanum();
-        } else {
-          getInstance().activateMecanum(false);
-        }
+        getInstance().activateMecanum(false);
       }
 
       @Override
