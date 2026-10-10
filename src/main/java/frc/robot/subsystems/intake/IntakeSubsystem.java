@@ -47,18 +47,19 @@ public class IntakeSubsystem extends StateMachine {
     },
 
     ZERO {
-      Timer m_zeroTimer = new Timer();
+      Timer zeroTimer = new Timer();
+      boolean finishedZeroing;
 
       @Override
       public void initialize() {
         getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE.in(Volts));
-        m_zeroTimer.reset();
-        m_zeroTimer.start();
+        zeroTimer.reset();
+        zeroTimer.start();
       }
 
       @Override
       public void execute() {
-        if (m_zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
+        if (zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
             && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Intake.ZERO_THRESHOLD.in(Amps)) {
           getInstance().m_armMotor.setPosition(0.0);

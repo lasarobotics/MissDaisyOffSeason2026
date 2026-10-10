@@ -174,11 +174,10 @@ public class HeadHoncho extends StateMachine {
   }
 
   public boolean finishedZeroing() {
-    if (IntakeSubsystem.getInstance().finishedZero()
-        && ShooterSubsystem.getInstance().finishedZero()) {
+    if (isZeroing()) {
       Robot.setZeroToggle(false);
-      IntakeSubsystem.getInstance().setFinishedZero(false);
-      ShooterSubsystem.getInstance().setFinishedZero(false);
+      IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+      ShooterSubsystem.getInstance().setState(ShooterStates.ON);
       return true;
     }
     return false;

@@ -72,28 +72,33 @@ public class ShooterSubsystem extends StateMachine {
       }
     },
     ZERO {
-      Timer m_zeroTimer = new Timer();
+      Timer zeroTimer = new Timer();
+      boolean finishedZeroing;
 
       @Override
       public void initialize() {
         getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
-        m_zeroTimer.reset();
-        m_zeroTimer.start();
+        zeroTimer.reset();
+        zeroTimer.start();
+        finishedZeroing = false;
       }
 
       @Override
       public void execute() {
-        if (m_zeroTimer.hasElapsed(Constants.Shooter.ZEROING_DELAY)
+        if (zeroTimer.hasElapsed(Constants.Shooter.ZEROING_DELAY)
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Shooter.ZERO_THRESHOLD.in(Amps)) {
           getInstance().m_hoodMotor.setPosition(0.0);
-          getInstance().setFinishedZero(true);
-          getInstance().setState(ON);
+          finishedZeroing = true;
         }
       }
 
       @Override
       public SystemState nextState() {
+        if (finishedZeroing) {
+          return OFF;
+        }
+
         return getInstance().m_selectedState;
       }
     },
