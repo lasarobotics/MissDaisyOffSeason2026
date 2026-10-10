@@ -94,13 +94,13 @@ public final class Constants {
         () -> {
           return RotationsPerSecond.of(
               (2 * Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
-                  / (Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
+                  / (Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
         };
     public static final Supplier<AngularVelocity> OMNI_SPEED =
         () -> {
           return RotationsPerSecond.of(
               (2 * Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())
-                  / (Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
+                  / (Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
         };
     public static final AngularVelocity MECANUM_REST_SPEED = RotationsPerSecond.of(0);
     public static final AngularVelocity OMNI_REST_SPEED = RotationsPerSecond.of(0);
