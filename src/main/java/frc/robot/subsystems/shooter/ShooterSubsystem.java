@@ -533,26 +533,17 @@ public class ShooterSubsystem extends StateMachine {
                   / Constants.Shooter.TURRET_GEAR_TEETH);
     }
 
-    double matchingValue = 0;
-    boolean foundSolution = false;
-    outerLoop:
+    double bestError = Double.MAX_VALUE;
+    double bestSolution = 0;
     for (double eOnePossible : encoderOnePossible) {
       for (double eTwoPossible : encoderTwoPossible) {
-        if (Math.abs(eTwoPossible - eOnePossible) < Constants.Shooter.CRT_EPSILON) {
-          matchingValue = (eOnePossible + eTwoPossible) / 2;
-          foundSolution = true;
-          break outerLoop;
-        }
-
-        if (eTwoPossible > eOnePossible) {
-          break;
+        if (Math.abs(eTwoPossible - eOnePossible) < bestError) {
+          bestSolution = (eOnePossible + eTwoPossible) / 2;
         }
       }
     }
 
-    if (foundSolution) {
-      m_turretMotor.setPosition(matchingValue);
-    }
+    m_turretMotor.setPosition(bestSolution);
   }
 
   public Angle getTurretPosition() {
