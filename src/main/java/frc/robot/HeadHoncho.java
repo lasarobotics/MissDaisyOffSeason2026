@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -42,10 +43,13 @@ public class HeadHoncho extends StateMachine {
 
     ZERO {
       boolean hasStartedZeroing;
+      Timer zeroTimeout = new Timer();
 
       @Override
       public void initialize() {
         hasStartedZeroing = false;
+        zeroTimeout.reset();
+        zeroTimeout.start();
 
         DriveSubsystem.getInstance().setState(DriveStates.REST);
         ShooterSubsystem.getInstance().setState(ShooterStates.ZERO);
@@ -58,9 +62,17 @@ public class HeadHoncho extends StateMachine {
         if (getInstance().isZeroing()) {
           hasStartedZeroing = true;
         }
-        if (!getInstance().isZeroing() && hasStartedZeroing) {
+        if (zeroTimeout.hasElapsed(Constants.OperatorConstants.ZERO_TIMEOUT)
+            || (!getInstance().isZeroing() && hasStartedZeroing)) {
           Robot.setZeroToggle(false);
         }
+      }
+
+      @Override
+      public void end(boolean interrupted) {
+        // force subsystems to leave zeroing state
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+        IntakeSubsystem.getInstance().setState(IntakeStates.ACTIVE);
       }
 
       @Override
@@ -69,7 +81,8 @@ public class HeadHoncho extends StateMachine {
           return AUTO;
         }
 
-        if (getInstance().m_zeroToggle.getAsBoolean() || getInstance().isZeroing()) {
+        if (!zeroTimeout.hasElapsed(Constants.OperatorConstants.ZERO_TIMEOUT)
+            && (getInstance().m_zeroToggle.getAsBoolean() || getInstance().isZeroing())) {
           return this;
         }
 

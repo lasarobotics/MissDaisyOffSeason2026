@@ -9,9 +9,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rectangle2d;
@@ -22,6 +22,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
 import java.util.function.Supplier;
@@ -38,6 +39,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final Time ZERO_TIMEOUT = Seconds.of(5);
   }
 
   public static class Drive {
@@ -116,7 +118,7 @@ public final class Constants {
     public static final int ENCODER_ONE_TEETH = 17;
     public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
-    public static final double CRT_EPSILON = 0.02;
+    public static final double CRT_EPSILON = 0.005;
     public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
     public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
     // shooter 0 degrees is half a rotation from robot front
@@ -129,7 +131,11 @@ public final class Constants {
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("/Tuning/maxBallYPos", 3.0);
-    public static final Angle TURRET_DEADBAND = Radians.of(0.035);
+
+    public static final Angle TURRET_ALLOWED_ERROR = Degrees.of(2);
+    public static final Angle HOOD_ALLOWED_ERROR = Degrees.of(2);
+    public static final AngularVelocity SHOOTER_ALLOWED_ERROR = RotationsPerSecond.of(2);
+
     public static final Voltage ZERO_VOLTAGE = Volts.of(-3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;

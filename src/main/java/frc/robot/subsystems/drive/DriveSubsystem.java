@@ -405,7 +405,7 @@ public class DriveSubsystem extends StateMachine {
       return null;
     }
 
-    if (Math.abs(m_driveTrain.getState().Speeds.omegaRadiansPerSecond)
+    if (Math.abs(m_driveTrain.getStateCopy().Speeds.omegaRadiansPerSecond)
         > Constants.Limelight.MAX_VISION_ANGULAR_VELOCITY_PER_SEC.in(Radians)) {
 
       return null;

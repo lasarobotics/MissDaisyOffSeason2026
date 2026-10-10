@@ -70,6 +70,7 @@ public class ShooterSubsystem extends StateMachine {
 
       @Override
       public void initialize() {
+        getInstance().m_readytoShoot = false;
         getInstance().setShooterSpeed(0);
 
         getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
@@ -93,6 +94,11 @@ public class ShooterSubsystem extends StateMachine {
       }
 
       @Override
+      public void end(boolean interrupted) {
+        turretUpdateThread.interrupt();
+      }
+
+      @Override
       public SystemState nextState() {
         return getInstance().m_selectedState;
       }
@@ -113,7 +119,17 @@ public class ShooterSubsystem extends StateMachine {
         Translation2d robotPose =
             getInstance()
                 .transformByTangentialRotationSpeed(
-                    getInstance().getFutureTurretPose(hangTime), hangTime);
+                    getInstance()
+                        .getFuturePose(
+                            DriveSubsystem.getInstance()
+                                .getPose()
+                                .transformBy(
+                                    new Transform2d(
+                                        Constants.Shooter.SHOOTER_OFFSET_X,
+                                        Constants.Shooter.SHOOTER_OFFSET_Y,
+                                        new Rotation2d(0))),
+                            hangTime),
+                    hangTime);
 
         Translation2d targetDiff = target.toTranslation2d().minus(robotPose);
         double distance = targetDiff.getNorm();
@@ -128,15 +144,9 @@ public class ShooterSubsystem extends StateMachine {
         }
 
         getInstance().m_readytoShoot =
-            getInstance()
-                .getTurretPosition()
-                .isNear(
-                    getInstance()
-                        .getDesiredTurretPos(
-                            target.toTranslation2d(),
-                            new Pose2d(
-                                robotPose, DriveSubsystem.getInstance().getPose().getRotation())),
-                    Constants.Shooter.TURRET_DEADBAND);
+            getInstance().turretAtPosition()
+                && getInstance().hoodAtPosition()
+                && getInstance().shooterAtSpeed();
 
         Logger.recordOutput("ShooterSubsystem/State", getInstance().getState().toString());
         Logger.recordOutput(
@@ -274,7 +284,8 @@ public class ShooterSubsystem extends StateMachine {
     m_turretMotor.getConfigurator().apply(turretConfig);
     m_encoderOne.getConfigurator().apply(encoderOneConfig);
     m_encoderTwo.getConfigurator().apply(encoderTwoConfig);
-    // updateTurretEncoder();
+
+    new Thread(() -> getInstance().updateTurretEncoder()).start();
   }
 
   public static ShooterSubsystem getInstance() {
@@ -299,6 +310,21 @@ public class ShooterSubsystem extends StateMachine {
   public boolean inNZ() {
     return DriveSubsystem.getInstance().getPose().getX() > Constants.Field.NZ_BLUE_X
         && DriveSubsystem.getInstance().getPose().getX() < Constants.Field.NZ_RED_X;
+  }
+
+  public boolean turretAtPosition() {
+    return m_turretMotor.getClosedLoopError().getValue()
+        <= Constants.Shooter.TURRET_ALLOWED_ERROR.in(Rotations);
+  }
+
+  public boolean hoodAtPosition() {
+    return m_hoodMotor.getClosedLoopError().getValue()
+        <= Constants.Shooter.HOOD_ALLOWED_ERROR.in(Rotations);
+  }
+
+  public boolean shooterAtSpeed() {
+    return m_shooterLeader.getClosedLoopError().getValue()
+        <= Constants.Shooter.SHOOTER_ALLOWED_ERROR.in(RotationsPerSecond);
   }
 
   private Translation3d getTarget() {
@@ -397,7 +423,9 @@ public class ShooterSubsystem extends StateMachine {
 
   public boolean robotCrossTrench() {
     Translation2d a = DriveSubsystem.getInstance().getPose().getTranslation();
-    Translation2d b = getFutureTurretPose(Constants.Shooter.HOOD_COLLISION_TIME);
+    Translation2d b =
+        getFuturePose(
+            DriveSubsystem.getInstance().getPose(), Constants.Shooter.HOOD_COLLISION_TIME);
     Translation2d c;
     Translation2d d;
     if (b.getX() > Constants.Field.NZ_MID_LINE_X) {
@@ -556,15 +584,7 @@ public class ShooterSubsystem extends StateMachine {
     return m_turretMotor.getPosition().getValue();
   }
 
-  private Translation2d getFutureTurretPose(double time) {
-    Pose2d currentPose =
-        DriveSubsystem.getInstance()
-            .getPose()
-            .transformBy(
-                new Transform2d(
-                    Constants.Shooter.SHOOTER_OFFSET_X,
-                    Constants.Shooter.SHOOTER_OFFSET_Y,
-                    new Rotation2d(0)));
+  private Translation2d getFuturePose(Pose2d currentPose, double time) {
     Translation2d futurePos =
         currentPose
             .getTranslation()
@@ -616,7 +636,8 @@ public class ShooterSubsystem extends StateMachine {
     Logger.recordOutput(
         "ShooterSubsystem/FuturePoseHoodCollisionTime",
         new Pose2d(
-            getFutureTurretPose(Constants.Shooter.HOOD_COLLISION_TIME),
+            getFuturePose(
+                DriveSubsystem.getInstance().getPose(), Constants.Shooter.HOOD_COLLISION_TIME),
             DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
     Logger.recordOutput("ShooterSubsystem/isReadyToShoot", isReadyToShoot());
