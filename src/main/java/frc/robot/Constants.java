@@ -117,8 +117,8 @@ public final class Constants {
     public static final int SHOOTER_FOLLOWER_ID = 51;
     public static final int HOOD_MOTOR_ID = 52;
     public static final int TURRET_MOTOR_ID = 53;
-    public static final int ENCODER_TWO_ID = 54;
-    public static final int ENCODER_ONE_ID = 55;
+    public static final int ENCODER_ONE_ID = 54;
+    public static final int ENCODER_TWO_ID = 55;
 
     public static final int ENCODER_ONE_TEETH = 17;
     public static final int ENCODER_TWO_TEETH = 18;
