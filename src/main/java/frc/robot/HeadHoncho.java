@@ -224,12 +224,12 @@ public class HeadHoncho extends StateMachine {
     Logger.recordOutput("HeadHoncho/currentState", getState().toString());
     Logger.recordOutput("HeadHoncho/activeToggle", m_activeToggle);
     Logger.recordOutput("HeadHoncho/reverse", m_reverseButton);
-    Logger.recordOutput("Field/BLUE_HUB_POS", Constants.Field.BLUE_HUB_POS);
-    Logger.recordOutput("Field/BLUE_LEFT_BUMP", Constants.Field.BLUE_LEFT_BUMP);
-    Logger.recordOutput("Field/BLUE_RIGHT_BUMP", Constants.Field.BLUE_RIGHT_BUMP);
-    Logger.recordOutput("Field/RED_HUB_POS", Constants.Field.RED_HUB_POS);
-    Logger.recordOutput("Field/RED_RIGHT_BUMP", Constants.Field.RED_RIGHT_BUMP);
-    Logger.recordOutput("Field/RED_LEFT_BUMP", Constants.Field.RED_LEFT_BUMP);
+    Logger.recordOutput("Field/blueHubPos", Constants.Field.BLUE_HUB_POS);
+    Logger.recordOutput("Field/blueLeftBump", Constants.Field.BLUE_LEFT_BUMP);
+    Logger.recordOutput("Field/blueRightBump", Constants.Field.BLUE_RIGHT_BUMP);
+    Logger.recordOutput("Field/redHubPos", Constants.Field.RED_HUB_POS);
+    Logger.recordOutput("Field/redRightBump", Constants.Field.RED_RIGHT_BUMP);
+    Logger.recordOutput("Field/redLeftBump", Constants.Field.RED_LEFT_BUMP);
     Logger.recordOutput("HeadHoncho/ballChecksPass", ballChecksPass());
 
     Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());

@@ -154,7 +154,7 @@ public final class Constants {
     public static final Translation3d BLUE_LEFT_BUMP =
         new Translation3d(BLUE_HUB_POS.getX(), 6.03, 0);
     public static final Translation3d BLUE_RIGHT_BUMP =
-        new Translation3d(BLUE_HUB_POS.getX(), 1, 0);
+        new Translation3d(BLUE_HUB_POS.getX(), 2.01, 0);
     public static final Translation3d RED_LEFT_BUMP =
         new Translation3d(RED_HUB_POS.getX(), 2.01, 0);
     public static final Translation3d RED_RIGHT_BUMP =
