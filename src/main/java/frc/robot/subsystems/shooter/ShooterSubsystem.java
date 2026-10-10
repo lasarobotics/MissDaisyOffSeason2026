@@ -547,8 +547,9 @@ public class ShooterSubsystem extends StateMachine {
         }
       }
     }
-
-    m_turretMotor.setPosition(bestSolution);
+    if (bestError <= Constants.Shooter.CRT_EPSILON) {
+      m_turretMotor.setPosition(bestSolution);
+    }
   }
 
   public Angle getTurretPosition() {

@@ -120,7 +120,7 @@ public final class Constants {
     public static final int ENCODER_ONE_TEETH = 17;
     public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
-    public static final double CRT_EPSILON = 0.01;
+    public static final double CRT_EPSILON = 0.02;
     public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
     public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
     // shooter 0 degrees is half a rotation from robot front
