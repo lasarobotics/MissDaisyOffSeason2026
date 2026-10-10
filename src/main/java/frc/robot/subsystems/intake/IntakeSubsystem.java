@@ -193,8 +193,8 @@ public class IntakeSubsystem extends StateMachine {
   public void activateIntake(boolean reverse) {
     double intakeSpeed =
         (reverse)
-            ? -Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond)
-            : Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond);
+            ? -Constants.Intake.INTAKE_ROLLER_SPEED.in(RotationsPerSecond)
+            : Constants.Intake.INTAKE_ROLLER_SPEED.in(RotationsPerSecond);
     getInstance()
         .m_intakeMotorLeader
         .setControl(getInstance().m_rollerRequest.withVelocity(intakeSpeed));
