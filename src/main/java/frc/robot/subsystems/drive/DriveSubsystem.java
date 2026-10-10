@@ -341,8 +341,6 @@ public class DriveSubsystem extends StateMachine {
               limelightEstimate.pose.toPose2d(),
               Utils.fpgaToCurrentTime(limelightEstimate.timestampSeconds));
         }
-
-        Logger.recordOutput(getName() + "/LimeLight Pose", limelightEstimate.pose);
       }
 
       try {
@@ -357,6 +355,7 @@ public class DriveSubsystem extends StateMachine {
     Logger.recordOutput("DriveSubsystem/Pose", m_driveTrain.getState().Pose);
     Logger.recordOutput("DriveSubsystem/State", getInstance().m_driveState);
 
+    m_driveTrain.periodic();
     updateTurretLimelightPose();
   }
 

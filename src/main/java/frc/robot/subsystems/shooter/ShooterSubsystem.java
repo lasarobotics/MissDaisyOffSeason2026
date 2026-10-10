@@ -102,7 +102,10 @@ public class ShooterSubsystem extends StateMachine {
       public void execute() {
         Translation3d target = getInstance().getTarget();
         double hangTime =
-            ((Math.sqrt(Constants.Shooter.MAX_BALL_Y_POS.getAsDouble() * 2)
+            ((Math.sqrt(
+                        (Constants.Shooter.MAX_BALL_Y_POS.getAsDouble()
+                                - Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters))
+                            * 2)
                     + Math.sqrt(
                         2 * (Constants.Shooter.MAX_BALL_Y_POS.getAsDouble() - target.getZ())))
                 / Math.sqrt(Constants.Field.GRAVITY_VALUE));
@@ -133,7 +136,7 @@ public class ShooterSubsystem extends StateMachine {
                             target.toTranslation2d(),
                             new Pose2d(
                                 robotPose, DriveSubsystem.getInstance().getPose().getRotation())),
-                    Constants.Shooter.TURRET_DEADBAND.in(Radians));
+                    Constants.Shooter.TURRET_DEADBAND);
 
         Logger.recordOutput("ShooterSubsystem/State", getInstance().getState().toString());
         Logger.recordOutput(
@@ -328,13 +331,13 @@ public class ShooterSubsystem extends StateMachine {
     double yOffset = target.getY() - robotPose.getY();
     Angle angleToTarget =
         Radians.of(robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset));
-    Angle turretDesired = angleToTarget.times(-1).plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET);
-
-    if (turretDesired.lt(Degrees.of(-90))) {
-      turretDesired = turretDesired.plus(Rotations.of(1));
-    } else if (turretDesired.gt(Degrees.of(90))) {
-      turretDesired = turretDesired.minus(Rotations.of(1));
-    }
+    Angle turretDesired =
+        Radians.of(
+            MathUtil.angleModulus(
+                angleToTarget
+                    .times(-1)
+                    .plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET)
+                    .in(Radians)));
     return turretDesired;
   }
 
@@ -573,8 +576,8 @@ public class ShooterSubsystem extends StateMachine {
     Angle turretAngleOffset =
         Radians.of(
             Math.atan2(
-                Constants.Shooter.SHOOTER_OFFSET_X.magnitude(),
-                Constants.Shooter.SHOOTER_OFFSET_Y.magnitude()));
+                Constants.Shooter.SHOOTER_OFFSET_Y.magnitude(),
+                Constants.Shooter.SHOOTER_OFFSET_X.magnitude()));
     double linearTangentSpeed =
         MathUtil.applyDeadband(
                 DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
