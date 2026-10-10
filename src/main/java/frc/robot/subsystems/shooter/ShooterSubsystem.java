@@ -531,7 +531,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public double getTurretRotation() {
-    return m_turretMotor.getPosition().getValueAsDouble();
+    return m_turretMotor.getPosition().getValueAsDouble() * 2 * Math.PI;
   }
 
   private Translation2d getFuturePose(double time) {

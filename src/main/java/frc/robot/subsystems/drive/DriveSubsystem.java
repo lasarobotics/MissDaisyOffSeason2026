@@ -337,8 +337,6 @@ public class DriveSubsystem extends StateMachine {
     double turretAngle =
         frc.robot.subsystems.shooter.ShooterSubsystem.getInstance().getTurretRotation();
 
-    turretAngle *= 2 * Math.PI;
-
     double cameraForward = Constants.Limelight.CAMERA_FORWARD.in(Meters);
     double cameraLeft = Constants.Limelight.CAMERA_LEFT.in(Meters);
 
