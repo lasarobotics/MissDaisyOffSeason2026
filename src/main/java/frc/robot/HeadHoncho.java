@@ -227,8 +227,8 @@ public class HeadHoncho extends StateMachine {
 
     Logger.recordOutput("HeadHoncho/isHubActive", GameHelpers.isHubActive());
     Logger.recordOutput(
-        "HeadHoncho/crossTrench", !ShooterSubsystem.getInstance().robotCrossTrench());
-    Logger.recordOutput("HeadHoncho/underTower", !DriveSubsystem.getInstance().underTower());
+        "HeadHoncho/crossTrench", ShooterSubsystem.getInstance().robotCrossTrench());
+    Logger.recordOutput("HeadHoncho/underTower", DriveSubsystem.getInstance().underTower());
     Logger.recordOutput("HeadHoncho/canSeeTarget", ShooterSubsystem.getInstance().canSeeTarget());
     Logger.recordOutput(
         "HeadHoncho/shifts",
