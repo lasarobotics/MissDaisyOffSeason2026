@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -560,13 +559,11 @@ public class ShooterSubsystem extends StateMachine {
                 DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
                 Constants.Drive.ROTATION_DEADBAND)
             * Constants.Shooter.SHOOTER_OFFSET_RADIUS.in(Meters);
+    // 90degrees CCW because CCW is positive and we want tangential velocity vector
     Translation2d transformationVector =
         new Translation2d(
             linearTangentSpeed * Constants.Shooter.HANG_TIME,
-            DriveSubsystem.getInstance()
-                .getPose()
-                .getRotation()
-                .minus(new Rotation2d(Radians.of(-Math.PI / 2))));
+            DriveSubsystem.getInstance().getPose().getRotation().plus(Rotation2d.kCCW_90deg));
     return currentPos.plus(transformationVector);
   }
 
