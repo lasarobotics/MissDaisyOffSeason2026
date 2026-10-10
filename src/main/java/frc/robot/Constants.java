@@ -73,11 +73,10 @@ public final class Constants {
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(0);
 
-    public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
+    public static final Distance INTAKE_ROLLER_DIAMETER = Inches.of(1.375);
     public static final AngularVelocity INTAKE_ROLLER_SPEED =
         RotationsPerSecond.of(
-            (2 * Drive.MAX_SPEED.in(MetersPerSecond))
-                / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
+            Drive.MAX_SPEED.in(MetersPerSecond) / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
@@ -97,13 +96,13 @@ public final class Constants {
     public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
           return RotationsPerSecond.of(
-              (2 * Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
+              (Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
                   / (Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
         };
     public static final Supplier<AngularVelocity> OMNI_SPEED =
         () -> {
           return RotationsPerSecond.of(
-              (2 * Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())
+              (Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())
                   / (Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
         };
     public static final AngularVelocity MECANUM_REST_SPEED = RotationsPerSecond.of(0);
