@@ -49,12 +49,8 @@ public final class Constants {
         RotationsPerSecond.of(
             MAX_SPEED.in(MetersPerSecond) / (2 * Math.PI * WHEEL_FROM_CENTER_DIST));
 
-    public static final double STOW_DISTANCE_REQUIREMENT = 6.75;
-    public static final double CENTER_XPOS = 8.25;
-
     public static final double DEADBAND_SCALAR = 0.1;
     public static final double SLOW_SPEED_SCALAR = 0.1;
-    public static final double MID_SPEED_SCALAR = 0.5;
     public static final double FAST_SPEED_SCALAR = 0.75;
 
     public static final double ROTATION_DEADBAND = 0.002 * Math.PI * 2;
@@ -235,11 +231,10 @@ public final class Constants {
     public static final Distance CAMERA_LEFT = Meters.of(0.0);
     public static final Distance CAMERA_HEIGHT = Inches.of(4.56);
 
-    public static final Angle CAMERA_YAW_AT_ZERO = Degrees.of(0);
+    public static final Angle CAMERA_YAW_AT_ZERO = Degrees.of(180);
     public static final Angle CAMERA_PITCH = Degrees.of(25.006);
     public static final Angle CAMERA_ROLL = Degrees.of(0.0);
 
-    public static final double MAX_TAG_AMBIGUITY = 1.0;
     public static final Angle MAX_VISION_ANGULAR_VELOCITY_PER_SEC = Rotations.of(1);
 
     public static final double VISION_STD_DEV_X = 0.7;
