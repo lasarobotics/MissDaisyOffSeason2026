@@ -113,7 +113,7 @@ public class ShooterSubsystem extends StateMachine {
 
         getInstance().m_readytoShoot =
             Math.abs(
-                    getInstance().getTurretRotation()
+                    getInstance().getTurretPosition().in(Rotations)
                         - getInstance()
                             .getDesiredTurretPos(
                                 target.toTranslation2d(),
@@ -530,8 +530,8 @@ public class ShooterSubsystem extends StateMachine {
     }
   }
 
-  public double getTurretRotation() {
-    return m_turretMotor.getPosition().getValueAsDouble() * 2 * Math.PI;
+  public Angle getTurretPosition() {
+    return Rotations.of(m_turretMotor.getPosition().getValueAsDouble());
   }
 
   private Translation2d getFuturePose(double time) {

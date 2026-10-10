@@ -335,7 +335,7 @@ public class DriveSubsystem extends StateMachine {
   private void updateTurretLimelightPose() {
 
     double turretAngle =
-        frc.robot.subsystems.shooter.ShooterSubsystem.getInstance().getTurretRotation();
+        frc.robot.subsystems.shooter.ShooterSubsystem.getInstance().getTurretPosition().in(Radians);
 
     double cameraForward = Constants.Limelight.CAMERA_FORWARD.in(Meters);
     double cameraLeft = Constants.Limelight.CAMERA_LEFT.in(Meters);
