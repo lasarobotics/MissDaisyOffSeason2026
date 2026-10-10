@@ -18,7 +18,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -121,21 +121,20 @@ public class IntakeSubsystem extends StateMachine {
   private TalonFX m_intakeMotorLeader;
   private TalonFX m_intakeMotorFollower;
 
-  private VelocityVoltage m_velocityVoltage;
+  private VelocityVoltage m_rollerRequest;
+  private MotionMagicVoltage m_armRequest;
 
   private boolean m_finishedZero;
-
-  private PositionVoltage m_positionRequest;
 
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
 
     m_finishedZero = false;
-    m_positionRequest = new PositionVoltage(0);
+    m_armRequest = new MotionMagicVoltage(0);
 
     m_requestedState = IntakeStates.INTAKE;
 
-    m_velocityVoltage = new VelocityVoltage(0);
+    m_rollerRequest = new VelocityVoltage(0);
 
     m_armMotor = new TalonFX(Constants.Intake.ARM_CAN_ID);
     m_intakeMotorLeader = new TalonFX(Constants.Intake.LEADER_CAN_ID);
@@ -201,21 +200,19 @@ public class IntakeSubsystem extends StateMachine {
             : Constants.Intake.INTAKE_ACTIVE_SPEED.in(RotationsPerSecond);
     getInstance()
         .m_intakeMotorLeader
-        .setControl(getInstance().m_velocityVoltage.withVelocity(intakeSpeed));
+        .setControl(getInstance().m_rollerRequest.withVelocity(intakeSpeed));
   }
 
   public void deployIntake() {
     getInstance()
         .m_armMotor
-        .setControl(
-            getInstance().m_positionRequest.withPosition(Constants.Intake.ARM_DEPLOY_SETPOINT));
+        .setControl(getInstance().m_armRequest.withPosition(Constants.Intake.ARM_DEPLOY_SETPOINT));
   }
 
   public void stowIntake() {
     getInstance()
         .m_armMotor
-        .setControl(
-            getInstance().m_positionRequest.withPosition(Constants.Intake.ARM_STOW_SETPOINT));
+        .setControl(getInstance().m_armRequest.withPosition(Constants.Intake.ARM_STOW_SETPOINT));
   }
 
   public boolean finishedZero() {

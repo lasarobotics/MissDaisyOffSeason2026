@@ -5,6 +5,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -23,7 +24,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -112,20 +113,19 @@ public class ShooterSubsystem extends StateMachine {
         double y_vel = getVelocityYStationary(Constants.Shooter.MAX_BALL_Y_POS.getAsDouble());
 
         getInstance().m_readytoShoot =
-            Math.abs(
-                    getInstance().getTurretPosition().in(Rotations)
-                        - getInstance()
-                            .getDesiredTurretPos(
-                                target.toTranslation2d(),
-                                new Pose2d(
-                                    robotPose,
-                                    DriveSubsystem.getInstance().getPose().getRotation())))
-                < Constants.Shooter.TURRET_DEADBAND;
+            getInstance()
+                .getTurretPosition()
+                .isNear(
+                    getInstance()
+                        .getDesiredTurretPos(
+                            target.toTranslation2d(),
+                            new Pose2d(
+                                robotPose, DriveSubsystem.getInstance().getPose().getRotation())),
+                    Constants.Shooter.TURRET_DEADBAND.in(Radians));
 
         Logger.recordOutput("ShooterSubsystem/State", getInstance().getState().toString());
         Logger.recordOutput(
-            "ShooterSubsystem/HoodAngle",
-            getInstance().getHoodPos(x_vel, y_vel) / (2 * Math.PI) * 360);
+            "ShooterSubsystem/HoodAngle", getInstance().getHoodPos(x_vel, y_vel).in(Degrees));
         Logger.recordOutput(
             "ShooterSubsystem/FlywheelSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
         Logger.recordOutput(
@@ -134,13 +134,13 @@ public class ShooterSubsystem extends StateMachine {
             "ShooterSubsystem/TurretPos",
             new Pose2d(
                 robotPose,
-                new Rotation2d(
+                Rotation2d.fromDegrees(
                     getInstance()
                         .getDesiredTurretPos(
                             target.toTranslation2d(),
                             new Pose2d(
-                                robotPose,
-                                DriveSubsystem.getInstance().getPose().getRotation())))));
+                                robotPose, DriveSubsystem.getInstance().getPose().getRotation()))
+                        .in(Degrees))));
         Logger.recordOutput(
             "ShooterSubsystem/AggregateAimPoint",
             new Pose2d(
@@ -149,17 +149,17 @@ public class ShooterSubsystem extends StateMachine {
                     .getPose()
                     .getRotation()
                     .plus(
-                        new Rotation2d(
-                            (getInstance()
+                        Rotation2d.fromDegrees(
+                                getInstance()
                                     .getDesiredTurretPos(
                                         target.toTranslation2d(),
                                         new Pose2d(
                                             robotPose,
                                             DriveSubsystem.getInstance().getPose().getRotation()))
-                                - (getInstance()
-                                    .m_turretMotor
-                                    .getPosition()
-                                    .getValueAsDouble()))))));
+                                    .in(Degrees))
+                            .minus(
+                                Rotation2d.fromDegrees(
+                                    getInstance().getTurretPosition().in(Degrees))))));
 
         getInstance()
             .setTurretPos(
@@ -188,8 +188,8 @@ public class ShooterSubsystem extends StateMachine {
   private CANcoder m_encoderTwo;
 
   private VelocityVoltage m_shooterRequest;
-  private PositionVoltage m_hoodRequest;
-  private PositionVoltage m_turretRequest;
+  private MotionMagicVoltage m_hoodRequest;
+  private MotionMagicVoltage m_turretRequest;
 
   private TalonFX m_turretMotor;
 
@@ -209,8 +209,8 @@ public class ShooterSubsystem extends StateMachine {
     m_encoderTwo = new CANcoder(Constants.Shooter.ENCODER_TWO_ID);
 
     m_shooterRequest = new VelocityVoltage(0);
-    m_hoodRequest = new PositionVoltage(0);
-    m_turretRequest = new PositionVoltage(0);
+    m_hoodRequest = new MotionMagicVoltage(0);
+    m_turretRequest = new MotionMagicVoltage(0);
 
     m_shooterFollower.setControl(
         new Follower(m_shooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
@@ -220,7 +220,6 @@ public class ShooterSubsystem extends StateMachine {
 
     TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
     hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.Shooter.HOOD_MAX_ANGLE;
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
@@ -311,37 +310,37 @@ public class ShooterSubsystem extends StateMachine {
     }
   }
 
-  private double getDesiredTurretPos(Translation2d target, Pose2d robotPose) {
+  private Angle getDesiredTurretPos(Translation2d target, Pose2d robotPose) {
     if (target == null) {
-      return 0;
+      return Degrees.of(0);
     }
     double xOffset = target.getX() - robotPose.getX();
     double yOffset = target.getY() - robotPose.getY();
-    double angleToTarget = robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset);
-    double turretDesired = -angleToTarget - (m_turretMotor.getPosition().getValueAsDouble());
-    if (turretDesired < -Math.PI) {
-      turretDesired += 2 * Math.PI;
-    } else if (turretDesired > Math.PI) {
-      turretDesired -= 2 * Math.PI;
+    Angle angleToTarget =
+        Radians.of(robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset));
+    Angle turretDesired = angleToTarget.times(-1).minus(getTurretPosition());
+    if (turretDesired.lt(Degrees.of(-90))) {
+      turretDesired = turretDesired.plus(Rotations.of(1));
+    } else if (turretDesired.gt(Degrees.of(90))) {
+      turretDesired = turretDesired.minus(Rotations.of(1));
     }
     return turretDesired;
   }
 
-  private void setTurretPos(double desiredPos) {
-    m_turretMotor.setControl(m_turretRequest.withPosition(desiredPos / (2 * Math.PI)));
+  private void setTurretPos(Angle desiredPos) {
+    m_turretMotor.setControl(m_turretRequest.withPosition(desiredPos));
   }
 
-  private double getHoodPos(double x_vel, double y_vel) {
+  private Angle getHoodPos(double x_vel, double y_vel) {
     if (robotCrossTrench()) {
-      return 0;
+      return Degrees.of(0);
     }
-    double hoodAngle = (Math.PI / 2) - Math.atan2(y_vel, x_vel);
-    hoodAngle = MathUtil.clamp(hoodAngle, 0, Constants.Shooter.HOOD_MAX_ANGLE * 2 * Math.PI);
+    Angle hoodAngle = Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel)));
     return hoodAngle;
   }
 
-  private void setHoodPos(double hoodPos) {
-    m_hoodMotor.setControl(m_hoodRequest.withPosition(hoodPos / (2 * Math.PI)));
+  private void setHoodPos(Angle hoodPos) {
+    m_hoodMotor.setControl(m_hoodRequest.withPosition(hoodPos));
   }
 
   private double getShooterSpeed(double x_vel, double y_vel) {
@@ -494,8 +493,13 @@ public class ShooterSubsystem extends StateMachine {
     double encoderTwoPosition = encoderTwoSignal.getValue().in(Rotations);
     double[] encoderOnePossible = new double[Constants.Shooter.ENCODER_ONE_TEETH];
     double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
-
-    for (int i = 0; i < Constants.Shooter.ENCODER_ONE_TEETH; i++) {
+    /*
+     * Basically, the turret rotates from -0.5 to 0.5 rotations,
+     * so based on this, as well as the period of alignment with the encoders (mod smth)
+     * we want to check negative and positive domains of i in this case
+     *
+     */
+    for (int i = -5; i < 10; i++) {
       encoderOnePossible[i] =
           (i + encoderOnePosition)
               * ((double) Constants.Shooter.ENCODER_ONE_TEETH

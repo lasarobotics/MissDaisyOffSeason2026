@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -124,13 +125,10 @@ public final class Constants {
     public static final Distance CENTER_TO_EDGE = Inches.of(13.25);
     public static final double HANG_TIME = 1.0;
     public static final double HOOD_COLLISION_TIME = 0.25;
-    public static final double HUB_HEIGHT = 1.83;
+    public static final Distance HUB_HEIGHT = Meters.of(1.83);
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("Tuning/maxBallYPos", 3.0);
-    public static final double HOOD_MAX_ANGLE = (19.0 / 175.0); // rotations
-    public static final double TURRET_DEADBAND =
-        0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
-    // meters away
+    public static final Angle TURRET_DEADBAND = Radians.of(0.035);
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
@@ -145,10 +143,12 @@ public final class Constants {
     public static final double AZ_DEPTH = Inches.of(158.6).in(Meters);
 
     public static final Translation3d BLUE_HUB_POS =
-        new Translation3d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
+        new Translation3d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d RED_HUB_POS =
         new Translation3d(
-            FIELD_X.in(Meters) - AZ_DEPTH - HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT);
+            FIELD_X.in(Meters) - AZ_DEPTH - HUB_WIDTH / 2,
+            NZ_MID_LINE_Y,
+            Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d BLUE_LEFT_BUMP =
         new Translation3d(BLUE_HUB_POS.getX(), 6.03, 0);
     public static final Translation3d BLUE_RIGHT_BUMP =

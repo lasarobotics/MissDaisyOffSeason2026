@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -38,6 +39,7 @@ import frc.robot.fsm.SystemState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -334,14 +336,13 @@ public class DriveSubsystem extends StateMachine {
 
   private void updateTurretLimelightPose() {
 
-    double turretAngle =
-        frc.robot.subsystems.shooter.ShooterSubsystem.getInstance().getTurretPosition().in(Radians);
+    Angle turretAngle = ShooterSubsystem.getInstance().getTurretPosition();
 
     double cameraForward = Constants.Limelight.CAMERA_FORWARD.in(Meters);
     double cameraLeft = Constants.Limelight.CAMERA_LEFT.in(Meters);
 
-    double cos = Math.cos(turretAngle);
-    double sin = Math.sin(turretAngle);
+    double cos = Math.cos(turretAngle.in(Radians));
+    double sin = Math.sin(turretAngle.in(Radians));
     double rotatedForward = cameraForward * cos - cameraLeft * sin;
     double rotatedLeft = cameraForward * sin + cameraLeft * cos;
     double robotSpaceX = Constants.Limelight.TURRET_PIVOT_FORWARD_METERS + rotatedForward;
@@ -349,8 +350,7 @@ public class DriveSubsystem extends StateMachine {
     double robotSpaceZ =
         Constants.Limelight.TURRET_PIVOT_HEIGHT_METERS
             + Constants.Limelight.CAMERA_HEIGHT.in(Meters);
-    double cameraYaw =
-        Constants.Limelight.CAMERA_YAW_AT_ZERO.in(Degrees) + Math.toDegrees(turretAngle);
+    double cameraYaw = Constants.Limelight.CAMERA_YAW_AT_ZERO.in(Degrees) + turretAngle.in(Degrees);
 
     LimelightHelpers.setCameraPose_RobotSpace(
         Constants.Limelight.LIMELIGHT_NAME,
