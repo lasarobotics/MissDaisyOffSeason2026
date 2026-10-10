@@ -113,7 +113,7 @@ public class ShooterSubsystem extends StateMachine {
         Translation2d robotPose =
             getInstance()
                 .transformByTangentialRotationSpeed(
-                    getInstance().getFuturePose(hangTime), hangTime);
+                    getInstance().getFutureTurretPose(hangTime), hangTime);
 
         Translation2d targetDiff = target.toTranslation2d().minus(robotPose);
         double distance = targetDiff.getNorm();
@@ -397,7 +397,7 @@ public class ShooterSubsystem extends StateMachine {
 
   public boolean robotCrossTrench() {
     Translation2d a = DriveSubsystem.getInstance().getPose().getTranslation();
-    Translation2d b = getFuturePose(Constants.Shooter.HOOD_COLLISION_TIME);
+    Translation2d b = getFutureTurretPose(Constants.Shooter.HOOD_COLLISION_TIME);
     Translation2d c;
     Translation2d d;
     if (b.getX() > Constants.Field.NZ_MID_LINE_X) {
@@ -556,8 +556,15 @@ public class ShooterSubsystem extends StateMachine {
     return m_turretMotor.getPosition().getValue();
   }
 
-  private Translation2d getFuturePose(double time) {
-    Pose2d currentPose = DriveSubsystem.getInstance().getPose();
+  private Translation2d getFutureTurretPose(double time) {
+    Pose2d currentPose =
+        DriveSubsystem.getInstance()
+            .getPose()
+            .transformBy(
+                new Transform2d(
+                    Constants.Shooter.SHOOTER_OFFSET_X,
+                    Constants.Shooter.SHOOTER_OFFSET_Y,
+                    new Rotation2d(0)));
     Translation2d futurePos =
         currentPose
             .getTranslation()
@@ -609,7 +616,7 @@ public class ShooterSubsystem extends StateMachine {
     Logger.recordOutput(
         "ShooterSubsystem/FuturePoseHoodCollisionTime",
         new Pose2d(
-            getFuturePose(Constants.Shooter.HOOD_COLLISION_TIME),
+            getFutureTurretPose(Constants.Shooter.HOOD_COLLISION_TIME),
             DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
     Logger.recordOutput("ShooterSubsystem/isReadyToShoot", isReadyToShoot());
