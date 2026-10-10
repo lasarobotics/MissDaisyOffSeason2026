@@ -50,13 +50,19 @@ public class HeadHoncho extends StateMachine {
       }
 
       @Override
+      public void end(boolean interrupted) {
+        Robot.setZeroToggle(false);
+        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
+      }
+
+      @Override
       public SystemState nextState() {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
 
-        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
-            || getInstance().isZeroing()) {
+        if (getInstance().m_zeroToggle.getAsBoolean() || getInstance().isZeroing()) {
           return this;
         }
 
@@ -82,8 +88,7 @@ public class HeadHoncho extends StateMachine {
           return AUTO;
         }
 
-        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
-            || getInstance().isZeroing()) {
+        if (getInstance().m_zeroToggle.getAsBoolean() || getInstance().isZeroing()) {
           return ZERO;
         }
 
@@ -119,8 +124,7 @@ public class HeadHoncho extends StateMachine {
           return AUTO;
         }
 
-        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
-            || getInstance().isZeroing()) {
+        if (getInstance().m_zeroToggle.getAsBoolean() || getInstance().isZeroing()) {
           return ZERO;
         }
 
@@ -149,8 +153,7 @@ public class HeadHoncho extends StateMachine {
         if (DriverStation.isAutonomous()) {
           return AUTO;
         }
-        if (getInstance().m_zeroToggle.getAsBoolean() && !getInstance().finishedZeroing()
-            || getInstance().isZeroing()) {
+        if (getInstance().m_zeroToggle.getAsBoolean() || getInstance().isZeroing()) {
           return ZERO;
         }
         if (getInstance().m_reverseButton.getAsBoolean()) {
@@ -171,16 +174,6 @@ public class HeadHoncho extends StateMachine {
 
   public HeadHoncho() {
     super(HeadHonchoStates.REST);
-  }
-
-  public boolean finishedZeroing() {
-    if (!isZeroing()) {
-      Robot.setZeroToggle(false);
-      IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
-      ShooterSubsystem.getInstance().setState(ShooterStates.ON);
-      return true;
-    }
-    return false;
   }
 
   public boolean isZeroing() {
