@@ -119,6 +119,11 @@ public class ShooterSubsystem extends StateMachine {
                 distance, target.getZ(), Constants.Shooter.MAX_BALL_Y_POS.getAsDouble());
         double y_vel = getVelocityYStationary(Constants.Shooter.MAX_BALL_Y_POS.getAsDouble());
 
+        if (!Double.isFinite(x_vel) || !Double.isFinite(y_vel)) {
+          getInstance().m_readytoShoot = false;
+          return;
+        }
+
         getInstance().m_readytoShoot =
             getInstance()
                 .getTurretPosition()
@@ -361,21 +366,30 @@ public class ShooterSubsystem extends StateMachine {
 
   private static double getVelocityXStationary(
       double distance, double targetHeight, double maxBallYPos) {
+
     double y_max = maxBallYPos;
     double y_end = targetHeight;
     double g = Constants.Field.GRAVITY_VALUE;
 
-    double x_vel =
-        distance * (Math.sqrt(g)) / (Math.sqrt(2 * y_max) + Math.sqrt(2 * (y_max - y_end)));
-    return x_vel;
+    if (maxBallYPos <= Math.max(Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters), targetHeight)) {
+      return Double.NaN;
+    }
+
+    return distance
+        * Math.sqrt(g)
+        / (Math.sqrt(2 * (maxBallYPos - Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters)))
+            + Math.sqrt(2 * (maxBallYPos - targetHeight)));
   }
 
   private static double getVelocityYStationary(double maxBallYPos) {
     double y_max = maxBallYPos;
     double g = Constants.Field.GRAVITY_VALUE;
 
-    double y_vel = Math.sqrt(y_max * 2 * g);
-    return y_vel;
+    if (maxBallYPos <= Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters)) {
+      return Double.NaN;
+    }
+
+    return Math.sqrt(2 * g * (maxBallYPos - Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters)));
   }
 
   public boolean robotCrossTrench() {
