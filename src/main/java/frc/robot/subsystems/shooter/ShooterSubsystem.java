@@ -250,7 +250,7 @@ public class ShooterSubsystem extends StateMachine {
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2.5))
-                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(1.5)));
+                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(2.5)));
 
     CANcoderConfiguration encoderOneConfig =
         new CANcoderConfiguration()

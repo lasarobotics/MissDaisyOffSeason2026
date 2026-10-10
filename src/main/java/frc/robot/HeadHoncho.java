@@ -41,8 +41,12 @@ public class HeadHoncho extends StateMachine {
     },
 
     ZERO {
+      boolean hasStartedZeroing;
+
       @Override
       public void initialize() {
+        hasStartedZeroing = false;
+
         DriveSubsystem.getInstance().setState(DriveStates.REST);
         ShooterSubsystem.getInstance().setState(ShooterStates.ZERO);
         IntakeSubsystem.getInstance().setState(IntakeStates.ZERO);
@@ -51,7 +55,10 @@ public class HeadHoncho extends StateMachine {
 
       @Override
       public void execute() {
-        if (!getInstance().isZeroing()) {
+        if (getInstance().isZeroing()) {
+          hasStartedZeroing = true;
+        }
+        if (!getInstance().isZeroing() && hasStartedZeroing) {
           Robot.setZeroToggle(false);
         }
       }

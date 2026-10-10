@@ -182,7 +182,7 @@ public class IntakeSubsystem extends StateMachine {
 
     m_intakeMotorFollower.setControl(
         new Follower(m_intakeMotorLeader.getDeviceID(), MotorAlignmentValue.Aligned));
-    m_armMotor.setPosition(Constants.Intake.ARM_ZERO_SETPOINT);
+    m_armMotor.setPosition(Constants.Intake.INITIAL_ARM_POSITION);
   }
 
   public static IntakeSubsystem getInstance() {
