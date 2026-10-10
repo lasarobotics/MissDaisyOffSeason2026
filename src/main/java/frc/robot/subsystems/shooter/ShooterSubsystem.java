@@ -241,9 +241,9 @@ public class ShooterSubsystem extends StateMachine {
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
-                    .withForwardSoftLimitThreshold(Rotations.of(0.25))
+                    .withForwardSoftLimitThreshold(Rotations.of(0.5))
                     .withReverseSoftLimitEnable(true)
-                    .withReverseSoftLimitThreshold(Rotations.of(-0.25)))
+                    .withReverseSoftLimitThreshold(Rotations.of(-0.5)))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2.5))
