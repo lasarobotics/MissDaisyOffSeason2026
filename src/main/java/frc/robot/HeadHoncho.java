@@ -64,12 +64,6 @@ public class HeadHoncho extends StateMachine {
       }
 
       @Override
-      public void end(boolean interrupted) {
-        IntakeSubsystem.getInstance().setState(IntakeStates.ACTIVE);
-        ShooterSubsystem.getInstance().setState(ShooterStates.ON);
-      }
-
-      @Override
       public SystemState nextState() {
         if (DriverStation.isAutonomous()) {
           return AUTO;
