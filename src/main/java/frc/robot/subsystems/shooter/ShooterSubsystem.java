@@ -355,8 +355,10 @@ public class ShooterSubsystem extends StateMachine {
 
   private double getShooterSpeed(double x_vel, double y_vel) {
     double shootSpeed = Math.hypot(x_vel, y_vel);
+    // 4/3 is because there's two wheels of different sizes
+    // This is hardcoded based on the physical robot, but that's not changing
+    // so it's not really worth programming the math
     double desiredRPS = (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI);
-    ;
     return desiredRPS;
   }
 
