@@ -4,19 +4,23 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -71,9 +75,8 @@ public final class Constants {
             (2 * Drive.MAX_SPEED.in(MetersPerSecond))
                 / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
 
-    public static final double ZERO_VOLTAGE = 3.0;
-    public static final double ZERO_THRESHOLD = 3.0;
-
+    public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
+    public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
   }
 
@@ -117,7 +120,7 @@ public final class Constants {
     public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
     public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
     public static final Distance SHOOTER_OFFSET_RADIUS =
-        Meters.of(Math.hypot(SHOOTER_OFFSET_X.in(Inches), SHOOTER_OFFSET_Y.in(Inches)));
+        Inches.of(Math.hypot(SHOOTER_OFFSET_X.in(Inches), SHOOTER_OFFSET_Y.in(Inches)));
     public static final Distance CENTER_TO_EDGE = Inches.of(13.25);
     public static final double HANG_TIME = 1.0;
     public static final double HOOD_COLLISION_TIME = 0.25;
@@ -128,8 +131,8 @@ public final class Constants {
     public static final double TURRET_DEADBAND =
         0.035; // in radians. This is around 2 degrees, which is not terrible accuracy even at 12
     // meters away
-    public static final double ZERO_VOLTAGE = 3.0;
-    public static final double ZERO_THRESHOLD = 3.0;
+    public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
+    public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
   }
 

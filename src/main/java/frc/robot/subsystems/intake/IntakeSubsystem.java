@@ -4,10 +4,12 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -49,7 +51,7 @@ public class IntakeSubsystem extends StateMachine {
 
       @Override
       public void initialize() {
-        getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE);
+        getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE.in(Volts));
         m_zeroTimer.reset();
         m_zeroTimer.start();
       }
@@ -58,7 +60,7 @@ public class IntakeSubsystem extends StateMachine {
       public void execute() {
         if (m_zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
             && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
-                >= Constants.Intake.ZERO_THRESHOLD) {
+                >= Constants.Intake.ZERO_THRESHOLD.in(Amps)) {
           getInstance().m_armMotor.setPosition(0.0);
           getInstance().setFinishedZero(true);
           getInstance().setState(INTAKE);

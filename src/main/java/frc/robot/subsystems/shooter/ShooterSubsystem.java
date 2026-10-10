@@ -4,12 +4,14 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -73,7 +75,7 @@ public class ShooterSubsystem extends StateMachine {
 
       @Override
       public void initialize() {
-        getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE);
+        getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
         m_zeroTimer.reset();
         m_zeroTimer.start();
       }
@@ -82,7 +84,7 @@ public class ShooterSubsystem extends StateMachine {
       public void execute() {
         if (m_zeroTimer.hasElapsed(Constants.Shooter.ZEROING_DELAY)
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
-                >= Constants.Intake.ZERO_THRESHOLD) {
+                >= Constants.Shooter.ZERO_THRESHOLD.in(Amps)) {
           getInstance().m_hoodMotor.setPosition(0.0);
           getInstance().setFinishedZero(true);
           getInstance().setState(ON);
