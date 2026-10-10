@@ -40,7 +40,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import frc.robot.fsm.StateMachine;
@@ -55,12 +54,6 @@ public class ShooterSubsystem extends StateMachine {
       @Override
       public void initialize() {
         getInstance().m_readytoShoot = false;
-
-        if (!RobotBase.isSimulation()) {
-          Thread turretUpdateThread = new Thread(() -> getInstance().updateTurretEncoder());
-          turretUpdateThread.start();
-        }
-
         getInstance().m_shooterLeader.setControl(getInstance().m_shooterRequest.withVelocity(0));
         getInstance().m_hoodMotor.setControl(getInstance().m_hoodRequest.withPosition(0));
         getInstance().m_turretMotor.setControl(getInstance().m_turretRequest.withPosition(0));
