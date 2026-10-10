@@ -291,7 +291,6 @@ public class DriveSubsystem extends StateMachine {
   private void limelightThread() {
 
     while (true) {
-      updateTurretLimelightPose();
 
       LimelightHelpers.PoseEstimate limelightEstimate = getFilteredPoseEstimate();
 
@@ -332,6 +331,8 @@ public class DriveSubsystem extends StateMachine {
   public void periodic() {
     Logger.recordOutput("DriveSubsystem/Pose", m_driveTrain.getState().Pose);
     Logger.recordOutput("DriveSubsystem/State", getInstance().m_driveState);
+
+    updateTurretLimelightPose();
   }
 
   private void updateTurretLimelightPose() {
