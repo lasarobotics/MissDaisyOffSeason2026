@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -69,6 +70,10 @@ public final class Constants {
     // TODO determine
     public static final Angle ARM_STOW_SETPOINT = Degrees.of(0.0);
     public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.0);
+
+    // TODO determine: what the angle of the arm should be on startup, assuming
+    // that straight up is 0 degrees
+    public static final Angle INITIAL_ARM_POSITION = Rotations.of(0);
 
     public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
     public static final AngularVelocity INTAKE_ROLLER_SPEED =

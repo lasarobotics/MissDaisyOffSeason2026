@@ -160,8 +160,6 @@ public class IntakeSubsystem extends StateMachine {
                     .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(5))
                     .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(40)));
 
-    m_armMotor.getConfigurator().apply(armConfig);
-
     TalonFXConfiguration intakeConfig =
         new TalonFXConfiguration()
             .withMotorOutput(
@@ -169,10 +167,13 @@ public class IntakeSubsystem extends StateMachine {
             .withSlot0(new Slot0Configs().withKP(0.2).withKS(0.259765625).withKV(0.24))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(2.037));
 
+    m_armMotor.getConfigurator().apply(armConfig);
     m_intakeMotorLeader.getConfigurator().apply(intakeConfig);
     m_intakeMotorFollower.getConfigurator().apply(intakeConfig);
+
     m_intakeMotorFollower.setControl(
         new Follower(m_intakeMotorLeader.getDeviceID(), MotorAlignmentValue.Aligned));
+    m_armMotor.setPosition(Constants.Intake.ARM_ZERO_SETPOINT);
   }
 
   public static IntakeSubsystem getInstance() {
