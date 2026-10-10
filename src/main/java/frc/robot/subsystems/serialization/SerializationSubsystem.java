@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.Constants;
+import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import org.littletonrobotics.junction.Logger;
@@ -37,9 +38,14 @@ public class SerializationSubsystem extends StateMachine {
 
     ACTIVE {
       @Override
-      public void initialize() {
-        getInstance().activateOmni(false);
-        getInstance().activateMecanum(false);
+      public void execute() {
+        if (HeadHoncho.getInstance().ballChecksPass()) {
+          getInstance().activateOmni(false);
+          getInstance().activateMecanum(false);
+        } else {
+          getInstance().restOmni();
+          getInstance().restMecanum();
+        }
       }
 
       @Override

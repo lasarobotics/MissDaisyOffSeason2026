@@ -27,7 +27,7 @@ public class HeadHoncho extends StateMachine {
       public void initialize() {
         DriveSubsystem.getInstance().setState(DriveStates.REST);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
-        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+        IntakeSubsystem.getInstance().setState(IntakeStates.ACTIVE);
         SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
       }
 
@@ -52,7 +52,7 @@ public class HeadHoncho extends StateMachine {
       @Override
       public void end(boolean interrupted) {
         Robot.setZeroToggle(false);
-        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
+        IntakeSubsystem.getInstance().setState(IntakeStates.ACTIVE);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
       }
 
@@ -106,16 +106,8 @@ public class HeadHoncho extends StateMachine {
       public void initialize() {
         DriveSubsystem.getInstance().setState(DriveStates.DRIVER_CONTROL);
         ShooterSubsystem.getInstance().setState(ShooterStates.ON);
-        IntakeSubsystem.getInstance().setState(IntakeStates.INTAKE);
-      }
-
-      @Override
-      public void execute() {
-        if (!(getInstance().ballChecksPass())) {
-          SerializationSubsystem.getInstance().setState(SerializationStates.REST);
-        } else {
-          SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
-        }
+        IntakeSubsystem.getInstance().setState(IntakeStates.ACTIVE);
+        SerializationSubsystem.getInstance().setState(SerializationStates.ACTIVE);
       }
 
       @Override
@@ -198,7 +190,7 @@ public class HeadHoncho extends StateMachine {
     return s_headHoncho;
   }
 
-  private boolean ballChecksPass() {
+  public boolean ballChecksPass() {
     boolean readytoShoot;
     if (!RobotBase.isSimulation()) {
       readytoShoot = ShooterSubsystem.getInstance().isReadyToShoot();

@@ -26,6 +26,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
+import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
 import frc.robot.fsm.SystemState;
 import org.littletonrobotics.junction.Logger;
@@ -86,11 +87,19 @@ public class IntakeSubsystem extends StateMachine {
       }
     },
 
-    INTAKE {
+    ACTIVE {
+      @Override
+      public void initialize() {
+        getInstance().deployIntake();
+      }
+
       @Override
       public void execute() {
-        getInstance().deployIntake();
-        getInstance().activateIntake(false);
+        if (HeadHoncho.getInstance().ballChecksPass()) {
+          getInstance().activateIntake(false);
+        } else {
+          getInstance().stopIntake();
+        }
       }
 
       @Override
@@ -101,7 +110,7 @@ public class IntakeSubsystem extends StateMachine {
 
     REVERSE {
       @Override
-      public void execute() {
+      public void initialize() {
         getInstance().deployIntake();
         getInstance().activateIntake(true);
       }
@@ -125,11 +134,11 @@ public class IntakeSubsystem extends StateMachine {
   private MotionMagicVoltage m_armRequest;
 
   public IntakeSubsystem() {
-    super(IntakeStates.INTAKE);
+    super(IntakeStates.ACTIVE);
 
     m_armRequest = new MotionMagicVoltage(0);
 
-    m_requestedState = IntakeStates.INTAKE;
+    m_requestedState = IntakeStates.ACTIVE;
 
     m_rollerRequest = new VelocityVoltage(0);
 

@@ -328,7 +328,7 @@ public class ShooterSubsystem extends StateMachine {
     double yOffset = target.getY() - robotPose.getY();
     Angle angleToTarget =
         Radians.of(robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset));
-    Angle turretDesired = angleToTarget.plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET);
+    Angle turretDesired = angleToTarget.times(-1).plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET);
 
     if (turretDesired.lt(Degrees.of(-90))) {
       turretDesired = turretDesired.plus(Rotations.of(1));
@@ -539,6 +539,7 @@ public class ShooterSubsystem extends StateMachine {
     for (double eOnePossible : encoderOnePossible) {
       for (double eTwoPossible : encoderTwoPossible) {
         if (Math.abs(eTwoPossible - eOnePossible) < bestError) {
+          bestError = Math.abs(eTwoPossible - eOnePossible);
           bestSolution = (eOnePossible + eTwoPossible) / 2;
         }
       }
