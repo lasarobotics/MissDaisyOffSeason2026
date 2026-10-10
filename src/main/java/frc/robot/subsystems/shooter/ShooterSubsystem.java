@@ -367,8 +367,6 @@ public class ShooterSubsystem extends StateMachine {
   private static double getVelocityXStationary(
       double distance, double targetHeight, double maxBallYPos) {
 
-    double y_max = maxBallYPos;
-    double y_end = targetHeight;
     double g = Constants.Field.GRAVITY_VALUE;
 
     if (maxBallYPos <= Math.max(Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters), targetHeight)) {
@@ -382,7 +380,6 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private static double getVelocityYStationary(double maxBallYPos) {
-    double y_max = maxBallYPos;
     double g = Constants.Field.GRAVITY_VALUE;
 
     if (maxBallYPos <= Constants.Limelight.TURRET_PIVOT_HEIGHT.in(Meters)) {
@@ -507,25 +504,28 @@ public class ShooterSubsystem extends StateMachine {
     StatusSignal<Angle> encoderOneSignal = m_encoderOne.getPosition();
     StatusSignal<Angle> encoderTwoSignal = m_encoderTwo.getPosition();
     BaseStatusSignal.refreshAll(encoderOneSignal, encoderTwoSignal);
-    BaseStatusSignal.waitForAll(0.1, encoderOneSignal, encoderTwoSignal);
+    BaseStatusSignal.waitForAll(0.05, encoderOneSignal, encoderTwoSignal);
     double encoderOnePosition = encoderOneSignal.getValue().in(Rotations);
     double encoderTwoPosition = encoderTwoSignal.getValue().in(Rotations);
-    double[] encoderOnePossible = new double[Constants.Shooter.ENCODER_ONE_TEETH];
-    double[] encoderTwoPossible = new double[Constants.Shooter.ENCODER_TWO_TEETH];
+
+    int checkRange = 5;
+
+    double[] encoderOnePossible = new double[checkRange * 2];
+    double[] encoderTwoPossible = new double[checkRange * 2];
 
     /*
      * Basically, the turret rotates from -0.5 to 0.5 rotations.
      * Every turret rotation is ~5.2 encoder rotations
      * so we check 5 encoder rotations in each direction to be safe
      */
-    for (int i = -5; i < 5; i++) {
-      encoderOnePossible[i] =
+    for (int i = -checkRange; i < checkRange; i++) {
+      encoderOnePossible[i + checkRange] =
           (i + encoderOnePosition)
               * ((double) Constants.Shooter.ENCODER_ONE_TEETH
                   / Constants.Shooter.TURRET_GEAR_TEETH);
     }
-    for (int i = -5; i < 5; i++) {
-      encoderTwoPossible[i] =
+    for (int i = -checkRange; i < checkRange; i++) {
+      encoderTwoPossible[i + checkRange] =
           (i + encoderTwoPosition)
               * ((double) Constants.Shooter.ENCODER_TWO_TEETH
                   / Constants.Shooter.TURRET_GEAR_TEETH);
