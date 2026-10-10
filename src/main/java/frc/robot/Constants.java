@@ -66,10 +66,11 @@ public final class Constants {
     public static final int LEADER_CAN_ID = 31;
     public static final int FOLLOWER_CAN_ID = 32;
 
+    // TODO determine
     public static final Angle ARM_STOW_SETPOINT = Degrees.of(0.0);
     public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.0);
-    public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
 
+    public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
     public static final AngularVelocity INTAKE_ROLLER_SPEED =
         RotationsPerSecond.of(
             (2 * Drive.MAX_SPEED.in(MetersPerSecond))
@@ -111,12 +112,12 @@ public final class Constants {
     public static final int SHOOTER_FOLLOWER_ID = 51;
     public static final int HOOD_MOTOR_ID = 52;
     public static final int TURRET_MOTOR_ID = 53;
+    public static final int ENCODER_TWO_ID = 54;
+    public static final int ENCODER_ONE_ID = 55;
+
     public static final int ENCODER_ONE_TEETH = 17;
     public static final int ENCODER_TWO_TEETH = 18;
     public static final int TURRET_GEAR_TEETH = 92;
-
-    public static final int ENCODER_TWO_ID = 54;
-    public static final int ENCODER_ONE_ID = 55;
     public static final double CRT_EPSILON = 0.01;
     public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
     public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
