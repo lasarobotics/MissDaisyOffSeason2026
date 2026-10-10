@@ -94,7 +94,7 @@ public class ShooterSubsystem extends StateMachine {
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Shooter.ZERO_THRESHOLD.in(Amps)
             && !turretUpdateThread.isAlive()) {
-          getInstance().m_hoodMotor.setPosition(0.0);
+          getInstance().m_hoodMotor.setPosition(Constants.Shooter.HOOD_ZERO_SETPOINT);
           getInstance().setState(ShooterStates.OFF);
         }
       }
