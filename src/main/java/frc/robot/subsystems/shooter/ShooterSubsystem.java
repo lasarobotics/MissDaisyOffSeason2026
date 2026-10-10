@@ -253,7 +253,7 @@ public class ShooterSubsystem extends StateMachine {
         new CANcoderConfiguration()
             .withMagnetSensor(
                 new MagnetSensorConfigs()
-                    .withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.99))
+                    .withAbsoluteSensorDiscontinuityPoint(Rotations.of(1.0))
                     .withMagnetOffset(Rotations.of(-0.417236328125))
                     .withSensorDirection(SensorDirectionValue.Clockwise_Positive));
 
@@ -261,7 +261,7 @@ public class ShooterSubsystem extends StateMachine {
         new CANcoderConfiguration()
             .withMagnetSensor(
                 new MagnetSensorConfigs()
-                    .withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.99))
+                    .withAbsoluteSensorDiscontinuityPoint(Rotations.of(1.0))
                     .withMagnetOffset(Rotations.of(-0.396728515625))
                     .withSensorDirection(SensorDirectionValue.Clockwise_Positive));
 
