@@ -68,7 +68,6 @@ public final class Constants {
 
     public static final Angle ARM_STOW_SETPOINT = Degrees.of(0.0);
     public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.0);
-    public static final AngularVelocity INTAKE_ACTIVE_SPEED = RotationsPerSecond.of(0);
     public static final Distance INTAKE_ROLLER_DIAMETER = Meters.of(0.035);
 
     public static final AngularVelocity INTAKE_ROLLER_SPEED =
