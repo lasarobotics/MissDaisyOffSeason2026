@@ -575,6 +575,11 @@ public class ShooterSubsystem extends StateMachine {
   by the tangential velocity and direction in order to have accurate SOTM */
   private Translation2d transformByTangentialRotationSpeed(
       Translation2d currentPos, double hangTime) {
+    Angle turretAngleOffset =
+        Radians.of(
+            Math.atan2(
+                Constants.Shooter.SHOOTER_OFFSET_X.magnitude(),
+                Constants.Shooter.SHOOTER_OFFSET_Y.magnitude()));
     double linearTangentSpeed =
         MathUtil.applyDeadband(
                 DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
@@ -584,7 +589,11 @@ public class ShooterSubsystem extends StateMachine {
     Translation2d transformationVector =
         new Translation2d(
             linearTangentSpeed * hangTime,
-            DriveSubsystem.getInstance().getPose().getRotation().plus(Rotation2d.kCCW_90deg));
+            DriveSubsystem.getInstance()
+                .getPose()
+                .getRotation()
+                .plus(Rotation2d.kCCW_90deg)
+                .plus(Rotation2d.fromDegrees(turretAngleOffset.in(Degrees))));
     return currentPos.plus(transformationVector);
   }
 
