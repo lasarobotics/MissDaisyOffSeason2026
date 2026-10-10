@@ -48,7 +48,6 @@ public class IntakeSubsystem extends StateMachine {
 
     ZERO {
       Timer zeroTimer = new Timer();
-      boolean finishedZeroing;
 
       @Override
       public void initialize() {
@@ -62,9 +61,8 @@ public class IntakeSubsystem extends StateMachine {
         if (zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
             && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
                 >= Constants.Intake.ZERO_THRESHOLD.in(Amps)) {
-          getInstance().m_armMotor.setPosition(0.0);
-          getInstance().setFinishedZero(true);
-          getInstance().setState(INTAKE);
+          getInstance().m_armMotor.setPosition(Constants.Intake.ARM_ZERO_SETPOINT);
+          getInstance().setState(IntakeStates.REST);
         }
       }
 
@@ -125,12 +123,9 @@ public class IntakeSubsystem extends StateMachine {
   private VelocityVoltage m_rollerRequest;
   private MotionMagicVoltage m_armRequest;
 
-  private boolean m_finishedZero;
-
   public IntakeSubsystem() {
     super(IntakeStates.INTAKE);
 
-    m_finishedZero = false;
     m_armRequest = new MotionMagicVoltage(0);
 
     m_requestedState = IntakeStates.INTAKE;
@@ -214,14 +209,6 @@ public class IntakeSubsystem extends StateMachine {
     getInstance()
         .m_armMotor
         .setControl(getInstance().m_armRequest.withPosition(Constants.Intake.ARM_STOW_SETPOINT));
-  }
-
-  public boolean finishedZero() {
-    return getInstance().m_finishedZero;
-  }
-
-  public void setFinishedZero(boolean value) {
-    getInstance().m_finishedZero = value;
   }
 
   @Override
