@@ -80,8 +80,7 @@ public class SerializationSubsystem extends StateMachine {
 
   public SerializationSubsystem() {
     super(SerializationStates.REST);
-
-    m_requestedState = SerializationStates.ACTIVE;
+    setState(SerializationStates.REST);
 
     m_velocityVoltage = new VelocityVoltage(0);
 
@@ -114,7 +113,7 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   public void setState(SerializationStates state) {
-    getInstance().m_requestedState = state;
+    m_requestedState = state;
   }
 
   public static SerializationSubsystem getInstance() {

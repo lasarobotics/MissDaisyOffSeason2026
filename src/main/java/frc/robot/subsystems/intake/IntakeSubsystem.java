@@ -135,10 +135,9 @@ public class IntakeSubsystem extends StateMachine {
 
   public IntakeSubsystem() {
     super(IntakeStates.ACTIVE);
+    setState(IntakeStates.ACTIVE);
 
     m_armRequest = new MotionMagicVoltage(0);
-
-    m_requestedState = IntakeStates.ACTIVE;
 
     m_rollerRequest = new VelocityVoltage(0);
 
@@ -193,11 +192,11 @@ public class IntakeSubsystem extends StateMachine {
   }
 
   public void setState(IntakeStates state) {
-    getInstance().m_requestedState = state;
+    m_requestedState = state;
   }
 
   public void stopIntake() {
-    getInstance().m_intakeMotorLeader.stopMotor();
+    m_intakeMotorLeader.stopMotor();
   }
 
   public void activateIntake(boolean reverse) {

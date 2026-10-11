@@ -196,8 +196,8 @@ public final class Constants {
         new Rectangle2d(new Translation2d(0, 3.173), new Translation2d(1.108, 4.346));
     public static final Rectangle2d RED_TOWER =
         new Rectangle2d(
-            new Translation2d(FIELD_X.in(Meters), 3.173),
-            new Translation2d(FIELD_X.in(Meters) - 1.108, 4.346));
+            new Translation2d(FIELD_X.in(Meters), FIELD_Y.in(Meters) - 3.173),
+            new Translation2d(FIELD_X.in(Meters) - 1.108, FIELD_Y.in(Meters) - 4.346));
     public static final double GRAVITY_VALUE = 9.81;
   }
 

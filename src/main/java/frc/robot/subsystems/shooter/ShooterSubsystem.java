@@ -38,6 +38,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -75,7 +76,28 @@ public class ShooterSubsystem extends StateMachine {
 
         getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
         getInstance().setTurretPos(getInstance().getTurretPosition());
-        turretUpdateThread = new Thread(() -> getInstance().updateTurretEncoder());
+        turretUpdateThread =
+            new Thread(
+                () -> {
+                  try {
+                    Thread.sleep(500);
+                    // keep trying until it succeeds for 10 tries
+                    int i = 0;
+                    boolean success = false;
+                    while (i < 10) {
+                      success = getInstance().updateTurretEncoder();
+                      if (success) {
+                        break;
+                      }
+                      Thread.sleep(20);
+                      i++;
+                    }
+                    if (!success) {
+                      DriverStation.reportError("ERROR: TURRET NOT ZEROED!", false);
+                    }
+                  } catch (InterruptedException e) {
+                  }
+                });
         turretUpdateThread.start();
 
         zeroTimer.reset();
@@ -143,6 +165,16 @@ public class ShooterSubsystem extends StateMachine {
           return;
         }
 
+        getInstance()
+            .setTurretPos(
+                getInstance()
+                    .updateDesiredTurretPos(
+                        target.toTranslation2d(),
+                        new Pose2d(
+                            robotPose, DriveSubsystem.getInstance().getPose().getRotation())));
+        getInstance().setHoodPos(getInstance().updateDesiredHoodPos(x_vel, y_vel));
+        getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
+
         getInstance().m_readytoShoot =
             getInstance().turretAtPosition()
                 && getInstance().hoodAtPosition()
@@ -150,7 +182,7 @@ public class ShooterSubsystem extends StateMachine {
 
         Logger.recordOutput("ShooterSubsystem/State", getInstance().getState().toString());
         Logger.recordOutput(
-            "ShooterSubsystem/HoodAngle", getInstance().getHoodPos(x_vel, y_vel).in(Degrees));
+            "ShooterSubsystem/HoodAngle", getInstance().getDesiredHoodPos().in(Degrees));
         Logger.recordOutput(
             "ShooterSubsystem/FlywheelSpeed", getInstance().getShooterSpeed(x_vel, y_vel));
         Logger.recordOutput(
@@ -159,13 +191,7 @@ public class ShooterSubsystem extends StateMachine {
             "ShooterSubsystem/TurretPos",
             new Pose2d(
                 robotPose,
-                Rotation2d.fromDegrees(
-                    getInstance()
-                        .getDesiredTurretPos(
-                            target.toTranslation2d(),
-                            new Pose2d(
-                                robotPose, DriveSubsystem.getInstance().getPose().getRotation()))
-                        .in(Degrees))));
+                Rotation2d.fromDegrees(getInstance().getDesiredTurretPos().in(Degrees))));
         Logger.recordOutput(
             "ShooterSubsystem/AggregateAimPoint",
             new Pose2d(
@@ -174,27 +200,10 @@ public class ShooterSubsystem extends StateMachine {
                     .getPose()
                     .getRotation()
                     .plus(
-                        Rotation2d.fromDegrees(
-                                getInstance()
-                                    .getDesiredTurretPos(
-                                        target.toTranslation2d(),
-                                        new Pose2d(
-                                            robotPose,
-                                            DriveSubsystem.getInstance().getPose().getRotation()))
-                                    .in(Degrees))
+                        Rotation2d.fromDegrees(getInstance().getDesiredTurretPos().in(Degrees))
                             .minus(
                                 Rotation2d.fromDegrees(
                                     getInstance().getTurretPosition().in(Degrees))))));
-
-        getInstance()
-            .setTurretPos(
-                getInstance()
-                    .getDesiredTurretPos(
-                        target.toTranslation2d(),
-                        new Pose2d(
-                            robotPose, DriveSubsystem.getInstance().getPose().getRotation())));
-        getInstance().setHoodPos(getInstance().getHoodPos(x_vel, y_vel));
-        getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
       }
 
       @Override
@@ -220,6 +229,9 @@ public class ShooterSubsystem extends StateMachine {
 
   private boolean m_blueAlliance;
   private boolean m_readytoShoot;
+
+  private Angle m_desiredTurretPosition;
+  private Angle m_desiredHoodPosition;
 
   public ShooterSubsystem() {
     super(ShooterStates.OFF);
@@ -285,7 +297,35 @@ public class ShooterSubsystem extends StateMachine {
     m_encoderOne.getConfigurator().apply(encoderOneConfig);
     m_encoderTwo.getConfigurator().apply(encoderTwoConfig);
 
-    new Thread(() -> getInstance().updateTurretEncoder()).start();
+    m_turretMotor.getClosedLoopError().setUpdateFrequency(50);
+    m_hoodMotor.getClosedLoopError().setUpdateFrequency(50);
+    m_shooterLeader.getClosedLoopError().setUpdateFrequency(50);
+
+    m_encoderOne.getAbsolutePosition().setUpdateFrequency(100);
+    m_encoderTwo.getAbsolutePosition().setUpdateFrequency(100);
+
+    new Thread(
+            () -> {
+              try {
+                Thread.sleep(500);
+                // keep trying until it succeeds for 20 tries
+                int i = 0;
+                boolean success = false;
+                while (i < 20) {
+                  success = getInstance().updateTurretEncoder();
+                  if (success) {
+                    break;
+                  }
+                  Thread.sleep(20);
+                  i++;
+                }
+                if (!success) {
+                  DriverStation.reportError("ERROR: TURRET NOT ZEROED!", false);
+                }
+              } catch (InterruptedException e) {
+              }
+            })
+        .start();
   }
 
   public static ShooterSubsystem getInstance() {
@@ -313,18 +353,23 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean turretAtPosition() {
-    return m_turretMotor.getClosedLoopError().getValue()
-        <= Constants.Shooter.TURRET_ALLOWED_ERROR.in(Rotations);
+    return getTurretPosition()
+        .isNear(getDesiredTurretPos(), Constants.Shooter.TURRET_ALLOWED_ERROR);
   }
 
   public boolean hoodAtPosition() {
-    return m_hoodMotor.getClosedLoopError().getValue()
-        <= Constants.Shooter.HOOD_ALLOWED_ERROR.in(Rotations);
+    return m_hoodMotor
+        .getPosition()
+        .isNear(getDesiredHoodPos(), Constants.Shooter.HOOD_ALLOWED_ERROR);
   }
 
   public boolean shooterAtSpeed() {
-    return m_shooterLeader.getClosedLoopError().getValue()
+    return Math.abs(m_shooterLeader.getClosedLoopError().getValue())
         <= Constants.Shooter.SHOOTER_ALLOWED_ERROR.in(RotationsPerSecond);
+  }
+
+  public AngularVelocity getTurretAngularVelocity() {
+    return m_turretMotor.getVelocity().getValue();
   }
 
   private Translation3d getTarget() {
@@ -349,7 +394,7 @@ public class ShooterSubsystem extends StateMachine {
     }
   }
 
-  private Angle getDesiredTurretPos(Translation2d target, Pose2d robotPose) {
+  private Angle updateDesiredTurretPos(Translation2d target, Pose2d robotPose) {
     if (target == null) {
       return Degrees.of(0);
     }
@@ -364,19 +409,30 @@ public class ShooterSubsystem extends StateMachine {
                     .times(-1)
                     .plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET)
                     .in(Radians)));
+    m_desiredTurretPosition = turretDesired;
     return turretDesired;
+  }
+
+  private Angle getDesiredTurretPos() {
+    return m_desiredTurretPosition;
   }
 
   private void setTurretPos(Angle desiredPos) {
     m_turretMotor.setControl(m_turretRequest.withPosition(desiredPos));
   }
 
-  private Angle getHoodPos(double x_vel, double y_vel) {
+  private Angle updateDesiredHoodPos(double x_vel, double y_vel) {
     if (robotCrossTrench()) {
+      m_desiredHoodPosition = Degrees.of(0);
       return Degrees.of(0);
     }
     Angle hoodAngle = Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel)));
+    m_desiredHoodPosition = hoodAngle;
     return hoodAngle;
+  }
+
+  private Angle getDesiredHoodPos() {
+    return m_desiredHoodPosition;
   }
 
   private void setHoodPos(Angle hoodPos) {
@@ -534,11 +590,13 @@ public class ShooterSubsystem extends StateMachine {
         && ((orient3 > 0 && orient4 < 0) || (orient3 < 0 && orient4 > 0));
   }
 
-  private void updateTurretEncoder() {
-    StatusSignal<Angle> encoderOneSignal = m_encoderOne.getPosition();
-    StatusSignal<Angle> encoderTwoSignal = m_encoderTwo.getPosition();
+  private boolean updateTurretEncoder() {
+    StatusSignal<Angle> encoderOneSignal = m_encoderOne.getAbsolutePosition();
+    StatusSignal<Angle> encoderTwoSignal = m_encoderTwo.getAbsolutePosition();
     BaseStatusSignal.refreshAll(encoderOneSignal, encoderTwoSignal);
-    BaseStatusSignal.waitForAll(0.05, encoderOneSignal, encoderTwoSignal);
+    encoderOneSignal.waitForUpdate(0.04);
+    encoderTwoSignal.waitForUpdate(0.04);
+
     double encoderOnePosition = encoderOneSignal.getValue().in(Rotations);
     double encoderTwoPosition = encoderTwoSignal.getValue().in(Rotations);
 
@@ -577,7 +635,9 @@ public class ShooterSubsystem extends StateMachine {
     }
     if (bestError <= Constants.Shooter.CRT_EPSILON) {
       m_turretMotor.setPosition(bestSolution);
+      return true;
     }
+    return false;
   }
 
   public Angle getTurretPosition() {

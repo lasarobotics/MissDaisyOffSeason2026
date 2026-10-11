@@ -7,6 +7,8 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -114,7 +116,8 @@ public class DriveSubsystem extends StateMachine {
   private CommandSwerveDrivetrain m_driveTrain;
   private SwerveRequest.FieldCentric m_drive;
   protected final Thread m_limelight_thread;
-  private static volatile Map<String, Double> m_limelightHeartbeat;
+  private static volatile AngularVelocity s_turretOmega;
+  private static volatile Map<String, Double> s_limelightHeartbeat;
 
   private final SwerveRequest.ApplyRobotSpeeds m_blineDriveRequest =
       new SwerveRequest.ApplyRobotSpeeds();
@@ -165,8 +168,9 @@ public class DriveSubsystem extends StateMachine {
     SmartDashboard.putBoolean("shouldFlip", shouldFlip);
     SmartDashboard.putBoolean("shouldMirror", shouldMirror);
 
-    m_limelightHeartbeat = new HashMap<>();
-    m_limelightHeartbeat.put(Constants.Limelight.LIMELIGHT_NAME, 0.0);
+    s_limelightHeartbeat = new HashMap<>();
+    s_limelightHeartbeat.put(Constants.Limelight.LIMELIGHT_NAME, 0.0);
+    s_turretOmega = RotationsPerSecond.of(0);
 
     m_limelight_thread = new Thread(this::limelightThread);
     m_limelight_thread.setDaemon(true);
@@ -205,12 +209,10 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public void setState(DriveStates driveState) {
-
     m_driveState = driveState;
   }
 
   public Pose2d getPose() {
-
     return m_driveTrain.getState().Pose;
   }
 
@@ -385,6 +387,8 @@ public class DriveSubsystem extends StateMachine {
         Constants.Limelight.CAMERA_ROLL.in(Degrees),
         Constants.Limelight.CAMERA_PITCH.in(Degrees),
         cameraYaw);
+
+    s_turretOmega = ShooterSubsystem.getInstance().getTurretAngularVelocity();
   }
 
   private LimelightHelpers.PoseEstimate getFilteredPoseEstimate() {
@@ -393,19 +397,21 @@ public class DriveSubsystem extends StateMachine {
 
     String limelight = Constants.Limelight.LIMELIGHT_NAME;
     double hb = LimelightHelpers.getHeartbeat(limelight);
-    Double savedHb = m_limelightHeartbeat.get(limelight);
+    Double savedHb = s_limelightHeartbeat.get(limelight);
 
     if (savedHb == null || savedHb == hb) {
       return null;
     } else {
-      m_limelightHeartbeat.put(limelight, hb);
+      s_limelightHeartbeat.put(limelight, hb);
     }
 
     if (pose_estimate == null) {
       return null;
     }
 
-    if (Math.abs(m_driveTrain.getStateCopy().Speeds.omegaRadiansPerSecond)
+    if (Math.abs(
+            m_driveTrain.getStateCopy().Speeds.omegaRadiansPerSecond
+                + s_turretOmega.in(RadiansPerSecond))
         > Constants.Limelight.MAX_VISION_ANGULAR_VELOCITY_PER_SEC.in(Radians)) {
 
       return null;
