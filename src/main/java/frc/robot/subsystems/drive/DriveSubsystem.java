@@ -157,6 +157,7 @@ public class DriveSubsystem extends StateMachine {
                 new PIDController(BLine.TRANSLATION_KP, BLine.TRANSLATION_KI, BLine.TRANSLATION_KD),
                 new PIDController(BLine.ROTATION_KP, BLine.ROTATION_KI, BLine.ROTATION_KD),
                 new PIDController(BLine.CROSS_TRACK_KP, BLine.CROSS_TRACK_KI, BLine.CROSS_TRACK_KD))
+            .withPoseReset(this::resetPose)
             .withTRatioBasedTranslationHandoffs(true);
 
     m_autoChooser.setDefaultOption("Do Nothing", "nothing");
@@ -256,7 +257,7 @@ public class DriveSubsystem extends StateMachine {
         Commands.runOnce(
             () -> {
               modulesAligned = false;
-              setModuleOrientations(path.getInitialModuleDirection(this::getPose));
+              setModuleOrientations(path.getInitialModuleDirection(this::getPose).unaryMinus());
             });
 
     Command waitForAlignment =
@@ -294,13 +295,17 @@ public class DriveSubsystem extends StateMachine {
 
     SwerveModule<TalonFX, TalonFX, CANcoder>[] modules = m_driveTrain.getModules();
 
+    double tolerance = Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Radians);
+
     for (SwerveModule<TalonFX, TalonFX, CANcoder> module : modules) {
       SwerveModulePosition pos = module.getPosition(true);
 
-      double angleDifference =
+      double difference =
           Math.abs(MathUtil.angleModulus(pos.angle.getRadians() - requestedPreMatch.getRadians()));
 
-      if (angleDifference > Constants.BLine.PREMATCH_MODULE_TOLERANCE.in(Radians)) {
+      double equivalentDifference = Math.min(difference, Math.PI - difference);
+
+      if (equivalentDifference > tolerance) {
         return false;
       }
     }
