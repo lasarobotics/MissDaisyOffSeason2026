@@ -79,6 +79,7 @@ public final class Constants {
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
+    // TODO determine
     public static Angle ARM_ZERO_SETPOINT = Degrees.of(0.0);
   }
 
@@ -126,6 +127,8 @@ public final class Constants {
     public static final Distance SHOOTER_OFFSET_RADIUS =
         Inches.of(Math.hypot(SHOOTER_OFFSET_X.in(Inches), SHOOTER_OFFSET_Y.in(Inches)));
 
+    public static final Angle HOOD_ZERO_ANGLE = Degrees.of(10.251);
+
     public static final Distance CENTER_TO_EDGE = Inches.of(13.25);
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
@@ -137,7 +140,8 @@ public final class Constants {
     public static final AngularVelocity SHOOTER_ALLOWED_ERROR = RotationsPerSecond.of(2);
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(-3.0);
-    public static final Current ZERO_THRESHOLD = Amps.of(30.0);
+    // TODO check sign on zero threshold
+    public static final Current ZERO_THRESHOLD = Amps.of(-30.0);
     public static final double ZEROING_DELAY = 0.2;
     public static Angle HOOD_ZERO_SETPOINT = Degrees.of(0.0);
   }

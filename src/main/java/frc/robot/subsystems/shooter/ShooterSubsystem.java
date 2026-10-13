@@ -426,7 +426,7 @@ public class ShooterSubsystem extends StateMachine {
       m_desiredHoodPosition = Degrees.of(0);
       return Degrees.of(0);
     }
-    Angle hoodAngle = Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel)));
+    Angle hoodAngle = Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel))).minus(Constants.Shooter.HOOD_ZERO_ANGLE);
     m_desiredHoodPosition = hoodAngle;
     return hoodAngle;
   }
