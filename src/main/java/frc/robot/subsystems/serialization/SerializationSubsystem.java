@@ -24,7 +24,7 @@ public class SerializationSubsystem extends StateMachine {
   public enum SerializationStates implements SystemState {
     REST {
       @Override
-      public void execute() {
+      public void initialize() {
         getInstance().restOmni();
         getInstance().restMecanum();
       }
@@ -55,7 +55,7 @@ public class SerializationSubsystem extends StateMachine {
 
     REVERSE {
       @Override
-      public void execute() {
+      public void initialize() {
         getInstance().activateOmni(true);
         getInstance().activateMecanum(true);
       }
@@ -98,12 +98,13 @@ public class SerializationSubsystem extends StateMachine {
     m_omniMotor.getConfigurator().apply(omniConfig);
 
     TalonFXConfiguration mecanumConfig = new TalonFXConfiguration();
-    mecanumConfig.Slot0.withKP(0).withKI(0).withKD(0);
-    mecanumConfig.CurrentLimits.SupplyCurrentLimit = 200;
-    mecanumConfig.CurrentLimits.StatorCurrentLimit = 120;
-    mecanumConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
-    mecanumConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
-    mecanumConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    mecanumConfig.Feedback.withSensorToMechanismRatio(1.4286);
+    // mecanumConfig.Slot0.withKP(0).withKI(0).withKD(0);
+    // mecanumConfig.CurrentLimits.SupplyCurrentLimit = 200;
+    // mecanumConfig.CurrentLimits.StatorCurrentLimit = 120;
+    // mecanumConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
+    // mecanumConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
+    // mecanumConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
 
     m_mecanumMotorLeader.getConfigurator().apply(mecanumConfig);
     m_mecanumMotorFollower.getConfigurator().apply(mecanumConfig);
@@ -124,22 +125,11 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   public void restOmni() {
-    getInstance()
-        .m_omniMotor
-        .setControl(
-            getInstance().m_velocityVoltage.withVelocity(Constants.Serialization.OMNI_REST_SPEED));
+    getInstance().m_omniMotor.stopMotor();
   }
 
   public void restMecanum() {
-    // getInstance()
-    //     .m_mecanumMotorLeader
-    //     .setControl(
-    //         getInstance()
-    //             .m_velocityVoltage
-    //             .withVelocity(Constants.Serialization.MECANUM_REST_SPEED));
-    getInstance()
-        .m_mecanumMotorLeader
-        .setVoltage(Constants.Serialization.MECANUM_VOLTAGE.magnitude());
+    getInstance().m_mecanumMotorLeader.stopMotor();
   }
 
   public void activateOmni(boolean reverse) {

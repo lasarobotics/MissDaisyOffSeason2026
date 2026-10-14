@@ -64,8 +64,8 @@ public final class Constants {
     public static final int FOLLOWER_CAN_ID = 32;
 
     // TODO update w/ bumpers
-    public static final Angle ARM_STOW_SETPOINT = Degrees.of(0.0);
-    public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.3);
+    public static final Angle ARM_STOW_SETPOINT = Rotations.of(0.0);
+    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.28);
 
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(-0.076904);
@@ -73,7 +73,8 @@ public final class Constants {
     public static final Distance INTAKE_ROLLER_DIAMETER = Inches.of(1.375);
     public static final AngularVelocity INTAKE_ROLLER_SPEED =
         RotationsPerSecond.of(
-            Drive.MAX_SPEED.in(MetersPerSecond) / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
+            Drive.MAX_SPEED.div(2).in(MetersPerSecond)
+                / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
@@ -92,22 +93,21 @@ public final class Constants {
         new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.1);
 
     // TODO update once both motors are attached
-    public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25);
-    // about 29.4rot/s w/ ballspeedincreaser at 0.1
+    public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25).div(2);
+    // about 29.74rot/s w/ ballspeedincreaser at 0.1
     public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
           return RotationsPerSecond.of(
-              (Drive.MAX_SPEED.in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
+              (Drive.MAX_SPEED.div(1.5).in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
                   / (Math.PI * MECANUM_WHEEL_DIAMETER.in(Meters)));
         };
     public static final Supplier<AngularVelocity> OMNI_SPEED =
         () -> {
           return RotationsPerSecond.of(
-              (Drive.MAX_SPEED.in(MetersPerSecond) + 2 * BALL_SPEED_INCREASER.getAsDouble())
+              (Drive.MAX_SPEED.div(1.5).in(MetersPerSecond)
+                      + 2 * BALL_SPEED_INCREASER.getAsDouble())
                   / (Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
         };
-    public static final AngularVelocity MECANUM_REST_SPEED = RotationsPerSecond.of(0);
-    public static final AngularVelocity OMNI_REST_SPEED = RotationsPerSecond.of(0);
   }
 
   public static class Shooter {
@@ -135,7 +135,7 @@ public final class Constants {
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
-        new LoggedNetworkNumber("/Tuning/maxBallYPos", 3.0);
+        new LoggedNetworkNumber("/Tuning/maxBallYPos", 2.6);
 
     public static final Angle TURRET_ALLOWED_ERROR = Degrees.of(2);
     public static final Angle HOOD_ALLOWED_ERROR = Degrees.of(2);
@@ -146,6 +146,11 @@ public final class Constants {
     public static final Current ZERO_THRESHOLD = Amps.of(-30.0);
     public static final double ZEROING_DELAY = 0.2;
     public static Angle HOOD_ZERO_SETPOINT = Degrees.of(0.0);
+
+    public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
+        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 7.5);
+    public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
+        new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", 1.0);
   }
 
   public static class Field {

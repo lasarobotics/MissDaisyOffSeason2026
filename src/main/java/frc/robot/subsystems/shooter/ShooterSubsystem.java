@@ -445,7 +445,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   private Angle getDesiredHoodPos() {
-    return m_desiredHoodPosition;
+    return m_desiredHoodPosition.plus(Degrees.of(Constants.Shooter.HOOD_FUDGE_FACTOR.getAsDouble()));
   }
 
   private void setHoodPos(Angle hoodPos) {
@@ -457,7 +457,7 @@ public class ShooterSubsystem extends StateMachine {
     // 4/3 is because there's two wheels of different sizes
     // This is hardcoded based on the physical robot, but that's not changing
     // so it's not really worth programming the math
-    double desiredRPS = (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI);
+    double desiredRPS = (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI) + Constants.Shooter.FLYWHEEL_FUDGE_FACTOR.getAsDouble();
     return desiredRPS;
   }
 
@@ -714,5 +714,15 @@ public class ShooterSubsystem extends StateMachine {
             DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
     Logger.recordOutput("ShooterSubsystem/isReadyToShoot", isReadyToShoot());
+    Logger.recordOutput("ShooterSubsystem/hoodPosition", m_hoodMotor.getPosition().getValue());
+    Logger.recordOutput(
+        "ShooterSubsystem/hoodTarget", m_hoodMotor.getClosedLoopReference().getValue());
+    Logger.recordOutput(
+        "ShooterSubsystem/shooterPosition", m_shooterLeader.getVelocity().getValue());
+    Logger.recordOutput(
+        "ShooterSubsystem/shooterTarget", m_shooterLeader.getClosedLoopReference().getValue());
+    Logger.recordOutput("ShooterSubsystem/turretPosition", m_turretMotor.getPosition().getValue());
+    Logger.recordOutput(
+        "ShooterSubsystem/turretTarget", m_turretMotor.getClosedLoopReference().getValue());
   }
 }

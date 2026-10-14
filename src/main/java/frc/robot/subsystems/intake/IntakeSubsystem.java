@@ -36,7 +36,7 @@ public class IntakeSubsystem extends StateMachine {
   public enum IntakeStates implements SystemState {
     REST {
       @Override
-      public void execute() {
+      public void initialize() {
         getInstance().deployIntake();
         getInstance().stopIntake();
       }
@@ -76,7 +76,7 @@ public class IntakeSubsystem extends StateMachine {
 
     STOW {
       @Override
-      public void execute() {
+      public void initialize() {
         getInstance().stowIntake();
         getInstance().stopIntake();
       }
@@ -134,8 +134,8 @@ public class IntakeSubsystem extends StateMachine {
   private MotionMagicVoltage m_armRequest;
 
   public IntakeSubsystem() {
-    super(IntakeStates.ACTIVE);
-    setState(IntakeStates.ACTIVE);
+    super(IntakeStates.REST);
+    setState(IntakeStates.REST);
 
     m_armRequest = new MotionMagicVoltage(0);
 
@@ -224,5 +224,8 @@ public class IntakeSubsystem extends StateMachine {
   @Override
   public void periodic() {
     Logger.recordOutput("IntakeSubsystem/State", getState().toString());
+    Logger.recordOutput("IntakeSubsystem/armPosition", m_armMotor.getPosition().getValue());
+    Logger.recordOutput(
+        "IntakeSubsystem/armTarget", m_armMotor.getClosedLoopReference().getValue());
   }
 }
