@@ -80,7 +80,7 @@ public final class Constants {
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
     // TODO determine
-    public static Angle ARM_ZERO_SETPOINT = Degrees.of(0.0);
+    public static Angle ARM_ZERO_SETPOINT = Degrees.of(-0.076904);
   }
 
   public static class Serialization {
