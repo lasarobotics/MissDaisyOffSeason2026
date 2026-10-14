@@ -157,7 +157,6 @@ public class DriveSubsystem extends StateMachine {
                 new PIDController(BLine.TRANSLATION_KP, BLine.TRANSLATION_KI, BLine.TRANSLATION_KD),
                 new PIDController(BLine.ROTATION_KP, BLine.ROTATION_KI, BLine.ROTATION_KD),
                 new PIDController(BLine.CROSS_TRACK_KP, BLine.CROSS_TRACK_KI, BLine.CROSS_TRACK_KD))
-            .withPoseReset(this::resetPose)
             .withTRatioBasedTranslationHandoffs(true);
 
     m_autoChooser.setDefaultOption("Do Nothing", "nothing");
