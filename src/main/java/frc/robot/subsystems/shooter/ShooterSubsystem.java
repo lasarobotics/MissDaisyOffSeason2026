@@ -17,19 +17,17 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -247,17 +245,29 @@ public class ShooterSubsystem extends StateMachine {
     m_hoodRequest = new MotionMagicVoltage(0);
     m_turretRequest = new MotionMagicVoltage(0);
 
-    m_shooterFollower.setControl(
-        new Follower(m_shooterLeader.getDeviceID(), MotorAlignmentValue.Opposed));
-    TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
-    shooterConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    final TalonFXConfiguration shooterConfig =
+        new TalonFXConfiguration()
+            .withSlot0(new Slot0Configs().withKP(0.4).withKS(0.19).withKV(0.11749999970197678))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicExpo_kV(
+                        Volts.per(RotationsPerSecond).ofNative(0.119999997317791))
+                    .withMotionMagicExpo_kA(
+                        Volts.per(RotationsPerSecondPerSecond).ofNative(0.10000000149011612)));
 
-    TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
-    hoodConfig.Slot0.withKP(0.55).withKI(0).withKD(0.01).withKS(0.2).withKV(0.1);
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    final TalonFXConfiguration hoodConfig =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(Amps.of(50))
+                    .withSupplyCurrentLimit(Amps.of(30)))
+            .withSlot0(new Slot0Configs().withKP(150).withKS(0.240234375))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(133.6888885498047))
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(Rotations.of(0.07500000298023224))
+                    .withReverseSoftLimitEnable(true));
 
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
@@ -426,7 +436,9 @@ public class ShooterSubsystem extends StateMachine {
       m_desiredHoodPosition = Degrees.of(0);
       return Degrees.of(0);
     }
-    Angle hoodAngle = Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel))).minus(Constants.Shooter.HOOD_ZERO_ANGLE);
+    Angle hoodAngle =
+        Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel)))
+            .minus(Constants.Shooter.HOOD_ZERO_ANGLE);
     m_desiredHoodPosition = hoodAngle;
     return hoodAngle;
   }
