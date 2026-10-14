@@ -8,12 +8,11 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
@@ -85,8 +84,9 @@ public class SerializationSubsystem extends StateMachine {
     m_velocityVoltage = new VelocityVoltage(0);
 
     m_omniMotor = new TalonFX(Constants.Serialization.OMNI_CAN_ID);
-    m_mecanumMotorLeader = new TalonFX(Constants.Serialization.MECANUM_LEADER_CAN_ID);
-    m_mecanumMotorFollower = new TalonFX(Constants.Serialization.MECANUM_FOLLOWER_CAN_ID);
+    // TODO TODO TODO (TIKI TIKI TIKI)
+    m_mecanumMotorLeader = new TalonFX(Constants.Serialization.MECANUM_FOLLOWER_CAN_ID);
+    m_mecanumMotorFollower = new TalonFX(Constants.Serialization.MECANUM_LEADER_CAN_ID);
 
     TalonFXConfiguration omniConfig =
         new TalonFXConfiguration()
@@ -108,8 +108,8 @@ public class SerializationSubsystem extends StateMachine {
     m_mecanumMotorLeader.getConfigurator().apply(mecanumConfig);
     m_mecanumMotorFollower.getConfigurator().apply(mecanumConfig);
 
-    m_mecanumMotorFollower.setControl(
-        new Follower(m_mecanumMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    // m_mecanumMotorFollower.setControl(
+    //     new Follower(m_mecanumMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   public void setState(SerializationStates state) {
@@ -131,12 +131,15 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   public void restMecanum() {
+    // getInstance()
+    //     .m_mecanumMotorLeader
+    //     .setControl(
+    //         getInstance()
+    //             .m_velocityVoltage
+    //             .withVelocity(Constants.Serialization.MECANUM_REST_SPEED));
     getInstance()
         .m_mecanumMotorLeader
-        .setControl(
-            getInstance()
-                .m_velocityVoltage
-                .withVelocity(Constants.Serialization.MECANUM_REST_SPEED));
+        .setVoltage(Constants.Serialization.MECANUM_VOLTAGE.magnitude());
   }
 
   public void activateOmni(boolean reverse) {
@@ -145,10 +148,10 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   public void activateMecanum(boolean reverse) {
-    AngularVelocity speed = Constants.Serialization.MECANUM_SPEED.get().times(reverse ? -1 : 1);
-    getInstance()
-        .m_mecanumMotorLeader
-        .setControl(getInstance().m_velocityVoltage.withVelocity(speed));
+    // AngularVelocity speed = Constants.Serialization.MECANUM_SPEED.get().times(reverse ? -1 : 1);
+    Voltage voltage = Constants.Serialization.MECANUM_VOLTAGE.times(reverse ? -1 : 1);
+    getInstance().m_mecanumMotorLeader.setVoltage(voltage.magnitude());
+    ;
   }
 
   @Override

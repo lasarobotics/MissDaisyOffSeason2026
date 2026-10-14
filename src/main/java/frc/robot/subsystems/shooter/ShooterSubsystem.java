@@ -25,6 +25,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -220,7 +221,7 @@ public class ShooterSubsystem extends StateMachine {
   private CANcoder m_encoderTwo;
 
   private VelocityVoltage m_shooterRequest;
-  private MotionMagicVoltage m_hoodRequest;
+  private PositionVoltage m_hoodRequest;
   private MotionMagicVoltage m_turretRequest;
 
   private TalonFX m_turretMotor;
@@ -242,7 +243,7 @@ public class ShooterSubsystem extends StateMachine {
     m_encoderTwo = new CANcoder(Constants.Shooter.ENCODER_TWO_ID);
 
     m_shooterRequest = new VelocityVoltage(0);
-    m_hoodRequest = new MotionMagicVoltage(0);
+    m_hoodRequest = new PositionVoltage(0);
     m_turretRequest = new MotionMagicVoltage(0);
 
     final TalonFXConfiguration shooterConfig =

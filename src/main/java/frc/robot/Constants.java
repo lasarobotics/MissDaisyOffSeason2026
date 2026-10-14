@@ -63,11 +63,10 @@ public final class Constants {
     public static final int LEADER_CAN_ID = 31;
     public static final int FOLLOWER_CAN_ID = 32;
 
-    // TODO determine
+    // TODO update w/ bumpers
     public static final Angle ARM_STOW_SETPOINT = Degrees.of(0.0);
-    public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.0);
+    public static final Angle ARM_DEPLOY_SETPOINT = Degrees.of(0.3);
 
-    // TODO determine: what the angle of the arm should be on startup, assuming
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(-0.076904);
 
@@ -79,8 +78,8 @@ public final class Constants {
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(30.0);
     public static final double ZEROING_DELAY = 0.2;
-    // TODO determine
-    public static Angle ARM_ZERO_SETPOINT = Rotations.of(0.0);
+    // TODO update w/ bumpers
+    public static Angle ARM_ZERO_SETPOINT = Rotations.of(0.3339);
   }
 
   public static class Serialization {
@@ -92,6 +91,9 @@ public final class Constants {
     public static final LoggedNetworkNumber BALL_SPEED_INCREASER =
         new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.1);
 
+    // TODO update once both motors are attached
+    public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25);
+    // about 29.4rot/s w/ ballspeedincreaser at 0.1
     public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
           return RotationsPerSecond.of(
