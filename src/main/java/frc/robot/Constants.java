@@ -137,9 +137,9 @@ public final class Constants {
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
         new LoggedNetworkNumber("/Tuning/maxBallYPos", 2.6);
 
-    public static final Angle TURRET_ALLOWED_ERROR = Degrees.of(2);
-    public static final Angle HOOD_ALLOWED_ERROR = Degrees.of(2);
-    public static final AngularVelocity SHOOTER_ALLOWED_ERROR = RotationsPerSecond.of(2);
+    public static final Angle TURRET_ALLOWED_ERROR = Degrees.of(4);
+    public static final Angle HOOD_ALLOWED_ERROR = Degrees.of(4);
+    public static final AngularVelocity SHOOTER_ALLOWED_ERROR = RotationsPerSecond.of(4);
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(-3.0);
     // TODO check sign on zero threshold
@@ -148,9 +148,9 @@ public final class Constants {
     public static Angle HOOD_ZERO_SETPOINT = Degrees.of(0.0);
 
     public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
-        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 7.5);
+        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 6.5);
     public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
-        new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", 1.0);
+        new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
   }
 
   public static class Field {
@@ -161,21 +161,31 @@ public final class Constants {
     public static final double HUB_WIDTH = Inches.of(47).in(Meters);
     public static final double AZ_DEPTH = Inches.of(158.6).in(Meters);
 
+    // dumb hack
     public static final Translation3d BLUE_HUB_POS =
-        new Translation3d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT.magnitude());
+        new Translation3d(
+            AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y - 0.3, Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d RED_HUB_POS =
         new Translation3d(
             FIELD_X.in(Meters) - AZ_DEPTH - HUB_WIDTH / 2,
-            NZ_MID_LINE_Y,
+            NZ_MID_LINE_Y - 0.3,
             Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d BLUE_LEFT_BUMP =
         new Translation3d(BLUE_HUB_POS.getX(), 6.03, 0);
+    public static final Translation3d BLUE_LEFT_PASS =
+        new Translation3d(BLUE_HUB_POS.getX() - 3, 6.03, 0);
     public static final Translation3d BLUE_RIGHT_BUMP =
         new Translation3d(BLUE_HUB_POS.getX(), 2.01, 0);
+    public static final Translation3d BLUE_RIGHT_PASS =
+        new Translation3d(BLUE_HUB_POS.getX() - 3, 2.01, 0);
     public static final Translation3d RED_LEFT_BUMP =
         new Translation3d(RED_HUB_POS.getX(), 2.01, 0);
+    public static final Translation3d RED_LEFT_PASS =
+        new Translation3d(RED_HUB_POS.getX() + 3, 2.01, 0);
     public static final Translation3d RED_RIGHT_BUMP =
         new Translation3d(RED_HUB_POS.getX(), 6.03, 0);
+    public static final Translation3d RED_RIGHT_PASS =
+        new Translation3d(RED_HUB_POS.getX() + 3, 6.03, 0);
 
     public static final double NZ_RED_X = RED_HUB_POS.getX();
     public static final double NZ_BLUE_X = BLUE_HUB_POS.getX();

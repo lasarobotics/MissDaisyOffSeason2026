@@ -248,7 +248,7 @@ public class ShooterSubsystem extends StateMachine {
 
     final TalonFXConfiguration shooterConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(0.4).withKS(0.19).withKV(0.11749999970197678))
+            .withSlot0(new Slot0Configs().withKP(0.42).withKS(0.19).withKV(0.11749999970197678))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicExpo_kV(
@@ -262,7 +262,7 @@ public class ShooterSubsystem extends StateMachine {
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(50))
                     .withSupplyCurrentLimit(Amps.of(30)))
-            .withSlot0(new Slot0Configs().withKP(150).withKS(0.240234375))
+            .withSlot0(new Slot0Configs().withKP(160).withKS(0.240234375))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(133.6888885498047))
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
@@ -272,7 +272,7 @@ public class ShooterSubsystem extends StateMachine {
 
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(75).withKS(0.2197265625))
+            .withSlot0(new Slot0Configs().withKP(80).withKS(0.2197265625))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(46))
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
@@ -315,6 +315,9 @@ public class ShooterSubsystem extends StateMachine {
     m_encoderOne.getAbsolutePosition().setUpdateFrequency(100);
     m_encoderTwo.getAbsolutePosition().setUpdateFrequency(100);
 
+    m_desiredHoodPosition = Rotations.of(0);
+    m_desiredTurretPosition = Rotations.of(0);
+
     new Thread(
             () -> {
               try {
@@ -337,6 +340,8 @@ public class ShooterSubsystem extends StateMachine {
               }
             })
         .start();
+
+    m_hoodMotor.setPosition(0.0);
   }
 
   public static ShooterSubsystem getInstance() {
@@ -371,7 +376,10 @@ public class ShooterSubsystem extends StateMachine {
   public boolean hoodAtPosition() {
     return m_hoodMotor
         .getPosition()
-        .isNear(getDesiredHoodPos(), Constants.Shooter.HOOD_ALLOWED_ERROR);
+        .getValue()
+        .isNear(
+            Rotations.of(m_hoodMotor.getClosedLoopError().getValue()),
+            Constants.Shooter.HOOD_ALLOWED_ERROR);
   }
 
   public boolean shooterAtSpeed() {
@@ -389,18 +397,18 @@ public class ShooterSubsystem extends StateMachine {
         return Constants.Field.BLUE_HUB_POS;
       } else {
         if (DriveSubsystem.getInstance().getPose().getY() < Constants.Field.NZ_MID_LINE_Y) {
-          return Constants.Field.BLUE_RIGHT_BUMP;
+          return Constants.Field.BLUE_RIGHT_PASS;
         }
-        return Constants.Field.BLUE_LEFT_BUMP;
+        return Constants.Field.BLUE_LEFT_PASS;
       }
     } else {
       if (inAZ()) {
         return Constants.Field.RED_HUB_POS;
       } else {
         if (DriveSubsystem.getInstance().getPose().getY() < Constants.Field.NZ_MID_LINE_Y) {
-          return Constants.Field.RED_LEFT_BUMP;
+          return Constants.Field.RED_LEFT_PASS;
         }
-        return Constants.Field.RED_RIGHT_BUMP;
+        return Constants.Field.RED_RIGHT_PASS;
       }
     }
   }
@@ -439,13 +447,14 @@ public class ShooterSubsystem extends StateMachine {
     }
     Angle hoodAngle =
         Radians.of(((Math.PI / 2) - Math.atan2(y_vel, x_vel)))
-            .minus(Constants.Shooter.HOOD_ZERO_ANGLE);
+            .minus(Constants.Shooter.HOOD_ZERO_ANGLE)
+            .plus(Degrees.of(Constants.Shooter.HOOD_FUDGE_FACTOR.getAsDouble()));
     m_desiredHoodPosition = hoodAngle;
     return hoodAngle;
   }
 
   private Angle getDesiredHoodPos() {
-    return m_desiredHoodPosition.plus(Degrees.of(Constants.Shooter.HOOD_FUDGE_FACTOR.getAsDouble()));
+    return m_desiredHoodPosition;
   }
 
   private void setHoodPos(Angle hoodPos) {
@@ -457,7 +466,9 @@ public class ShooterSubsystem extends StateMachine {
     // 4/3 is because there's two wheels of different sizes
     // This is hardcoded based on the physical robot, but that's not changing
     // so it's not really worth programming the math
-    double desiredRPS = (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI) + Constants.Shooter.FLYWHEEL_FUDGE_FACTOR.getAsDouble();
+    double desiredRPS =
+        (shootSpeed * 4 / 3) / (Inches.of(4).in(Meters) * Math.PI)
+            + Constants.Shooter.FLYWHEEL_FUDGE_FACTOR.getAsDouble();
     return desiredRPS;
   }
 
@@ -697,7 +708,8 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean isReadyToShoot() {
-    return m_readytoShoot;
+    return true;
+    //  return m_readytoShoot;
   }
 
   @Override
@@ -714,6 +726,9 @@ public class ShooterSubsystem extends StateMachine {
             DriveSubsystem.getInstance().getPose().getRotation()));
     Logger.recordOutput("ShooterSubsystem/UnderTrench", robotCrossTrench());
     Logger.recordOutput("ShooterSubsystem/isReadyToShoot", isReadyToShoot());
+    Logger.recordOutput("ShooterSubsystem/hoodAtPosition", hoodAtPosition());
+    Logger.recordOutput("ShooterSubsystem/turretAtPosition", turretAtPosition());
+    Logger.recordOutput("ShooterSubsystem/shooterAtSpeed", shooterAtSpeed());
     Logger.recordOutput("ShooterSubsystem/hoodPosition", m_hoodMotor.getPosition().getValue());
     Logger.recordOutput(
         "ShooterSubsystem/hoodTarget", m_hoodMotor.getClosedLoopReference().getValue());
