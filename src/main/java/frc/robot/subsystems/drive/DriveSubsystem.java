@@ -386,7 +386,7 @@ public class DriveSubsystem extends StateMachine {
     LimelightHelpers.setCameraPose_RobotSpace(
         Constants.Limelight.LIMELIGHT_NAME,
         robotSpaceX,
-        robotSpaceY,
+        -robotSpaceY,
         robotSpaceZ,
         Constants.Limelight.CAMERA_ROLL.in(Degrees),
         Constants.Limelight.CAMERA_PITCH.in(Degrees),
