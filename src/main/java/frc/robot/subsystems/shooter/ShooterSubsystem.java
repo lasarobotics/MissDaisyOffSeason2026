@@ -27,6 +27,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -73,7 +74,11 @@ public class ShooterSubsystem extends StateMachine {
         getInstance().m_readytoShoot = false;
         getInstance().m_shooterLeader.stopMotor();
 
-        getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
+        getInstance()
+            .m_hoodMotor
+            .setControl(
+                new VoltageOut(Constants.Shooter.ZERO_VOLTAGE.in(Volts))
+                    .withIgnoreSoftwareLimits(true));
         getInstance().setTurretPos(getInstance().getTurretPosition());
         turretUpdateThread =
             new Thread(
