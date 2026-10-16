@@ -147,5 +147,10 @@ public class SerializationSubsystem extends StateMachine {
   @Override
   public void periodic() {
     Logger.recordOutput("SerializationSubsystem/State", getState().toString());
+    Logger.recordOutput(
+        "SerializationSubsystem/omniCurrent", m_omniMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "SerializationSubsystem/mecanumCurrent",
+        m_mecanumMotorLeader.getStatorCurrent().getValueAsDouble());
   }
 }

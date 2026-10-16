@@ -154,20 +154,21 @@ public class ShooterSubsystem extends StateMachine {
                         2 * (Constants.Shooter.MAX_BALL_Y_POS.getAsDouble() - target.getZ())))
                 / Math.sqrt(Constants.Field.GRAVITY_VALUE));
 
-        Translation2d robotPose =
-            getInstance()
-                .transformByTangentialRotationSpeed(
-                    getInstance()
-                        .getFuturePose(
-                            DriveSubsystem.getInstance()
-                                .getPose()
-                                .transformBy(
-                                    new Transform2d(
-                                        Constants.Shooter.SHOOTER_OFFSET_X,
-                                        Constants.Shooter.SHOOTER_OFFSET_Y,
-                                        new Rotation2d(0))),
-                            hangTime),
-                    hangTime);
+        // Translation2d robotPose =
+        //     getInstance()
+        //         .transformByTangentialRotationSpeed(
+        //             getInstance()
+        //                 .getFuturePose(
+        //                     DriveSubsystem.getInstance()
+        //                         .getPose()
+        //                         .transformBy(
+        //                             new Transform2d(
+        //                                 Constants.Shooter.SHOOTER_OFFSET_X,
+        //                                 Constants.Shooter.SHOOTER_OFFSET_Y,
+        //                                 new Rotation2d(0))),
+        //                     hangTime),
+        //             hangTime);
+        Translation2d robotPose = DriveSubsystem.getInstance().getPose().getTranslation();
 
         Translation2d targetDiff = target.toTranslation2d().minus(robotPose);
         double distance = targetDiff.getNorm();
@@ -265,13 +266,7 @@ public class ShooterSubsystem extends StateMachine {
 
     final TalonFXConfiguration shooterConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(0.42).withKS(0.19).withKV(0.11749999970197678))
-            .withMotionMagic(
-                new MotionMagicConfigs()
-                    .withMotionMagicExpo_kV(
-                        Volts.per(RotationsPerSecond).ofNative(0.119999997317791))
-                    .withMotionMagicExpo_kA(
-                        Volts.per(RotationsPerSecondPerSecond).ofNative(0.10000000149011612)));
+            .withSlot0(new Slot0Configs().withKP(0.42).withKS(0.19).withKV(0.11749999970197678));
 
     final TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
@@ -757,5 +752,11 @@ public class ShooterSubsystem extends StateMachine {
     Logger.recordOutput("ShooterSubsystem/turretPosition", m_turretMotor.getPosition().getValue());
     Logger.recordOutput(
         "ShooterSubsystem/turretTarget", m_turretMotor.getClosedLoopReference().getValue());
+    Logger.recordOutput(
+        "ShooterSubsystem/hoodCurrent", m_hoodMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "ShooterSubsystem/shooterCurrent", m_shooterLeader.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "ShooterSubsystem/turretCurrent", m_turretMotor.getStatorCurrent().getValueAsDouble());
   }
 }

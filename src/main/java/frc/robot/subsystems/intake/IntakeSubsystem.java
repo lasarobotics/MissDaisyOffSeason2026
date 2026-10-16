@@ -232,5 +232,7 @@ public class IntakeSubsystem extends StateMachine {
     Logger.recordOutput("IntakeSubsystem/armPosition", m_armMotor.getPosition().getValue());
     Logger.recordOutput(
         "IntakeSubsystem/armTarget", m_armMotor.getClosedLoopReference().getValue());
+    Logger.recordOutput(
+        "IntakeSubsystem/rollerCurrent", m_intakeMotorLeader.getStatorCurrent().getValueAsDouble());
   }
 }
