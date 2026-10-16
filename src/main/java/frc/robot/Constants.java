@@ -143,10 +143,10 @@ public final class Constants {
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(-3.0);
     // TODO check sign on zero threshold
-    public static final Current ZERO_THRESHOLD = Amps.of(-35);
+    public static final Current ZERO_THRESHOLD = Amps.of(-50);
     public static final double ZEROING_DELAY = 0.2;
     public static Angle HOOD_ZERO_SETPOINT =
-        Degrees.of(0.0); // TODO figure out what this is when hoodPosition is .002
+        Rotations.of(-0.002);
 
     public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 6.5);
