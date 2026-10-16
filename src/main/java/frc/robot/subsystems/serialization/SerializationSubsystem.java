@@ -132,7 +132,7 @@ public class SerializationSubsystem extends StateMachine {
     getInstance().m_mecanumMotorLeader.stopMotor();
     m_mecanumMotorFollower.stopMotor();
   }
-
+  
   public void activateOmni(boolean reverse) {
     AngularVelocity speed = Constants.Serialization.OMNI_SPEED.get().times(reverse ? -1 : 1);
     getInstance().m_omniMotor.setControl(getInstance().m_velocityVoltage.withVelocity(speed));
