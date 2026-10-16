@@ -63,9 +63,8 @@ public final class Constants {
     public static final int LEADER_CAN_ID = 31;
     public static final int FOLLOWER_CAN_ID = 32;
 
-    // TODO update w/ bumpers
-    public static final Angle ARM_STOW_SETPOINT = Rotations.of(0.0);
-    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.28);
+    public static final Angle ARM_STOW_SETPOINT = Rotations.of(0.033966);
+    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.269);
 
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(-0.076904);
@@ -77,10 +76,9 @@ public final class Constants {
                 / (Math.PI * INTAKE_ROLLER_DIAMETER.in(Meters)));
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
-    public static final Current ZERO_THRESHOLD = Amps.of(30.0);
+    public static final Current ZERO_THRESHOLD = Amps.of(69.0);
     public static final double ZEROING_DELAY = 0.2;
-    // TODO update w/ bumpers
-    public static Angle ARM_ZERO_SETPOINT = Rotations.of(0.3339);
+    public static Angle ARM_ZERO_SETPOINT = Rotations.of(0.295166);
   }
 
   public static class Serialization {
@@ -145,8 +143,7 @@ public final class Constants {
     // TODO check sign on zero threshold
     public static final Current ZERO_THRESHOLD = Amps.of(-50);
     public static final double ZEROING_DELAY = 0.2;
-    public static Angle HOOD_ZERO_SETPOINT =
-        Rotations.of(-0.002);
+    public static Angle HOOD_ZERO_SETPOINT = Rotations.of(-0.002);
 
     public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 6.5);
