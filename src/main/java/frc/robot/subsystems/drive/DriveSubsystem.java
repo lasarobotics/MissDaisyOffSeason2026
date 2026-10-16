@@ -163,8 +163,10 @@ public class DriveSubsystem extends StateMachine {
             .withTRatioBasedTranslationHandoffs(true);
 
     m_autoChooser.setDefaultOption("Do Nothing", "nothing");
-
-    m_autoChooser.addOption("BLine Test", "test");
+    m_autoChooser.addOption("BLine Test", "left_depot_full_sweep");
+    m_autoChooser.addOption("BLine Test", "left_depot_half_sweep");
+    m_autoChooser.addOption("BLine Test", "left_full_sweep");
+    m_autoChooser.addOption("BLine Test", "left_half_sweep");
 
     SmartDashboard.putData("Autonomous", m_autoChooser);
 
@@ -241,14 +243,13 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public Command followBLinePath(Path path) {
-
     return m_blinePathBuilder.build(path);
   }
 
   public Command getAutonomousCommand() {
     Path path = new Path(m_autoChooser.getSelected());
 
-    boolean flip = SmartDashboard.getBoolean("shouldFlip", false);
+    boolean flip = SmartDashboard.getBoolean("shouldFlipAlliance", false);
     boolean mirror = SmartDashboard.getBoolean("shouldMirror", false);
 
     if (flip) {
@@ -372,7 +373,7 @@ public class DriveSubsystem extends StateMachine {
     updateTurretLimelightPose();
 
     if (m_resetGyroButton.getAsBoolean()) {
-        m_driveTrain.seedFieldCentric(Rotation2d.kZero);
+      m_driveTrain.seedFieldCentric(Rotation2d.kZero);
     }
   }
 
