@@ -29,6 +29,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -126,6 +127,7 @@ public class DriveSubsystem extends StateMachine {
   private final SendableChooser<String> m_autoChooser = new SendableChooser<>();
 
   private BooleanSupplier m_resetGyroButton;
+  private final Field2d m_field;
 
   public DriveSubsystem() {
 
@@ -163,15 +165,18 @@ public class DriveSubsystem extends StateMachine {
             .withTRatioBasedTranslationHandoffs(true);
 
     m_autoChooser.setDefaultOption("Do Nothing", "nothing");
-    m_autoChooser.addOption("BLine Test", "left_depot_full_sweep");
-    m_autoChooser.addOption("BLine Test", "left_depot_half_sweep");
-    m_autoChooser.addOption("BLine Test", "left_full_sweep");
-    m_autoChooser.addOption("BLine Test", "left_half_sweep");
+    m_autoChooser.addOption("Left Depot Full Sweep", "left_depot_full_sweep");
+    m_autoChooser.addOption("Left Depot Half Sweep", "left_depot_half_sweep");
+    m_autoChooser.addOption("Left Full Sweep", "left_full_sweep");
+    m_autoChooser.addOption("Left Half Sweep", "left_half_sweep");
 
     SmartDashboard.putData("Autonomous", m_autoChooser);
 
-    SmartDashboard.putBoolean("shouldFlip", shouldFlip);
+    SmartDashboard.putBoolean("shouldFlipAlliance", shouldFlip);
     SmartDashboard.putBoolean("shouldMirror", shouldMirror);
+
+    m_field = new Field2d();
+    SmartDashboard.putData("Field", m_field);
 
     s_limelightHeartbeat = new HashMap<>();
     s_limelightHeartbeat.put(Constants.Limelight.LIMELIGHT_NAME, 0.0);
@@ -368,6 +373,7 @@ public class DriveSubsystem extends StateMachine {
   public void periodic() {
     Logger.recordOutput("DriveSubsystem/Pose", m_driveTrain.getState().Pose);
     Logger.recordOutput("DriveSubsystem/State", getInstance().m_driveState);
+    m_field.setRobotPose(getPose());
 
     m_driveTrain.periodic();
     updateTurretLimelightPose();
