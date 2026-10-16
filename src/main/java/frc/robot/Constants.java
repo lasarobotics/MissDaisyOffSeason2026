@@ -93,7 +93,7 @@ public final class Constants {
         new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.1);
 
     // TODO update once both motors are attached
-    public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25).div(2);
+    public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25).div(1.5);
     // about 29.74rot/s w/ ballspeedincreaser at 0.1
     public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
@@ -143,9 +143,10 @@ public final class Constants {
 
     public static final Voltage ZERO_VOLTAGE = Volts.of(-3.0);
     // TODO check sign on zero threshold
-    public static final Current ZERO_THRESHOLD = Amps.of(-30.0);
+    public static final Current ZERO_THRESHOLD = Amps.of(-35);
     public static final double ZEROING_DELAY = 0.2;
-    public static Angle HOOD_ZERO_SETPOINT = Degrees.of(0.0);
+    public static Angle HOOD_ZERO_SETPOINT =
+        Degrees.of(0.0); // TODO figure out what this is when hoodPosition is .002
 
     public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 6.5);

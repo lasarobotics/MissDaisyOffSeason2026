@@ -54,7 +54,7 @@ public class ShooterSubsystem extends StateMachine {
       @Override
       public void initialize() {
         getInstance().m_readytoShoot = false;
-        getInstance().m_shooterLeader.setControl(getInstance().m_shooterRequest.withVelocity(0));
+        getInstance().m_shooterLeader.stopMotor();
         getInstance().m_hoodMotor.setControl(getInstance().m_hoodRequest.withPosition(0));
         getInstance().m_turretMotor.setControl(getInstance().m_turretRequest.withPosition(0));
       }
@@ -71,7 +71,7 @@ public class ShooterSubsystem extends StateMachine {
       @Override
       public void initialize() {
         getInstance().m_readytoShoot = false;
-        getInstance().setShooterSpeed(0);
+        getInstance().m_shooterLeader.stopMotor();
 
         getInstance().m_hoodMotor.setVoltage(Constants.Shooter.ZERO_VOLTAGE.in(Volts));
         getInstance().setTurretPos(getInstance().getTurretPosition());
@@ -105,9 +105,21 @@ public class ShooterSubsystem extends StateMachine {
 
       @Override
       public void execute() {
+        Logger.recordOutput(
+            "ShooterSubsystem/Current",
+            getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble());
+        Logger.recordOutput(
+            "ShooterSubsystem/ResetCurrent", Constants.Shooter.ZERO_THRESHOLD.in(Amps));
+        Logger.recordOutput(
+            "ShooterSubsystem/atZeroThreshold",
+            getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
+                <= Constants.Shooter.ZERO_THRESHOLD.in(Amps));
+        Logger.recordOutput(
+            "ShooterSubsystem/hoodVoltage",
+            getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble());
         if (zeroTimer.hasElapsed(Constants.Shooter.ZEROING_DELAY)
             && getInstance().m_hoodMotor.getTorqueCurrent().getValueAsDouble()
-                >= Constants.Shooter.ZERO_THRESHOLD.in(Amps)
+                <= Constants.Shooter.ZERO_THRESHOLD.in(Amps)
             && !turretUpdateThread.isAlive()) {
           getInstance().m_hoodMotor.setPosition(Constants.Shooter.HOOD_ZERO_SETPOINT);
           getInstance().setState(ShooterStates.OFF);
@@ -715,6 +727,7 @@ public class ShooterSubsystem extends StateMachine {
   @Override
   public void periodic() {
     m_blueAlliance = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+    Logger.recordOutput("ShooterSubsystem/State", getState().toString());
     Logger.recordOutput("ShooterSubsystem/InNZ", inNZ());
     Logger.recordOutput("ShooterSubsystem/InAZ", inAZ());
     Logger.recordOutput("ShooterSubsystem/Target", getTarget());

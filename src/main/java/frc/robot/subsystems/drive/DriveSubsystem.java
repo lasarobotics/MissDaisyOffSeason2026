@@ -46,6 +46,7 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -123,6 +124,8 @@ public class DriveSubsystem extends StateMachine {
       new SwerveRequest.ApplyRobotSpeeds();
   private final FollowPath.Builder m_blinePathBuilder;
   private final SendableChooser<String> m_autoChooser = new SendableChooser<>();
+
+  private BooleanSupplier m_resetGyroButton;
 
   public DriveSubsystem() {
 
@@ -202,10 +205,14 @@ public class DriveSubsystem extends StateMachine {
   }
 
   public void configureBindings(
-      DoubleSupplier driveRequest, DoubleSupplier strafeRequest, DoubleSupplier rotateRequest) {
+      DoubleSupplier driveRequest,
+      DoubleSupplier strafeRequest,
+      DoubleSupplier rotateRequest,
+      BooleanSupplier resetGyroButton) {
     m_driveRequest = driveRequest;
     m_strafeRequest = strafeRequest;
     m_rotateRequest = rotateRequest;
+    m_resetGyroButton = resetGyroButton;
   }
 
   public void setState(DriveStates driveState) {
@@ -363,6 +370,10 @@ public class DriveSubsystem extends StateMachine {
 
     m_driveTrain.periodic();
     updateTurretLimelightPose();
+
+    if (m_resetGyroButton.getAsBoolean()) {
+        m_driveTrain.seedFieldCentric(Rotation2d.kZero);
+    }
   }
 
   private void updateTurretLimelightPose() {

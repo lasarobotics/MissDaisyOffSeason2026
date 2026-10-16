@@ -52,7 +52,7 @@ public class IntakeSubsystem extends StateMachine {
 
       @Override
       public void initialize() {
-        getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE.in(Volts));
+        // getInstance().m_armMotor.setVoltage(Constants.Intake.ZERO_VOLTAGE.in(Volts));
         zeroTimer.reset();
         zeroTimer.start();
         getInstance().stopIntake();
@@ -60,12 +60,12 @@ public class IntakeSubsystem extends StateMachine {
 
       @Override
       public void execute() {
-        if (zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
-            && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
-                >= Constants.Intake.ZERO_THRESHOLD.in(Amps)) {
-          getInstance().m_armMotor.setPosition(Constants.Intake.ARM_ZERO_SETPOINT);
-          getInstance().setState(IntakeStates.REST);
-        }
+        // if (zeroTimer.hasElapsed(Constants.Intake.ZEROING_DELAY)
+        //     && getInstance().m_armMotor.getTorqueCurrent().getValueAsDouble()
+        //         >= Constants.Intake.ZERO_THRESHOLD.in(Amps)) {
+        //   getInstance().m_armMotor.setPosition(Constants.Intake.ARM_ZERO_SETPOINT);
+           getInstance().setState(IntakeStates.REST);
+        // }
       }
 
       @Override

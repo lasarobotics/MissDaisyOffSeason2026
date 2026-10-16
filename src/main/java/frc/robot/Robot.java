@@ -55,7 +55,8 @@ public class Robot extends LoggedRobot {
         .configureBindings(
             () -> m_controller.getLeftY(),
             () -> m_controller.getLeftX(),
-            () -> m_controller.getRightX());
+            () -> m_controller.getRightX(),
+            m_controller.start());
   }
 
   public static void setZeroToggle(boolean value) {
