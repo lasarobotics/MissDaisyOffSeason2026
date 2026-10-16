@@ -182,6 +182,8 @@ public class ShooterSubsystem extends StateMachine {
           return;
         }
 
+        Logger.recordOutput("ShooterSubsystem/translation2dTarget", target.toTranslation2d());
+
         getInstance()
             .setTurretPos(
                 getInstance()
@@ -217,10 +219,10 @@ public class ShooterSubsystem extends StateMachine {
                     .getPose()
                     .getRotation()
                     .plus(
-                        Rotation2d.fromDegrees(getInstance().getDesiredTurretPos().in(Degrees))
-                            .minus(
-                                Rotation2d.fromDegrees(
-                                    getInstance().getTurretPosition().in(Degrees))))));
+                        Rotation2d.fromDegrees(
+                            Constants.Shooter.SHOOTER_ROTATION_OFFSET
+                                .plus(getInstance().getTurretPosition())
+                                .in(Degrees)))));
       }
 
       @Override

@@ -133,7 +133,7 @@ public final class Constants {
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
-        new LoggedNetworkNumber("/Tuning/maxBallYPos", 2.6);
+        new LoggedNetworkNumber("/Tuning/maxBallYPos", 3);
 
     public static final Angle TURRET_ALLOWED_ERROR = Degrees.of(4);
     public static final Angle HOOD_ALLOWED_ERROR = Degrees.of(4);
@@ -146,7 +146,7 @@ public final class Constants {
     public static Angle HOOD_ZERO_SETPOINT = Rotations.of(-0.002);
 
     public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
-        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 6.5);
+        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 5.8);
     public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
   }
@@ -162,7 +162,7 @@ public final class Constants {
     // dumb hack
     public static final Translation3d BLUE_HUB_POS =
         new Translation3d(
-            AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y - .2, Shooter.HUB_HEIGHT.magnitude());
+            AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y + .2, Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d RED_HUB_POS =
         new Translation3d(
             FIELD_X.in(Meters) - AZ_DEPTH - HUB_WIDTH / 2,
