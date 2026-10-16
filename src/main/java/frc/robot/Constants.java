@@ -161,11 +161,12 @@ public final class Constants {
 
     // dumb hack
     public static final Translation3d BLUE_HUB_POS =
-        new Translation3d(AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y, Shooter.HUB_HEIGHT.magnitude());
+        new Translation3d(
+            AZ_DEPTH + HUB_WIDTH / 2, NZ_MID_LINE_Y - .2, Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d RED_HUB_POS =
         new Translation3d(
             FIELD_X.in(Meters) - AZ_DEPTH - HUB_WIDTH / 2,
-            NZ_MID_LINE_Y,
+            NZ_MID_LINE_Y + .2,
             Shooter.HUB_HEIGHT.magnitude());
     public static final Translation3d BLUE_LEFT_BUMP =
         new Translation3d(BLUE_HUB_POS.getX(), 6.03, 0);
