@@ -64,7 +64,7 @@ public final class Constants {
     public static final int FOLLOWER_CAN_ID = 32;
 
     public static final Angle ARM_STOW_SETPOINT = Rotations.of(0.033966);
-    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.269);
+    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.274);
 
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(-0.076904);
@@ -78,7 +78,7 @@ public final class Constants {
     public static final Voltage ZERO_VOLTAGE = Volts.of(3.0);
     public static final Current ZERO_THRESHOLD = Amps.of(69.0);
     public static final double ZEROING_DELAY = 0.2;
-    public static Angle ARM_ZERO_SETPOINT = Rotations.of(0.295166);
+    public static Angle ARM_ZERO_SETPOINT = Rotations.of(0.300166);
   }
 
   public static class Serialization {
@@ -93,7 +93,7 @@ public final class Constants {
     // TODO update once both motors are attached
     public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25).div(1.5);
     // about 29.74rot/s w/ ballspeedincreaser at 0.1
-    public static final Supplier<AngularVelocity> MECANUM_SPEED =
+      public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
           return RotationsPerSecond.of(
               (Drive.MAX_SPEED.div(1.5).in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
@@ -102,7 +102,7 @@ public final class Constants {
     public static final Supplier<AngularVelocity> OMNI_SPEED =
         () -> {
           return RotationsPerSecond.of(
-              (Drive.MAX_SPEED.div(1.5).in(MetersPerSecond)
+              (Drive.MAX_SPEED.times(1.2).in(MetersPerSecond)
                       + 2 * BALL_SPEED_INCREASER.getAsDouble())
                   / (Math.PI * OMNI_WHEEL_DIAMETER.in(Meters)));
         };
