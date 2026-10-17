@@ -122,6 +122,8 @@ public final class Constants {
     public static final double CRT_EPSILON = 0.005;
     public static final Distance SHOOTER_OFFSET_X = Inches.of(-4);
     public static final Distance SHOOTER_OFFSET_Y = Inches.of(-3);
+    public static final Angle TURRET_FORWARD_LIMIT = Rotations.of(0.6);
+    public static final Angle TURRET_BACKWARD_LIMIT = Rotations.of(-0.55);
     // shooter 0 degrees is half a rotation from robot front
     public static final Angle SHOOTER_ROTATION_OFFSET = Rotations.of(0.5);
     public static final Distance SHOOTER_OFFSET_RADIUS =

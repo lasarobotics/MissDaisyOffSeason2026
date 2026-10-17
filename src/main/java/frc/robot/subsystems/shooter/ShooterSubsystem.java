@@ -31,7 +31,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -285,13 +284,13 @@ public class ShooterSubsystem extends StateMachine {
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
-                    .withForwardSoftLimitThreshold(Rotations.of(0.5))
+                    .withForwardSoftLimitThreshold(Rotations.of(0.6))
                     .withReverseSoftLimitEnable(true)
-                    .withReverseSoftLimitThreshold(Rotations.of(-0.5)))
+                    .withReverseSoftLimitThreshold(Rotations.of(-0.55)))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicCruiseVelocity(RotationsPerSecond.of(5))
-                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(5)));
+                    .withMotionMagicCruiseVelocity(RotationsPerSecond.of(6))
+                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(7)));
 
     CANcoderConfiguration encoderOneConfig =
         new CANcoderConfiguration()
@@ -425,15 +424,18 @@ public class ShooterSubsystem extends StateMachine {
     double yOffset = target.getY() - robotPose.getY();
     Angle angleToTarget =
         Radians.of(robotPose.getRotation().getRadians() - Math.atan2(yOffset, xOffset));
-    Angle turretDesired =
-        Radians.of(
-            MathUtil.angleModulus(
-                angleToTarget
-                    .times(-1)
-                    .plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET)
-                    .in(Radians)));
-    m_desiredTurretPosition = turretDesired;
-    return turretDesired;
+    Angle desiredAngle = angleToTarget.times(-1).plus(Constants.Shooter.SHOOTER_ROTATION_OFFSET);
+    while (desiredAngle.gt(Constants.Shooter.TURRET_FORWARD_LIMIT)
+        || desiredAngle.lt(Constants.Shooter.TURRET_BACKWARD_LIMIT)) {
+      if (desiredAngle.gt(Constants.Shooter.TURRET_FORWARD_LIMIT)) {
+        desiredAngle = desiredAngle.minus(Rotations.of(1));
+      }
+      if (desiredAngle.lt(Constants.Shooter.TURRET_BACKWARD_LIMIT)) {
+        desiredAngle = desiredAngle.plus(Rotations.of(1));
+      }
+    }
+    m_desiredTurretPosition = desiredAngle;
+    return desiredAngle;
   }
 
   private Angle getDesiredTurretPos() {
