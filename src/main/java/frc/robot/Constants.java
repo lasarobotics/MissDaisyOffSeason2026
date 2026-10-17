@@ -64,7 +64,7 @@ public final class Constants {
     public static final int FOLLOWER_CAN_ID = 32;
 
     public static final Angle ARM_STOW_SETPOINT = Rotations.of(0.033966);
-    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.274);
+    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.281);
 
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(-0.076904);
@@ -148,11 +148,12 @@ public final class Constants {
     public static Angle HOOD_ZERO_SETPOINT = Rotations.of(-0.002);
 
     public static final LoggedNetworkNumber FLYWHEEL_FUDGE_FACTOR =
-        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 5.8);
+        new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 7);
     public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
     public static final LoggedNetworkNumber SOTM_LATENCY =
-        new LoggedNetworkNumber("/Tuning/sotmLatency", 0.1);
+        new LoggedNetworkNumber("/Tuning/sotmLatency", 0.15);
+    public static final LoggedNetworkNumber TURRET_OMEGA_FEEDFORWARD = new LoggedNetworkNumber("/Tuning/turretOmegaFeedforward", 4.495);
   }
 
   public static class Field {

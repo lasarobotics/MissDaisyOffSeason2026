@@ -78,7 +78,7 @@ public class ShooterSubsystem extends StateMachine {
             .setControl(
                 new VoltageOut(Constants.Shooter.ZERO_VOLTAGE.in(Volts))
                     .withIgnoreSoftwareLimits(true));
-        getInstance().setTurretPos(getInstance().getTurretPosition());
+        getInstance().setTurretPos(getInstance().getTurretPosition(), RotationsPerSecond.of(0));
         turretUpdateThread =
             new Thread(
                 () -> {
@@ -168,6 +168,13 @@ public class ShooterSubsystem extends StateMachine {
             getInstance().transformByTangentialRotationSpeed(linearFuturePose, hangTime);
 
         // Translation2d robotPose = DriveSubsystem.getInstance().getPose().getTranslation();
+        AngularVelocity turretIdealOmega =
+            getInstance()
+                .getTurretIdealAngularVelocity(
+                    target.toTranslation2d(),
+                    new Pose2d(
+                        fullyTransformedPose,
+                        DriveSubsystem.getInstance().getPose().getRotation()));
 
         Translation2d targetDiff = target.toTranslation2d().minus(fullyTransformedPose);
         double distance = targetDiff.getNorm();
@@ -190,7 +197,8 @@ public class ShooterSubsystem extends StateMachine {
                         target.toTranslation2d(),
                         new Pose2d(
                             fullyTransformedPose,
-                            DriveSubsystem.getInstance().getPose().getRotation())));
+                            DriveSubsystem.getInstance().getPose().getRotation())),
+                turretIdealOmega);
         getInstance().setHoodPos(getInstance().updateDesiredHoodPos(x_vel, y_vel));
         getInstance().setShooterSpeed(getInstance().getShooterSpeed(x_vel, y_vel));
 
@@ -442,8 +450,59 @@ public class ShooterSubsystem extends StateMachine {
     return m_desiredTurretPosition;
   }
 
-  private void setTurretPos(Angle desiredPos) {
-    m_turretMotor.setControl(m_turretRequest.withPosition(desiredPos));
+  private AngularVelocity getTurretIdealAngularVelocity(Translation2d target, Pose2d currentPose) {
+    // taken from
+    // https://github.com/4322/2026_Robot/blob/main/src/main/java/frc/robot/util/firecontrol/ShotCalculator.java
+    double turretAngularVelocityRad = 0;
+
+    double cosH = Math.cos(currentPose.getRotation().getRadians());
+    double sinH = Math.sin(currentPose.getRotation().getRadians());
+
+    double robotX = currentPose.getTranslation().getX();
+    double robotY = currentPose.getTranslation().getY();
+
+    double launcherX =
+        robotX
+            + Constants.Shooter.SHOOTER_OFFSET_X.in(Meters) * cosH
+            - Constants.Shooter.SHOOTER_OFFSET_Y.in(Meters) * sinH;
+    double launcherY =
+        robotY
+            + Constants.Shooter.SHOOTER_OFFSET_X.in(Meters) * sinH
+            + Constants.Shooter.SHOOTER_OFFSET_Y.in(Meters) * cosH;
+
+    double drivetrainOmega =
+        DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond;
+
+    double vx =
+        DriveSubsystem.getInstance().getFieldRelativeSpeeds().vxMetersPerSecond
+            + (-Constants.Shooter.SHOOTER_OFFSET_Y.in(Meters)) * drivetrainOmega;
+    double vy =
+        DriveSubsystem.getInstance().getFieldRelativeSpeeds().vyMetersPerSecond
+            + Constants.Shooter.SHOOTER_OFFSET_X.in(Meters) * drivetrainOmega;
+
+    // Displacement from launcher to hub
+    double rx = target.getX() - launcherX;
+    double ry = target.getY() - launcherY;
+    double distance = Math.hypot(rx, ry);
+
+    double tangentialVel = (ry * vx - rx * vy) / distance;
+    turretAngularVelocityRad = tangentialVel / distance;
+
+    // corner angular rate - chassis angular rate = turret angular rate feed forward
+    turretAngularVelocityRad =
+        turretAngularVelocityRad
+            - DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond;
+
+    return RotationsPerSecond.of(turretAngularVelocityRad);
+  }
+
+  private void setTurretPos(Angle desiredPos, AngularVelocity turretIdealOmega) {
+    m_turretMotor.setControl(
+        m_turretRequest
+            .withPosition(desiredPos)
+            .withFeedForward(
+                Volts.of(Constants.Shooter.TURRET_OMEGA_FEEDFORWARD.getAsDouble())
+                    .times(turretIdealOmega.in(RotationsPerSecond))));
   }
 
   private Angle updateDesiredHoodPos(double x_vel, double y_vel) {
