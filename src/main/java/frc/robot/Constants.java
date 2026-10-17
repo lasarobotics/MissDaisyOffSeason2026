@@ -93,7 +93,7 @@ public final class Constants {
     // TODO update once both motors are attached
     public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25).div(1.5);
     // about 29.74rot/s w/ ballspeedincreaser at 0.1
-      public static final Supplier<AngularVelocity> MECANUM_SPEED =
+    public static final Supplier<AngularVelocity> MECANUM_SPEED =
         () -> {
           return RotationsPerSecond.of(
               (Drive.MAX_SPEED.div(1.5).in(MetersPerSecond) + BALL_SPEED_INCREASER.getAsDouble())
@@ -149,6 +149,8 @@ public final class Constants {
         new LoggedNetworkNumber("/Tuning/flywheelFudgeFactor", 5.8);
     public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
+    public static final LoggedNetworkNumber SOTM_LATENCY =
+        new LoggedNetworkNumber("Tuning/sotmLatency", 0.1);
   }
 
   public static class Field {
