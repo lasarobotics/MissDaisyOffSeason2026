@@ -382,7 +382,7 @@ public class ShooterSubsystem extends StateMachine {
   }
 
   public boolean hoodAtPosition() {
-    return Rotations.of(m_hoodMotor.getClosedLoopError().getValue())
+    return Rotations.of(Math.abs(m_hoodMotor.getClosedLoopError().getValue()))
         .lte(Constants.Shooter.HOOD_ALLOWED_ERROR);
   }
 
@@ -694,12 +694,11 @@ public class ShooterSubsystem extends StateMachine {
             Math.atan2(
                 Constants.Shooter.SHOOTER_OFFSET_Y.in(Meters),
                 Constants.Shooter.SHOOTER_OFFSET_X.in(Meters)));
+    double omega = DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond;
     double linearTangentSpeed =
-        MathUtil.applyDeadband(
-                DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
-                Constants.Drive.ROTATION_DEADBAND)
+        (omega < Constants.Drive.ROTATION_DEADBAND ? 0 : omega)
             * Constants.Shooter.SHOOTER_OFFSET_RADIUS.in(Meters);
-    // 90degrees CCW because CCW is positive and we want tangential velocity vector
+    // 90 degrees CCW because CCW is positive and we want tangential velocity vector
     Translation2d transformationVector =
         new Translation2d(
             linearTangentSpeed * hangTime,

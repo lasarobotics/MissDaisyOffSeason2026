@@ -150,7 +150,7 @@ public final class Constants {
     public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
     public static final LoggedNetworkNumber SOTM_LATENCY =
-        new LoggedNetworkNumber("Tuning/sotmLatency", 0.1);
+        new LoggedNetworkNumber("/Tuning/sotmLatency", 0.1);
   }
 
   public static class Field {
