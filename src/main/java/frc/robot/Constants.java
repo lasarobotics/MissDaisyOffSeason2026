@@ -153,7 +153,8 @@ public final class Constants {
         new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
     public static final LoggedNetworkNumber SOTM_LATENCY =
         new LoggedNetworkNumber("/Tuning/sotmLatency", 0.15);
-    public static final LoggedNetworkNumber TURRET_OMEGA_FEEDFORWARD = new LoggedNetworkNumber("/Tuning/turretOmegaFeedforward", 4.495);
+    public static final LoggedNetworkNumber TURRET_OMEGA_FEEDFORWARD =
+        new LoggedNetworkNumber("/Tuning/turretOmegaFeedforward", 1);
   }
 
   public static class Field {
