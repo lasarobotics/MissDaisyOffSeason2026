@@ -702,8 +702,8 @@ public class ShooterSubsystem extends StateMachine {
     Angle turretAngleOffset =
         Radians.of(
             Math.atan2(
-                Constants.Shooter.SHOOTER_OFFSET_Y.magnitude(),
-                Constants.Shooter.SHOOTER_OFFSET_X.magnitude()));
+                Constants.Shooter.SHOOTER_OFFSET_Y.in(Meters),
+                Constants.Shooter.SHOOTER_OFFSET_X.in(Meters)));
     double linearTangentSpeed =
         MathUtil.applyDeadband(
                 DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond,
