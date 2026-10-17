@@ -286,7 +286,7 @@ public class ShooterSubsystem extends StateMachine {
 
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(80).withKS(0.2197265625))
+            .withSlot0(new Slot0Configs().withKP(85).withKS(0.2197265625))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(46))
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
@@ -296,8 +296,8 @@ public class ShooterSubsystem extends StateMachine {
                     .withReverseSoftLimitThreshold(Rotations.of(-0.5)))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2.5))
-                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(2.5)));
+                    .withMotionMagicCruiseVelocity(RotationsPerSecond.of(3))
+                    .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(4)));
 
     CANcoderConfiguration encoderOneConfig =
         new CANcoderConfiguration()
