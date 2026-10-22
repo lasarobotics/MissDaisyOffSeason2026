@@ -8,11 +8,12 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 import frc.robot.HeadHoncho;
 import frc.robot.fsm.StateMachine;
@@ -97,20 +98,16 @@ public class SerializationSubsystem extends StateMachine {
 
     m_omniMotor.getConfigurator().apply(omniConfig);
 
-    TalonFXConfiguration mecanumConfig = new TalonFXConfiguration();
-    mecanumConfig.Feedback.withSensorToMechanismRatio(1.4286);
-    // mecanumConfig.Slot0.withKP(0).withKI(0).withKD(0);
-    // mecanumConfig.CurrentLimits.SupplyCurrentLimit = 200;
-    // mecanumConfig.CurrentLimits.StatorCurrentLimit = 120;
-    // mecanumConfig.CurrentLimits.SupplyCurrentLowerLimit = 30.0;
-    // mecanumConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
-    // mecanumConfig.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    final TalonFXConfiguration mecanumConfig =
+        new TalonFXConfiguration()
+            .withSlot0(new Slot0Configs().withKP(0.1).withKS(0.2998046875).withKV(0.167))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1.4285999536514282));
 
     m_mecanumMotorLeader.getConfigurator().apply(mecanumConfig);
     m_mecanumMotorFollower.getConfigurator().apply(mecanumConfig);
 
-    // m_mecanumMotorFollower.setControl(
-    //     new Follower(m_mecanumMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    m_mecanumMotorFollower.setControl(
+        new Follower(m_mecanumMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   public void setState(SerializationStates state) {
@@ -130,7 +127,6 @@ public class SerializationSubsystem extends StateMachine {
 
   public void restMecanum() {
     getInstance().m_mecanumMotorLeader.stopMotor();
-    m_mecanumMotorFollower.stopMotor();
   }
 
   public void activateOmni(boolean reverse) {
@@ -139,10 +135,11 @@ public class SerializationSubsystem extends StateMachine {
   }
 
   public void activateMecanum(boolean reverse) {
-    // AngularVelocity speed = Constants.Serialization.MECANUM_SPEED.get().times(reverse ? -1 : 1);
-    Voltage voltage = Constants.Serialization.MECANUM_VOLTAGE.times(reverse ? -1 : 1);
-    getInstance().m_mecanumMotorLeader.setVoltage(voltage.magnitude());
-    m_mecanumMotorFollower.setVoltage(-voltage.magnitude());
+    AngularVelocity speed = Constants.Serialization.MECANUM_SPEED.get().times(reverse ? -1 : 1);
+    // Voltage voltage = Constants.Serialization.MECANUM_SPEED.times(reverse ? -1 : 1);
+    getInstance()
+        .m_mecanumMotorLeader
+        .setControl(getInstance().m_velocityVoltage.withVelocity(speed));
   }
 
   @Override
@@ -153,5 +150,10 @@ public class SerializationSubsystem extends StateMachine {
     Logger.recordOutput(
         "SerializationSubsystem/mecanumCurrent",
         m_mecanumMotorLeader.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "SerializationSubsystem/mecanumSpeed",
+        m_mecanumMotorLeader.getVelocity().getValueAsDouble());
+    Logger.recordOutput(
+        "SerializationSubsystem/omniSpeed", m_omniMotor.getVelocity().getValueAsDouble());
   }
 }
