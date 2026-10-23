@@ -88,7 +88,7 @@ public final class Constants {
     public static final Distance OMNI_WHEEL_DIAMETER = Inches.of(6);
     public static final Distance MECANUM_WHEEL_DIAMETER = Inches.of(2.25);
     public static final LoggedNetworkNumber BALL_SPEED_INCREASER =
-        new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.1);
+        new LoggedNetworkNumber("/Tuning/ballSpeedIncreaser", 0.3);
 
     // TODO update once both motors are attached
     public static final Voltage MECANUM_VOLTAGE = Volts.of(-5.25).div(1.5);
@@ -152,7 +152,7 @@ public final class Constants {
     public static final LoggedNetworkNumber HOOD_FUDGE_FACTOR =
         new LoggedNetworkNumber("/Tuning/hoodFudgeFactor", -1.29);
     public static final LoggedNetworkNumber SOTM_LATENCY =
-        new LoggedNetworkNumber("/Tuning/sotmLatency", 0.15);
+        new LoggedNetworkNumber("/Tuning/sotmLatency", 0.05);
     public static final LoggedNetworkNumber TURRET_OMEGA_FEEDFORWARD =
         new LoggedNetworkNumber("/Tuning/turretOmegaFeedforward", 1);
   }
