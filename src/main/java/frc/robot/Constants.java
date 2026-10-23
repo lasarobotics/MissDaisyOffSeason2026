@@ -64,7 +64,7 @@ public final class Constants {
     public static final int FOLLOWER_CAN_ID = 32;
 
     public static final Angle ARM_STOW_SETPOINT = Rotations.of(0.033966);
-    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.281);
+    public static final Angle ARM_DEPLOY_SETPOINT = Rotations.of(0.275);
 
     // that straight up is 0 degrees
     public static final Angle INITIAL_ARM_POSITION = Rotations.of(-0.076904);
@@ -135,7 +135,7 @@ public final class Constants {
     public static final double HOOD_COLLISION_TIME = 0.25;
     public static final Distance HUB_HEIGHT = Meters.of(1.83);
     public static final LoggedNetworkNumber MAX_BALL_Y_POS =
-        new LoggedNetworkNumber("/Tuning/maxBallYPos", 3);
+        new LoggedNetworkNumber("/Tuning/maxBallYPos", 2.6);
 
     public static final Angle TURRET_ALLOWED_ERROR = Degrees.of(4);
     public static final Angle HOOD_ALLOWED_ERROR = Degrees.of(4);
