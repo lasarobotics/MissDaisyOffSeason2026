@@ -102,7 +102,7 @@ public class SerializationSubsystem extends StateMachine {
         new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
-            .withSlot0(new Slot0Configs().withKP(0.1).withKS(0.2998046875).withKV(0.167))
+            .withSlot0(new Slot0Configs().withKP(0.5).withKS(0.2998046875).withKV(0.167))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1.4285999536514282));
 
     m_mecanumMotorLeader.getConfigurator().apply(mecanumConfig);
